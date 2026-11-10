@@ -80,8 +80,9 @@ mensajes ocupando lo que sobra. Solo lee los turnos.
 - [P] Todo lo que pide la página y los iconos del manifiesto están en la lista `ESSENTIAL` de `sw.js`.
 - [M] Sin conexión con el servidor apagado; versión nueva borra solo cachés propias; lo ajeno no se guarda.
 - [M] Contraste de las horas extra ≥ 4,5 en los 4 temas.
-- **Sin comprobar:** arrastrar ⠿ con el dedo en un móvil real; el calendario del título (es del navegador);
-  `navigator.storage.persist()` con la app instalada.
+- [M] Arrastrar ⠿ con el dedo en un móvil real (Nando, 10-nov: funciona, y «prácticamente todo» lo demás).
+- **Sin confirmar al detalle:** el calendario del título (es del navegador); `navigator.storage.persist()` con la app
+  instalada.
 
 ## Datos
 En `localStorage` con prefijo `dp_` (el dominio `fvilpaz.github.io` lo comparten varias apps):

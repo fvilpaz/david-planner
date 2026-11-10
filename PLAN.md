@@ -39,9 +39,9 @@ El tema va aparte, en `dp_theme`: es de cada aparato y se tiene que leer antes d
 un parpadeo del tema por defecto).
 
 ## ❓ Para decidir (Nando) — clarificación del 10-nov, al cerrar
-1. **Probar en tu móvil** (yo solo puedo simular ratón): arrastrar ⠿ con el dedo, el calendario al tocar el título,
-   instalarla y ver que abre sin conexión. Con la app instalada, mirar si el navegador acepta proteger los datos
-   (`persist()`); en una pestaña de prueba lo rechaza.
+1. ✅ **Probado en el móvil por Nando (10-nov):** arrastrar ⠿ con el dedo funciona y, dice, «prácticamente todo». Queda
+   sin confirmar al detalle: si el navegador acepta proteger los datos con la app instalada (`persist()`; en una
+   pestaña de prueba lo rechaza) y abrirla sin conexión.
 2. **«Baja» significa dos cosas:** el estado «Baja» (baja médica, en una casilla) y «Dar de baja» en Personal (dejar
    de trabajar aquí). Propuesta: en Personal, «Ya no trabaja aquí desde el…» / «Vuelve a trabajar aquí». Decides tú.
 3. **Refactor de las tres ventanas** (Personal, Estados, Puntos de venta comparten esqueleto): ¿se junta ahora, con
