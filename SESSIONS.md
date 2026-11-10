@@ -21,6 +21,11 @@
 con la letra derecha («+2 h» / «extra») y su propio borde** ← la elegida. La fila no crece y en el móvil cabe; las
 horas ya no se parten en dos líneas (`white-space: nowrap`: si no cabe, la columna se ensancha).
 
+**Color del aviso:** el ámbar oscuro (`#b45309`) parecía marrón y, medido, se quedaba en contraste 4,2 sobre el
+fondo de la franja (hace falta 4,5 para letra pequeña): fallo mío, no lo había medido. Comparadas en pantalla
+naranja y fucsia; elegido **fucsia** (`#be185d` en claros, `#f472b6` en oscuros, contraste 4,5–4,9 medido en los 4
+temas): no se confunde con los colores cálidos del personal (con naranja, el aviso se perdía sobre las horas de Ana).
+
 **Siguiente**
 - Paso 5: «Intercambiar con…» (dos toques).
 

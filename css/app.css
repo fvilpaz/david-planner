@@ -189,5 +189,5 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-table tr { break-inside: avoid; }  /* una persona nunca partida entre dos hojas */
   .cell-empty { visibility: hidden; }  /* el «+» de las casillas vacías no va al papel */
   .schedule-table th, .chip, .cell.has-overtime { -webkit-print-color-adjust: exact; print-color-adjust: exact; }  /* que se impriman los colores */
-  html[data-theme] { --warning: #b45309; }  /* en papel, el ámbar de los temas claros */
+  html[data-theme] { --warning: #be185d; }  /* en papel, el fucsia de los temas claros */
 }
