@@ -1,5 +1,26 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Arreglo: bordes del PDF
+
+**Hecho**
+- Nando: «cuando pasas a PDF no se ven los bordes» (captura de la tabla vacía de la primera vez: rayas muy claras y
+  sueltas). Generado el PDF yo mismo (Chrome sin ventana `--print-to-pdf` + `pypdfium2` para verlo como imagen) con el
+  ejemplo y con la tabla vacía: sin marco por fuera, rayas claras (#cfcfcf) y, en el ejemplo, **faltaban las rayas del
+  nombre de Diego y de Sara** (con bordes unidos el PDF perdía rayas sueltas).
+- Arreglo solo en `@media print` (`css/app.css`): rejilla propia con bordes separados (marco arriba/izquierda en la
+  tabla y derecha/abajo en cada celda, #8f959c), sin «sticky» ni sombra en la columna de nombres (que dibujaba una raya
+  doble). Verificado con los dos PDF: todas las rayas, marco por los cuatro lados, una hoja. 35/35.
+
+**Decidido**
+- Rayas más oscuras en papel que en pantalla: en pantalla acompañan el diseño; en papel son lo que separa a las personas.
+
+**Aprendido**
+- Con `border-collapse: collapse` las rayas finas de un PDF pueden desaparecer sueltas; con bordes separados no.
+- Para ver un PDF sin poppler: `pypdfium2` (ya instalado) lo pasa a imagen.
+
+**Siguiente**
+- Paso 13: «Copiar a…» un turno a casillas libres (idea de David, vía Nando).
+
 ## 10-nov-2026 — Paso 12b: Fervis contesta
 
 **Hecho**

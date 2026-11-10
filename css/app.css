@@ -331,14 +331,22 @@ button.danger { background: var(--error); color: var(--on-error); }
    Siempre en colores claros aunque en pantalla haya un tema oscuro (si no, casillas oscuras y texto que no se lee). */
 @media print {
   @page { size: A4 landscape; margin: 10mm; }
-  html[data-theme] { --bg: #fff; --surface: #fff; --text: #000; --muted: #5d6470; --border: #cfcfcf;
+  html[data-theme] { --bg: #fff; --surface: #fff; --text: #000; --muted: #5d6470; --border: #b0b5bc;
                      --tint-mix: 10%; color-scheme: light; }
   body { background: #fff; display: block; font-size: 10pt; }
   .topbar, .no-print, .section-header { display: none !important; }
   .page { padding: 0; }
   .print-only { display: block; font-size: 14pt; margin: 0 0 4mm; }
   .schedule-scroll { overflow: visible; max-height: none; border: 0; border-radius: 0; margin: 0; }
-  .schedule-table { font-size: 8pt; }
+  /* Rejilla propia para el papel: bordes separados (con los unidos, el PDF perdía rayas sueltas) — el marco (arriba e
+     izquierda) en la tabla y derecha y abajo en cada celda, así ninguna raya se dobla — y más oscura que en pantalla */
+  .schedule-table { font-size: 8pt; border-collapse: separate; border-spacing: 0; border-top: 1px solid #8f959c;
+                    border-left: 1px solid #8f959c; }
+  .schedule-table th, .schedule-table td { border: 0; border-right: 1px solid #8f959c; border-bottom: 1px solid #8f959c; }
+  /* En papel nada se desliza: sin «sticky». Con él, Chrome pierde las rayas de las celdas fijas (el nombre de cada persona
+     salía sin líneas entre filas) */
+  .schedule-table th, .schedule-table thead th, .schedule-table th[scope=row], .schedule-table thead th:first-child {
+    position: static; box-shadow: none; }
   .schedule-table td, .schedule-table thead th:not(:first-child) { min-width: 0; }  /* en papel cabe la semana entera */
   .schedule-table td { height: 34px; }
   .schedule-table tr { break-inside: avoid; }  /* una persona nunca partida entre dos hojas */
