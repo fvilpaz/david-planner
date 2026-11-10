@@ -36,6 +36,7 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | Temas | **Claro, Lino, Oscuro y Carbón** (colores de `gestion-hosteleria/app/core/static/core/themes.css`). |
 | PDF | Imprimir del navegador («Guardar como PDF»), **A4 apaisado**, siempre en colores claros. Sin PNG ni jsPDF. |
 | Footer | El de Nando, como en health-tracker: «David Planner © 2026 · Fernando Vilas Paz» + GitHub, LinkedIn y CV. |
+| Fervis (paso 12) | Asistente de los turnos con la **clave gratuita de Groq de David** (Nando, 10-nov; como `Crypto_Portafolio/js/fervis.js`, pero más pequeño): sin servidor, el navegador habla con Groq. La clave, solo en su navegador (`dp_groq_key`), **nunca** en el código ni en la copia de seguridad. **Solo lee**, no cambia turnos. Al preguntar, los turnos y el personal que hagan falta **sí salen a Groq** (lo dice la ventana): única excepción a «Datos solo en el aparato». El robot de la cartera, en el acento de cada tema, con sus 7 movimientos al tocarlo. |
 | Librerías | Ninguna de fuera. Si alguna vez hiciera falta, copiada en el repo, nunca de un CDN. |
 
 ## Forma de trabajar
@@ -67,6 +68,6 @@ internet la app instalada se abre rota, sin avisar. Lo vigila la prueba «Todo l
 
 ## Estructura (prevista; se crea paso a paso)
 `index.html` · `css/` (estilos y temas) · `js/` (un archivo por pieza: `app.js` cuadrante, `cell.js` casilla,
-`swap.js` intercambiar, `staff.js`/`states.js`/`places.js` ventanas con `lists.js` común, `backup.js` copias,
+`swap.js` intercambiar, `staff.js`/`states.js`/`places.js` ventanas con `lists.js` común, `backup.js` copias, `fervis.js` asistente,
 `pwa.js` instalable…) · `manifest.webmanifest` y `sw.js` (PWA: solo atiende sus archivos y solo borra cachés
 `david-planner-`) · `icons/` (generados con Chrome sin ventana desde un HTML de diseño) · `servidor.py` (local, 8731).

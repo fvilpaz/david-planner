@@ -42,6 +42,10 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 
 **Barra**: local y ciudad (un lápiz) y persona (círculo); iniciales automáticas solo con letras y números.
 
+**Fervis** (paso 12): el robot (acento del tema) hace un movimiento al azar, nunca el mismo dos veces seguidas (quieto
+con «reducir movimiento») y abre el chat. Sin clave, lo dice y abre el campo; la clave pegada de un `.env` se limpia;
+lo que no parece una clave no se guarda; «Quitar la clave» la borra. Solo lee los turnos.
+
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.
 
 ## Criterios de aceptación
@@ -59,6 +63,8 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 - [P] Descargar; cargar (no JSON, otra app, sin estados, trampas con `__proto__`); copias automáticas; franja.
 - [P] Iniciales y nombres como texto (no HTML).
 - [M] Nombres y días fijos al deslizar (390 px, 800×390, PC). [M] PDF en una hoja (Claro y Carbón en pantalla).
+- [P] Fervis: el robot se mueve y luego abre; sin clave; clave limpia, rechazada y quitada. [P] La clave no sale en la
+  copia descargada ni en las automáticas. [M] Robot en los 4 temas; 390 px (robot y «Gestión» juntos, sin desplazar).
 - [P] Todo lo que pide la página y los iconos del manifiesto están en la lista `ESSENTIAL` de `sw.js`.
 - [M] Sin conexión con el servidor apagado; versión nueva borra solo cachés propias; lo ajeno no se guarda.
 - [M] Contraste de las horas extra ≥ 4,5 en los 4 temas.
@@ -68,11 +74,12 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 ## Datos
 En `localStorage` con prefijo `dp_` (el dominio `fvilpaz.github.io` lo comparten varias apps):
 `dp_data` (personas, estados, puntos de venta y turnos; forma en `PLAN.md`), `dp_name`, `dp_city`, `dp_person`,
-`dp_theme`, `dp_copias`, `dp_last_export`, `dp_since`; `dp_demo_data` para `?demo`; en `sessionStorage`, `dp_swap` y
+`dp_theme`, `dp_copias`, `dp_last_export`, `dp_since`, `dp_groq_key` (la clave de Fervis: nunca en la copia); `dp_demo_data` para `?demo`; en `sessionStorage`, `dp_swap` y
 `dp_backup_later`. Nunca `localStorage.clear()`.
 
 ## Seguridad y privacidad
-- Ningún dato sale del aparato salvo el archivo que descarga David. Repositorio público: solo código y datos inventados.
+- Ningún dato sale del aparato salvo el archivo que descarga David y, si pone su clave de Groq, lo que Fervis mande a
+  Groq para contestar (paso 12b; la ventana lo avisa). Repositorio público: solo código y datos inventados.
 - Todo se pinta con `textContent` (nunca `innerHTML`): un nombre con HTML se ve como texto.
 - Un archivo cargado se revisa campo a campo y solo se copian los campos conocidos.
 - Sin librerías de fuera. `audit` (nando-toolkit): git, python y semgrep limpios; 25 avisos de ESLint revisados,

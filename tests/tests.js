@@ -458,6 +458,40 @@
   });
 
   // =================================================================================================================
+  // Fervis (fervis.js). La clave de las pruebas es inventada: no es de nadie ni vale en Groq.
+  const FAKE_KEY = "gsk_inventada_para_pruebas_1234";
+
+  test("Fervis sin clave: lo dice y abre el campo; lo que no parece una clave no se guarda; pegada de un .env, se limpia", async function () {
+    await open(fixture());
+    $("#fervis-button").click();
+    ok(!$("#fervis-dialog").open, "primero el robot se mueve");
+    await wait(1100);  // el movimiento más largo dura 1 s
+    ok($("#fervis-dialog").open && !$("#fervis-key-form").hidden, "se abre el chat y, sin clave, el campo de la clave");
+    $("#fervis-question").value = "¿Quién trabaja hoy?";
+    $("#fervis-form").requestSubmit();
+    const said = $$(".fervis-msg").map(function (m) { return m.className.replace("fervis-msg ", "") + ": " + m.textContent; });
+    ok(said.length === 3 && said[1] === "david: ¿Quién trabaja hoy?" && said[2].includes("clave gratuita de Groq"), "conversación: " + said.join(" | "));
+    $("#fervis-key").value = "con espacios no vale";
+    $("#fervis-key-form").requestSubmit();
+    equal(localStorage.getItem("dp_groq_key"), null, "lo que no parece una clave no se guarda");
+    $("#fervis-key").value = ' GROQ_API_KEY="' + FAKE_KEY + '" ';
+    $("#fervis-key-form").requestSubmit();
+    equal([localStorage.getItem("dp_groq_key"), $("#fervis-key").value, $("#fervis-key-form").hidden], [FAKE_KEY, "", true], "limpia, guardada y el campo vacío y cerrado");
+    $("#fervis-key-toggle").click();
+    $("#fervis-key-remove").click();
+    equal(localStorage.getItem("dp_groq_key"), null, "«Quitar la clave» la borra");
+  });
+
+  test("La clave de Groq no sale en la copia descargada ni en las copias automáticas", async function () {
+    const w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
+    const files = catchDownloads(w);
+    $("#backup-download").click();
+    await wait(300);
+    ok(files.length === 1 && files[0].text && !files[0].text.includes(FAKE_KEY), "la copia descargada no la lleva");
+    ok(localStorage.getItem("dp_copias") && !localStorage.getItem("dp_copias").includes(FAKE_KEY), "la copia automática (hecha al abrir) no la lleva");
+  });
+
+  // =================================================================================================================
   // Sin conexión (sw.js): la lista ESSENTIAL se escribe a mano. Un archivo que la página pide y no está en ella hace
   // que la app instalada se abra rota sin internet, sin ningún aviso (con internet todo va bien).
   test("Todo lo que pide la página (y los iconos del manifiesto) está en la lista ESSENTIAL de sw.js", async function () {

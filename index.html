@@ -65,6 +65,14 @@
     </div>
     <div class="section-header">
       <span class="section-header-title">Cuadrante semanal</span>
+      <!-- El robot y «Gestión» van juntos a la derecha (en el móvil, si no caben, bajan los dos) -->
+      <div class="section-actions">
+      <!-- Fervis: el robot de Crypto_Portafolio, con el color del acento del tema; al tocarlo hace un movimiento -->
+      <button type="button" class="fervis-button no-print" id="fervis-button" title="Hablar con Fervis"
+              aria-label="Abrir el chat con Fervis"><span class="fervis-face"><svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+        focusable="false"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V5"/><circle cx="12" cy="3.6"
+        r="1.1"/><path d="M9 14h.01M15 14h.01"/><path d="M2 13v3M22 13v3"/></svg></span></button>
       <!-- «Gestión», como en gestion-hosteleria: todo lo que no es el cuadrante. Se cierra al tocar fuera o con Escape -->
       <details class="menu manage-menu no-print">
         <summary>Gestión</summary>
@@ -114,6 +122,7 @@
           </details>
         </div>
       </details>
+      </div>
     </div>
     <h1 class="print-only">Turnos · <span id="print-name"></span> · <span id="print-week"></span></h1>
     <!-- La semana entre dos flechas. El título es el botón que abre el calendario (el campo de fecha está, pero no se
@@ -288,6 +297,39 @@
     </div>
   </dialog>
 
+  <!-- Fervis (fervis.js, paso 12): el asistente de los turnos, con la clave gratuita de Groq de David -->
+  <dialog id="fervis-dialog" class="dialog" aria-labelledby="fervis-title">
+    <div class="dialog-form">
+      <div class="dialog-head">
+        <h2 id="fervis-title">💬 Fervis</h2>
+        <span class="fervis-actions">
+          <button type="button" class="secondary" id="fervis-key-toggle" aria-expanded="false"
+                  aria-controls="fervis-key-form">🔑 Clave</button>
+          <button type="button" class="secondary" data-close>Cerrar</button>
+        </span>
+      </div>
+      <form id="fervis-key-form" class="fervis-key" hidden novalidate>
+        <p class="help">Pega tu clave gratuita de Groq (se crea en
+          <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com</a>).
+          Se guarda solo en este navegador y no va en la copia de seguridad. Al preguntar, a Groq se envían tu pregunta
+          y los turnos y el personal que hagan falta para contestarte.</p>
+        <div class="fervis-row">
+          <input id="fervis-key" class="fervis-key-input" maxlength="300" placeholder="gsk_…" autocomplete="off"
+                 autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore aria-label="Clave de Groq">
+          <button type="submit">Guardar</button>
+        </div>
+        <p class="help" id="fervis-key-state" role="status"></p>
+        <button type="button" class="danger" id="fervis-key-remove" hidden>Quitar la clave</button>
+      </form>
+      <ul class="fervis-messages" id="fervis-messages" role="log" aria-live="polite"></ul>
+      <form id="fervis-form" class="fervis-row" autocomplete="off">
+        <input id="fervis-question" maxlength="300" placeholder="Pregunta por los turnos…" aria-label="Tu pregunta">
+        <button type="submit" aria-label="Enviar">➤</button>
+      </form>
+      <small class="help">Fervis solo lee los turnos: no cambia nada.</small>
+    </div>
+  </dialog>
+
   <!-- Aviso de «Intercambiar con…» (swap.js): abajo, al alcance del pulgar en el móvil -->
   <div id="swap-bar" class="swap-bar no-print" role="status" hidden>
     <span id="swap-text"></span>
@@ -316,6 +358,7 @@
   <script src="js/states.js"></script>
   <script src="js/places.js"></script>
   <script src="js/backup.js"></script>
+  <script src="js/fervis.js"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>

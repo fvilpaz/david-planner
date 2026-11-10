@@ -1,5 +1,35 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 12a: Fervis, la ventana y la clave
+
+**Hecho**
+- `js/fervis.js` (nuevo), ventana en `index.html`, estilos en `css/app.css`, `js/fervis.js` en `ESSENTIAL` de `sw.js`.
+  Robot de `Crypto_Portafolio` (mismo dibujo y los 7 movimientos: pulso, hunde, gesto, bote, giro, asoma, balón; al azar,
+  nunca el mismo dos veces; quieto con «reducir movimiento») en `--primary-text` de cada tema; al acabar el movimiento
+  se abre el chat. Clave de Groq de David en `dp_groq_key` (limpieza al pegar de la cartera; se ve enmascarada
+  `gsk_…1234`; campo de texto con puntos para que el navegador no la ofrezca guardar). Sin clave, lo dice y abre el
+  campo. Con clave, por ahora contesta que las respuestas llegan en el 12b.
+- Robot y «Gestión» en un mismo grupo (`.section-actions`): con el título largo del ejemplo, en 375 px «Gestión» bajaba
+  solo; ahora bajan juntos. Con el título normal caben en una línea.
+- Pruebas 28 y 29. **Controles reales**: (1) antes de apuntar `js/fervis.js` en `sw.js`, la prueba 27 lo señaló sola;
+  (2) clave añadida a `SETTINGS` de `backup.js` y limpieza del `NOMBRE=` desactivada → fallan justo la 28 y la 29;
+  devueltos los archivos (copias previas) → 29/29.
+- Verificado en Chrome: robot en Claro, Lino, Oscuro y Carbón; ventana en PC y a 390 px (marco: la ventana de Chrome
+  maximizada no se deja estrechar), sin desplazamiento lateral.
+
+**Decidido**
+- Clave de David, no de Nando, y sin servidor (Nando, como en la cartera). Solo lee. Los datos salen a Groq solo al
+  preguntar (12b) y la ventana lo avisa: excepción apuntada en `CLAUDE.md` y en la especificación.
+- No se trae el efecto de «el chat nace del robot» de la cartera: aquí la ventana es un `<dialog>` del navegador.
+
+**Aprendido**
+- Las herramientas de Chrome bloquean la salida si lleva algo con forma de clave (`gsk_…`), aunque sea inventada: para
+  leer los fallos de las pruebas, sacar solo el título y el motivo.
+
+**Siguiente**
+- 12b: que conteste (manual corto de la app + datos de esta semana y la siguiente + una consulta para otras fechas;
+  quién está en turno ahora lo calcula la app). Para probarlo de verdad, Nando pega su clave.
+
 ## 10-nov-2026 — Prueba 27: la lista de `sw.js`
 
 **Hecho**
