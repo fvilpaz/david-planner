@@ -1,5 +1,38 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 10: instalable (PWA) y puerto propio
+
+**Hecho**
+- `manifest.webmanifest`, iconos «DP» blanco sobre azul (192, 512, maskable 512 y 180 de iPhone), `sw.js` (como
+  health-tracker: red primero con tope de 3 s y `cache: "no-cache"`; caché de nombre fijo `david-planner-v1`; solo
+  borra cachés `david-planner-`; **solo atiende sus propios archivos**) y `js/pwa.js` (registro y `storage.persist()`
+  solo cuando ya hay datos).
+- **Puerto propio 8731** (nota lateral + Nando): el service worker se había instalado en `localhost:8000`, el puerto
+  del ERP; un service worker abarca toda la dirección. Dado de baja allí y cachés borradas. `servidor.py` en 8731 y
+  sin `allow_reuse_address`.
+- Verificado: 23 archivos guardados; `/api/v1/docs` y `/otra-cosa/` pasan sin guardarse; versión nueva simulada →
+  borra sus cachés viejas y respeta una de «otra app»; **con el servidor apagado** la app abre con estilos, datos y
+  otra semana; dos servidores en 8731 → el segundo avisa y para. `persist()`: el navegador no lo concede en una
+  pestaña de prueba (sin instalar); queda por ver instalada.
+
+**Decidido**
+- Icono sin dibujo (Nando): solo «DP».
+- Nombre de caché fijo: con la red primero, lo guardado se renueva solo; no hace falta el proceso de GitHub que usa
+  health-tracker para cambiarlo en cada subida.
+
+**Aprendido**
+- **Un service worker abarca toda la dirección (origen)** y se queda instalado aunque se apague el servidor: nunca
+  probarlo en un puerto que use otra app.
+- **En Windows, `allow_reuse_address` deja a dos programas escuchar en el mismo puerto:** el control (arrancar un
+  segundo servidor) lo destapó; sin el control, el «avisa si está ocupado» habría parecido funcionar.
+- **Chrome sin ventana no hace ventanas pequeñas:** los iconos de 180 y 192 salieron rotos (letra gigante); se
+  dibujan a 512 y se capturan a escala (`--force-device-scale-factor`). Se vio mirando las imágenes, no por el tamaño.
+- **Una prueba que da de baja y registra el service worker en la misma página no lo reinstala** (recupera el que
+  está «a medio irse»): la limpieza se prueba simulando una versión nueva.
+
+**Siguiente**
+- Paso 11: publicar en GitHub Pages, `audit` e instalar en el móvil (y ver si `persist()` se concede instalada).
+
 ## 10-nov-2026 — Paso 9b: copias automáticas y menú en el móvil
 
 **Hecho**

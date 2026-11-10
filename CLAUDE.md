@@ -16,7 +16,7 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | Tema | Decisión |
 |---|---|
 | Tipo de app | Página estática (HTML + CSS + JS), **PWA instalable**. Sin TWA (solo haría falta para Google Play). |
-| Dónde vive | Primero en local (`python -m http.server 8000`); después **GitHub Pages** (repositorio público `fvilpaz/david-planner`). |
+| Dónde vive | Primero en local (`python servidor.py` → `localhost:8731`); después **GitHub Pages** (repositorio público `fvilpaz/david-planner`). |
 | Datos | Solo en el aparato (`localStorage`). En el repositorio **nunca** hay datos reales: solo datos de ejemplo inventados. |
 | Almacenamiento compartido | `fvilpaz.github.io` es **un solo dominio** para todas las apps de Pages (health-tracker, nplayer, MasterMind…): comparten `localStorage` y cachés. Por eso: **todas las claves con el prefijo `dp_`** (como `ht_` y `np_`), **nunca `localStorage.clear()`**, cachés con el prefijo `david-planner-` y el service worker **solo borra sus propias cachés** (como `health-tracker/src/sw.js`). Lo mismo pasa en `localhost:8000` con otros proyectos. |
 | Copia | Exportar e importar **JSON** (con número de versión del formato). Importar = sustituir todo, con confirmación y copia previa automática. |
@@ -50,10 +50,14 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 ```
 python D:\Fernando\Coding\projects\david-planner\servidor.py
 ```
-y abrir `http://localhost:8000` (con `?demo` al final, los datos de ejemplo). `servidor.py` es como
-`python -m http.server 8000` pero le dice al navegador que **no guarde copias** (`Cache-Control: no-store`): con el
-otro, Chrome usaba CSS viejos y parecía que faltaban cosas. (Con doble clic en `index.html` no funciona la parte
+y abrir `http://localhost:8731` (con `?demo` al final, los datos de ejemplo). **Puerto propio: 8731, nunca el 8000**
+(lo usa el ERP; un service worker abarca toda la dirección donde se instala y podría meterse en el ERP). Si está
+ocupado, `servidor.py` avisa y para. Le dice al navegador que **no guarde copias** (`Cache-Control: no-store`): con
+`python -m http.server`, Chrome usaba CSS viejos y parecía que faltaban cosas. (Con doble clic en `index.html` no funciona la parte
 instalable: necesita `localhost` o `https`.)
 
 ## Estructura (prevista; se crea paso a paso)
-`index.html` · `css/` (estilos y temas) · `js/` (app, datos de ejemplo) · `manifest.webmanifest` y `sw.js` (PWA, paso 10) · `icons/`.
+`index.html` · `css/` (estilos y temas) · `js/` (un archivo por pieza: `app.js` cuadrante, `cell.js` casilla,
+`swap.js` intercambiar, `staff.js`/`states.js`/`places.js` ventanas con `lists.js` común, `backup.js` copias,
+`pwa.js` instalable…) · `manifest.webmanifest` y `sw.js` (PWA: solo atiende sus archivos y solo borra cachés
+`david-planner-`) · `icons/` (generados con Chrome sin ventana desde un HTML de diseño) · `servidor.py` (local, 8731).
