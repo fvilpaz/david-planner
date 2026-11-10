@@ -330,6 +330,24 @@ button.danger { background: var(--error); color: var(--on-error); }
 @media (min-width: 900px) { .fervis-msg { font-size: 1.05rem; max-width: 75%; } }
 .fervis-msg { max-width: 85%; padding: .5rem .75rem; border-radius: var(--radius); white-space: pre-wrap;
               overflow-wrap: anywhere; }
+/* El glosario: grupos y temas que se despliegan (details); ocupa el sitio de la conversación mientras está abierto */
+.fervis-dialog [hidden] { display: none !important; }  /* los display de abajo pesarían más que hidden */
+.fervis-icon[aria-expanded=true] { border: 2px solid var(--primary); }
+/* Con cuatro botones arriba, en el móvil el título no cabía: «Cerrar» pasa a ser una ✕ (el texto sigue ahí para los lectores de pantalla) */
+@media (max-width: 600px) {
+  .fervis-dialog .dialog-head [data-close] { font-size: 0; width: 48px; padding: 0; }
+  .fervis-dialog .dialog-head [data-close]::before { content: "✕"; font-size: 1.1rem; }
+  .fervis-dialog .dialog-head h2 { white-space: nowrap; }
+}
+.fervis-guide { flex: 1; min-height: 6rem; overflow-y: auto; display: grid; gap: .5rem; align-content: start; }
+.fervis-guide summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding: 0 .9rem; font-weight: 600; }
+.fervis-guide summary:focus-visible { outline: 3px solid var(--primary); outline-offset: -3px; }
+.fervis-guide-group { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.fervis-guide-group[open] > summary { border-bottom: 1px solid var(--border); }
+.fervis-guide-topic { margin: .35rem .6rem; border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border)); border-radius: var(--radius);
+                      background: color-mix(in srgb, var(--primary) 7%, var(--surface)); }
+.fervis-guide-topic summary { font-weight: 500; }
+.fervis-guide-topic ul { margin: 0; padding: 0 1rem .8rem 2.1rem; display: grid; gap: .4rem; }
 .fervis-chips { list-style: none; display: flex; flex-wrap: wrap; gap: .5rem; }
 /* Los chips, con el tono del tema (suave, no un arcoíris) y su emoji delante, como los del menú «Gestión» */
 .fervis-chip { min-height: 40px; padding: 0 1rem; border-radius: 999px; font-size: .95rem; text-align: left;

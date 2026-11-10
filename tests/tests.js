@@ -647,24 +647,34 @@
     equal(pressed.style.getPropertyValue("--swatch"), "#16a085", "el primero de la paleta que no usa nadie (no el siguiente por orden)");
   });
 
-  test("La guía interactiva: el botón 📖 y el chip enseñan el índice, un tema sale en pasos con «Otros temas», sin clave y sin llamar a Groq", async function () {
+  test("La guía como glosario: el botón 📖 despliega grupos y temas (sin chat, sin Groq, sin clave) y vuelve al chat", async function () {
     const w = await open(fixture());  // sin clave
     let calls = 0;
     w.fetch = function () { calls++; return Promise.reject(new Error("la guía no debe llamar a Groq")); };
     w.Fervis.open();
+    const before = $$(".fervis-msg").length;
+    ok($("#fervis-guide-view").hidden && !$("#fervis-messages").hidden, "al abrir, el chat");
+    $("#fervis-guide").click();
+    ok(!$("#fervis-guide-view").hidden && $("#fervis-messages").hidden && $("#fervis-form").hidden && $("#fervis-key-form").hidden, "se ve el glosario y se esconde el chat");
+    equal($$("#fervis-guide-view > details > summary").map(function (x) { return x.textContent; }),
+      ["📅 Turnos y casillas", "🛠️ Menú Gestión", "🏢 Mi local, la app y Fervis"], "primero, tres grupos");
+    const group = $("#fervis-guide-view > details");
+    ok(!group.open, "cerrado al principio");
+    group.querySelector("summary").click();
+    ok(group.open, "al tocar el grupo se despliega");
+    equal($$("#fervis-guide-view > details:first-child > details > summary").map(function (x) { return x.textContent; }),
+      ["🧭 Moverse por el cuadrante", "✏️ Poner o cambiar un turno", "⏱️ Horas extra", "⇄ Intercambiar dos turnos", "📋 Copiar un turno a otras casillas"], "y salen sus temas");
+    const topic = $$("#fervis-guide-view .fervis-guide-topic").find(function (d) { return d.querySelector("summary").textContent.includes("Copiar un turno"); });
+    topic.querySelector("summary").click();
+    ok(topic.open && topic.querySelectorAll("li").length === 5 && topic.querySelector("li").textContent.startsWith("Abre una casilla con turno"), "al tocar el tema, sus pasos");
+    equal($$("#fervis-guide-view .fervis-guide-topic").length, w.Fervis.tool("manual_app").split("»): ")[1].split("; ").length, "los grupos cubren todos los temas de la guía");
+    equal([$$(".fervis-msg").length, calls], [before, 0], "no añade nada a la conversación ni llama a Groq");
+    $("#fervis-guide").click();
+    ok($("#fervis-guide-view").hidden && !$("#fervis-messages").hidden && !$("#fervis-form").hidden, "el mismo botón vuelve al chat");
     $$(".fervis-chip").pop().click();  // el chip «Guía de la app» del saludo
-    const topics = $$(".fervis-chip").map(function (c) { return c.textContent; });
-    ok(topics.length >= 14 && topics[0] === "Moverse por el cuadrante" && topics.includes("Copiar un turno a otras casillas"), "el índice: " + topics.length + " temas");
-    $$(".fervis-chip").find(function (c) { return c.textContent === "Copiar un turno a otras casillas"; }).click();
-    const msgs = $$(".fervis-msg").map(function (m) { return m.textContent; });
-    ok(msgs[msgs.length - 2] === "📋 Copiar un turno a otras casillas" && msgs[msgs.length - 1].startsWith("📋 Copiar un turno a otras casillas\n• Abre una casilla con turno"), "lo tocado y la respuesta en pasos");
-    equal($$(".fervis-chip").map(function (c) { return c.textContent; }), ["Otros temas"], "debajo, solo «Otros temas»");
-    $$(".fervis-chip")[0].click();
-    ok($$(".fervis-chip").length >= 14, "«Otros temas» vuelve al índice");
+    ok(!$("#fervis-guide-view").hidden, "el chip del saludo también abre el glosario");
     $("#fervis-clear").click();
-    $("#fervis-guide").click();  // el botón de la cabecera
-    ok($$(".fervis-chip").length >= 14 && $$(".fervis-msg").pop().textContent.startsWith("📖 Guía de la app"), "el botón 📖 también");
-    equal(calls, 0, "la guía no llama a Groq (y funciona sin clave)");
+    ok($("#fervis-guide-view").hidden && !$("#fervis-messages").hidden, "la papelera vuelve al chat");
   });
 
   test("La guía de Fervis: cada tema responde, el índice los lista todos y cada botón del menú Gestión y de la casilla sale en ella", async function () {

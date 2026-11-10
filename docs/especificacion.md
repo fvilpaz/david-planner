@@ -66,10 +66,11 @@ la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «Ho
 no sirve para nada más) y debajo cuatro **chips** con preguntas de ejemplo que se tocan y se mandan solas (sin clave,
 abren Ajustes y dejan la pregunta escrita); desaparecen al mandar la primera y la papelera las devuelve. Para «quién
 tiene más…», `resumen_entre` trae un RANKING ya hecho por la app con el motivo (vacaciones o baja no es librar). La ventana es grande (hasta 860 px de ancho y el 92 % del alto), con los
-mensajes ocupando lo que sobra. **Guía de la app, interactiva** (botón 📖 de la cabecera y chip «Guía de la app» del saludo): un índice de 14 temas como chips; al
-tocar uno sale solo ese, en pasos, con «Otros temas». La responde la app (instantánea, sin Groq y **sin clave**); el modelo la
-consulta por temas con `manual_app` para los «cómo hago…» y, si piden «la guía» en general, remite al botón 📖. Una prueba exige
-que cada botón del menú Gestión y de la ventana de la casilla salga en la guía. Solo lee los turnos.
+mensajes ocupando lo que sobra. **Guía de la app como glosario** (botón 📖 de la cabecera y chip «Guía de la app» del saludo): una vista aparte, no el chat, con 3 grupos
+(Turnos y casillas, Menú Gestión, Mi local la app y Fervis) que se despliegan en sus temas y estos en sus pasos. No añade
+burbujas, no llama a Groq y **no necesita clave**; el 📖 alterna con el chat. El modelo la consulta por temas con `manual_app`
+para los «cómo hago…» y, si piden «la guía» en general, remite al 📖. Una prueba exige que cada botón del menú Gestión y de la
+ventana de la casilla salga en la guía. Solo lee los turnos.
 
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.
 

@@ -1,29 +1,34 @@
 # SESSIONS — david-planner
 
-## 10-nov-2026 — Fervis: guía de la app interactiva (por módulos)
+## 10-nov-2026 — Fervis: la guía, como glosario desplegable
 
-**Hecho (en local; sin subir a GitHub, a la espera de Nando)**
-- Nando, con captura: al preguntar «¿tienes una guía o manual?» Fervis recitaba siete líneas sueltas: «algo más estructurado y que el
-  bot vaya más interactivo, por módulos». El manual viejo era corto y no decía nada de Copiar a…, estados, puntos de venta, horas
-  extra, instalar ni lo que puede hacer Fervis.
-- **Guía por temas y en pasos** (`GUIDE` en `js/fervis.js`): 14 temas (moverse, casilla, horas extra, intercambiar, copiar un turno,
-  copiar semanas, personal, estados, puntos de venta, imprimir, copia de seguridad, temas, local y persona, instalar, Fervis).
-- **Interactiva y sin modelo**: botón 📖 en la cabecera y chip «Guía de la app» → índice de chips → un tema en pasos + «Otros
-  temas». La responde la app: instantánea, gratis y **sin clave** (David puede aprender la app antes de tener la cuenta de Groq). El
-  modelo la consulta con `manual_app(tema)` para los «cómo hago…»; para «la guía» en general remite al 📖.
-- Pruebas 44 y 45: la guía interactiva (índice, tema en pasos, «Otros temas», sin llamar a Groq ni pedir clave) y un **guardián**:
-  cada botón del menú Gestión y de la ventana de la casilla tiene que aparecer en la guía (si se añade un botón y se olvida la
-  guía, falla). **Control:** sin quitar los chips anteriores → falla. 45/45.
+**Hecho (en local; sin subir a GitHub: Nando pidió «no subas todavía, que GitHub vaya lanzándose solo; nosotros currando en local»)**
+- Nando, con captura: el manual del modelo recitaba siete líneas («algo más estructurado y más interactivo, por módulos»). Primero,
+  guía por temas y en pasos (`GUIDE`, 15 temas). Después Nando: «cada vez que le das se abre todas las opciones» → tres niveles
+  (grupos → temas → pasos). Y por último: «que el botón, en vez de modo bot, se convierta en **glosario**: vas pulsando y va
+  desplegando; no gasta tokens ni interactúa con el bot».
+- **Resultado final:** el botón 📖 de la cabecera (y el chip «Guía de la app» del saludo) alterna el chat con una **vista aparte**: 3
+  grupos (Turnos y casillas, Menú Gestión, Mi local la app y Fervis) que se despliegan (`<details>`) en sus temas y estos en sus
+  pasos. No añade burbujas, no llama a Groq, no necesita clave. Se abre siempre en el chat; la papelera vuelve al chat.
+- El modelo sigue consultando la guía con `manual_app(tema)` para los «cómo hago…»; para «la guía» en general remite al 📖.
+- Un **guardián**: cada botón del menú Gestión y de la ventana de la casilla tiene que salir en la guía. Cubre botones y menús, no
+  reglas ni gestos: eso depende de que quien cambie la app actualice `GUIDE`.
+- Móvil: con cuatro botones arriba el título se partía; en ≤ 600 px «Cerrar» pasa a ser una ✕. Probado a 390 px.
+- Pruebas 44 y 45 (glosario: grupos, temas, pasos, cubre todos los temas, no añade burbujas ni llama a Groq, vuelve al chat) y el
+  guardián. **Controles:** el glosario sin esconder el chat → falla (y, en la versión de chips, no apilar el mismo mensaje).
+  45/45.
 
 **Decidido (pendiente de Nando)**
-- Nando apunta una pega de negocio: una guía que enseña sola puede **cerrar la vía de ir él a dar formación** a los locales que
-  quieran la app. Sin decidir; la guía queda en un solo sitio (`GUIDE`), fácil de recortar o quitar.
+- Pega de negocio que apunta Nando: una guía que enseña sola puede cerrar la vía de ir él a dar formación a los locales. Sin decidir;
+  la guía está en un solo sitio (`GUIDE`, `GUIDE_GROUPS`), fácil de recortar o quitar. Opinión mía: la guía quita lo aburrido (dónde
+  se pulsa); lo que él vale es cómo organizar los turnos de un local.
 
 **Aprendido**
-- Una guía se queda vieja si nadie la toca: por eso el guardián. Cubre botones y menús, no comportamientos (reglas, gestos).
+- Mezclar guía y chat llena la conversación de burbujas repetidas; una guía de consulta es mejor como vista aparte.
+- `hidden` no gana a un `display:flex` propio: hace falta `[hidden] { display: none !important }` en la ventana.
 
 **Siguiente**
-- Que Nando mire la guía y decida si sube. Cuenta de Groq de David y probar en su móvil.
+- Que Nando mire el glosario y decida si sube. Cuenta de Groq de David y probar en su móvil.
 
 ## 10-nov-2026 — Fervis: ranking, chips y color libre
 

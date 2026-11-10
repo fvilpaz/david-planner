@@ -353,7 +353,7 @@ window.Fervis = (function () {
       "inventes ni lo cuentes tú a ojo: turnos_entre da los turnos concretos (qué turno tiene alguien, quién trabaja un " +
       "día; con «persona» solo los de esa persona), resumen_entre da lo ya contado por persona (días de turno partido o " +
       "seguido, libres, vacaciones, bajas, fines de semana completos sin trabajar y sábados o domingos sueltos) y " +
-      "manual_app(tema) es la guía de la app: cómo se hace cada cosa y qué puede hacer cada parte (úsala para todo «cómo hago…» y «qué puedes hacer»; si dudas del tema, sin tema da el índice). Si piden la guía o el manual en general, no la recites: di en una línea que pulsen el botón 📖 de arriba (guía por temas) y, si preguntan algo concreto, explícalo con manual_app. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
+      "manual_app(tema) es la guía de la app: cómo se hace cada cosa y qué puede hacer cada parte (úsala para todo «cómo hago…» y «qué puedes hacer»; si dudas del tema, sin tema da el índice). Si piden la guía o el manual en general, no la recites: di en una línea que pulsen el botón 📖 de arriba (el glosario de la app, por temas) y, si preguntan algo concreto, explícalo con manual_app. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
       "completos (sábado y domingo) y los días sueltos por separado, sin mezclarlos en «días libres». Para «quién tiene " +
       "más…» usa las líneas RANKING ya calculadas y di siempre el motivo: vacaciones o baja NO es librar. «Sin nada puesto» " +
       "es un día sin planificar: no es libre, dilo aparte. «Esta semana», " +
@@ -520,19 +520,41 @@ window.Fervis = (function () {
     messages.scrollTop = messages.scrollHeight;
   }
 
-  // La guía interactiva: el índice son chips; al tocar un tema, sale solo ese, en pasos. La responde la app (no el modelo): al
-  // instante, sin gastar Groq y sin necesitar clave.
-  function guideIndex() {
-    say("fervis", "📖 Guía de la app. ¿Sobre qué quieres que te explique?");
-    chipRow(GUIDE.map(function (item) { return [item[1], item[2], function () { guideTopic(item[0]); }]; }));
+  // La guía como GLOSARIO (Nando: «que el botón, en vez de modo bot, se convierta en glosario: vas pulsando y va desplegando»): una
+  // vista aparte dentro de la ventana, con grupos y temas que se despliegan. No es el chat: no añade burbujas, no llama a Groq y no
+  // necesita clave. El botón 📖 (y el chip «Guía de la app» del saludo) alterna entre el chat y el glosario.
+  const GUIDE_GROUPS = [
+    ["turnos", "📅", "Turnos y casillas", ["empezar", "casilla", "horas_extra", "intercambiar", "copiar_turno"]],
+    ["gestion", "🛠️", "Menú Gestión", ["copiar_semanas", "personal", "estados", "puntos_de_venta", "imprimir", "copia_seguridad", "temas"]],
+    ["app", "🏢", "Mi local, la app y Fervis", ["local_y_persona", "instalar", "fervis"]],
+  ];
+  const guideView = document.getElementById("fervis-guide-view");
+  const guideButton = document.getElementById("fervis-guide");
+
+  function buildGuide() {
+    guideView.replaceChildren();
+    GUIDE_GROUPS.forEach(function (group) {
+      const groupBox = guideView.appendChild(document.createElement("details"));
+      groupBox.className = "fervis-guide-group";
+      groupBox.appendChild(document.createElement("summary")).textContent = group[1] + " " + group[2];
+      group[3].forEach(function (topicId) {
+        const item = GUIDE.find(function (it) { return it[0] === topicId; });
+        const topic = groupBox.appendChild(document.createElement("details"));
+        topic.className = "fervis-guide-topic";
+        topic.appendChild(document.createElement("summary")).textContent = item[1] + " " + item[2];
+        const steps = topic.appendChild(document.createElement("ul"));
+        item[3].forEach(function (step) { steps.appendChild(document.createElement("li")).textContent = step; });
+      });
+    });
   }
 
-  function guideTopic(id) {
-    const item = GUIDE.find(function (it) { return it[0] === id; });
-    clearChips();
-    say("david", item[1] + " " + item[2]);
-    say("fervis", item[1] + " " + item[2] + "\n" + item[3].map(function (step) { return "• " + step; }).join("\n"));
-    chipRow([["📖", "Otros temas", guideIndex]]);
+  function showGuide(show) {  // el glosario o el chat: uno u otro
+    if (show && !guideView.children.length) { buildGuide(); }
+    guideView.hidden = !show;
+    messages.hidden = show;
+    chat.hidden = show;
+    if (show) { keyForm.hidden = true; guideView.scrollTop = 0; }
+    guideButton.setAttribute("aria-expanded", String(show));
   }
 
   const QUESTIONS = [["🕒", "¿Quién trabaja hoy?"], ["🌴", "¿Quién libra este fin de semana?"],
@@ -542,16 +564,17 @@ window.Fervis = (function () {
     say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?");
     chipRow(QUESTIONS.map(function (pair) {
       return [pair[0], pair[1], function () { question.value = pair[1]; chat.requestSubmit(); }];  // sin clave, abre Ajustes y deja la pregunta escrita
-    }).concat([["📖", "Guía de la app", guideIndex]]));
+    }).concat([["📖", "Guía de la app", function () { showGuide(true); }]]));
   }
 
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
   // la respuesta llegaría a una conversación que ya no existe
-  document.getElementById("fervis-guide").addEventListener("click", guideIndex);
+  guideButton.addEventListener("click", function () { showGuide(guideView.hidden); });
 
   document.getElementById("fervis-clear").addEventListener("click", function () {
     if (busy) { return; }
     history.length = 0;
+    showGuide(false);
     messages.replaceChildren();
     greet();
     if (readKey()) { question.focus(); }
@@ -610,6 +633,7 @@ window.Fervis = (function () {
   // La conversación se queda al cerrar y volver a abrir (hasta recargar la página)
   function open() {
     dialog.showModal();
+    showGuide(false);  // siempre se abre en el chat
     const key = readKey();
     if (!messages.children.length) { greet(); }
     showKeyForm(!key);
