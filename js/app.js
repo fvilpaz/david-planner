@@ -10,6 +10,7 @@ window.Schedule = (function () {
   const title = document.getElementById("week-title");
   const picker = document.getElementById("week-picker");
   const dayName = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric" });
+  const hoursFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });  // 1.5 → «1,5»
   // formatRange junta lo que se repite: «9–15 nov 2026», «30 nov – 6 dic 2026», «29 dic 2026 – 4 ene 2027»
   const weekRange = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" });
 
@@ -61,7 +62,15 @@ window.Schedule = (function () {
     } else {
       box.append(el("span", "cell-empty", "+"));
     }
-    box.setAttribute("aria-label", employee.name + ", " + dayName.format(day) + ": " + (texts.join(" y ") || "vacía"));
+    // Horas extra: borde de aviso y «+2 h extra» debajo; el motivo, al pasar el ratón y para el lector de pantalla
+    if (status && status.countsAsWork && shift.overtime) {
+      const extra = "+" + hoursFormat.format(shift.overtime.hours) + " h extra";
+      box.classList.add("has-overtime");
+      box.append(el("span", "overtime-tag", extra));
+      texts.push(extra + (shift.overtime.reason ? " (" + shift.overtime.reason + ")" : ""));
+      if (shift.overtime.reason) { box.title = shift.overtime.reason; }
+    }
+    box.setAttribute("aria-label", employee.name + ", " + dayName.format(day) + ": " + (texts.join(", ") || "vacía"));
     return box;
   }
 

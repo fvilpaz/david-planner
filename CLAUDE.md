@@ -28,7 +28,8 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | Estados | **Editables** (como `gestion-hosteleria`): nombre, color, si cuenta como trabajo y orden. Al empezar: Trabajo, Libre, Vacaciones, Baja. Un estado en uso no se puede borrar. Color de la casilla: si cuenta como trabajo, el de la persona; si no, el del estado. |
 | Intercambiar | «Intercambiar con…» y tocar otra casilla: misma persona en dos días, dos personas el mismo día o cualquier combinación. Dos toques, no arrastrar (se confunde con desplazar en el móvil). |
 | Horas extra | Número y motivo opcional en la casilla. Se ve con **borde de aviso + texto «+2 h extra»** (nunca solo color). **Salen en el PDF.** No se copian al copiar semanas. |
-| Menú «Gestión» | Imprimir / PDF · Copiar la semana anterior (en 1–8 semanas) · Personal · Estados · Tema · Copia de seguridad. |
+| Puntos de venta | Lista editable (Chiringuito, Cafetería, Pub…). Un «Dónde» por tramo. Se ve como **texto pequeño debajo de la hora**, no con colores y leyenda (el color ya es la persona o el estado; en blanco y negro el texto sigue ahí). Con la lista vacía no aparece nada. |
+| Menú «Gestión» | Imprimir / PDF · Copiar la semana anterior (en 1–8 semanas) · Personal · Estados · Puntos de venta · Tema · Copia de seguridad. |
 | Copiar semanas | Como `gestion-hosteleria`: la semana anterior a la que se ve se repite en esta y en las siguientes (1–8), **solo en casillas vacías** y sin quien esté de baja en la semana de destino. |
 | Personal | Añadir, nombre, color, orden (número o arrastrar por ⠿), **dar de baja desde una semana** (sigue en las anteriores) y volver a dar de alta. |
 | Temas | **Claro, Lino, Oscuro y Carbón** (colores de `gestion-hosteleria/app/core/static/core/themes.css`). |

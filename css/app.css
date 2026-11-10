@@ -124,6 +124,10 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
         border-radius: 8px; background: transparent; color: inherit; font-size: inherit; }
 .cell:hover { outline: 2px solid var(--primary); }
 .cell-empty { margin: auto; color: var(--muted); font-size: 1.4rem; line-height: 1; }
+/* Horas extra: borde de aviso + «+2 h extra» (nunca solo el color: en blanco y negro el texto sigue ahí) */
+.cell.has-overtime { box-shadow: inset 0 0 0 2px var(--warning); padding: 2px; }
+.overtime-tag { color: var(--warning); font-size: .72rem; font-weight: 700; line-height: 1.2; }
+.slot .overtime-hours { flex: 0 0 5rem; text-align: center; }  /* .slot input le daría todo el ancho */
 .chip { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;
         border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px;
         font-size: .8rem; font-weight: 500; line-height: 1.35; }
@@ -178,5 +182,6 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-table td { height: 34px; }
   .schedule-table tr { break-inside: avoid; }  /* una persona nunca partida entre dos hojas */
   .cell-empty { visibility: hidden; }  /* el «+» de las casillas vacías no va al papel */
-  .schedule-table th, .chip { -webkit-print-color-adjust: exact; print-color-adjust: exact; }  /* que se impriman los colores */
+  .schedule-table th, .chip, .cell.has-overtime { -webkit-print-color-adjust: exact; print-color-adjust: exact; }  /* que se impriman los colores */
+  html[data-theme] { --warning: #b45309; }  /* en papel, el ámbar de los temas claros */
 }

@@ -1,12 +1,15 @@
-// Ventana de la casilla: estado, horario (uno o dos tramos), Guardar y Vaciar. Como la de gestion-hosteleria con dos
-// mejoras: un solo Guardar para toda la casilla, y si el estado no cuenta como trabajo el horario se oculta al
-// momento (allí seguía a la vista y se borraba al guardar). Las horas extra que ya tuviera la casilla se conservan.
+// Ventana de la casilla: estado, horario (uno o dos tramos), horas extra, Guardar y Vaciar. Como la de
+// gestion-hosteleria con dos mejoras: un solo Guardar para toda la casilla, y si el estado no cuenta como trabajo el
+// horario y las extras se ocultan al momento (allí seguían a la vista y se borraban al guardar).
 window.CellDialog = (function () {
   "use strict";
   const dialog = document.getElementById("cell-dialog");
   const form = document.getElementById("cell-form");
   const statusSelect = document.getElementById("cell-status");
   const hours = document.getElementById("cell-hours");
+  const overtime = document.getElementById("cell-overtime");
+  const overtimeHours = document.getElementById("overtime-hours");
+  const overtimeReason = document.getElementById("overtime-reason");
   const second = document.getElementById("slot-2");
   const addSlot = document.getElementById("add-slot");
   const clear = document.getElementById("cell-clear");
@@ -32,10 +35,20 @@ window.CellDialog = (function () {
     if (!on) { slotInputs(2).forEach(function (input) { input.value = ""; }); }
   }
 
-  // El horario solo se ve si el estado elegido cuenta como trabajo
+  // El horario y las horas extra solo se ven si el estado elegido cuenta como trabajo
   function syncHours() {
     const status = window.Schedule.statusOf(statusSelect.value);
-    hours.hidden = !(status && status.countsAsWork);
+    hours.hidden = overtime.hidden = !(status && status.countsAsWork);
+  }
+
+  // Horas extra: vacío = ninguna. Vale «2», «1,5» o «1.5»; se redondea a medias horas (como gestion-hosteleria).
+  // Devuelve { overtime } (null si no hay) o { error }.
+  function readOvertime() {
+    const text = overtimeHours.value.trim().replace(",", ".");
+    if (!text) { return { overtime: null }; }
+    const hoursNumber = /^\d{1,2}(\.\d{1,2})?$/.test(text) ? Math.round(Number(text) * 2) / 2 : NaN;
+    if (!(hoursNumber > 0 && hoursNumber <= 16)) { return { error: "Las horas extra van de 0,5 a 16 (por ejemplo, 2 o 1,5)." }; }
+    return { overtime: { hours: hoursNumber, reason: overtimeReason.value.trim().slice(0, 80) } };
   }
 
   function open(employee, isoDay) {
@@ -53,6 +66,9 @@ window.CellDialog = (function () {
       inputs[1].value = slots[n - 1] ? slots[n - 1].end : "";
     });
     showSecond(slots.length > 1);
+    const extra = shift && shift.overtime;
+    overtimeHours.value = extra ? String(extra.hours).replace(".", ",") : "";
+    overtimeReason.value = extra ? extra.reason : "";
     clear.hidden = !shift;  // Vaciar solo si hay algo que vaciar
     showError(statuses.length ? "" : "No hay estados: créalos antes en «Gestión».");
     syncHours();
@@ -85,14 +101,18 @@ window.CellDialog = (function () {
     const status = window.Schedule.statusOf(statusSelect.value);
     if (!status) { showError("Elige un estado."); return; }
     const slots = [];
+    let extra = null;  // sin trabajo no hay horas extra
     if (status.countsAsWork) {
       for (const n of second.hidden ? [1] : [1, 2]) {
         const read = readSlot(n);
         if (read.error) { showError(read.error); return; }
         if (read.slot) { slots.push(read.slot); }
       }
+      const readExtra = readOvertime();
+      if (readExtra.error) { showError(readExtra.error); return; }
+      extra = readExtra.overtime;
     }
-    save({ statusId: status.id, slots: slots, overtime: (current.shift && current.shift.overtime) || null });
+    save({ statusId: status.id, slots: slots, overtime: extra });
   });
 
   statusSelect.addEventListener("change", function () { showError(""); syncHours(); });

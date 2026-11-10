@@ -1,5 +1,25 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 4: horas extra
+
+**Hecho**
+- En la ventana: «Horas extra» y «Motivo» (solo con un estado que cuenta como trabajo). En la casilla: borde ámbar
+  (`--warning`, en los 4 temas) y «+2 h extra»; el motivo en `title` y en la descripción para lectores de pantalla.
+  Ejemplo inventado en los datos de prueba (Diego, sábado, +2 h «Cierre tarde»).
+- Verificado: «1,5» → 1,5; «1.3» → 1,5 (medias horas); «16» vale; «0,2», «abc», «17» → aviso; vacío → sin extras;
+  pasar a Libre las oculta y las borra; se ve en Claro y en Carbón; PDF real con el borde y el texto.
+
+**Decidido**
+- Puntos de venta (Nando): texto pequeño debajo de la hora, un «Dónde» por tramo, lista editable; paso 7b.
+- Las horas extra van con el trabajo: un estado que no cuenta como trabajo no las lleva.
+
+**Aprendido**
+- **`type="number"` y la coma:** algunos navegadores no aceptan «1,5». Campo de texto con `inputmode="decimal"`
+  (teclado numérico en el móvil) y se cambia la coma por punto al leerlo.
+
+**Siguiente**
+- Paso 5: «Intercambiar con…» (dos toques).
+
 ## 10-nov-2026 — Paso 3: editar la casilla
 
 **Hecho**

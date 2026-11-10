@@ -1,6 +1,7 @@
 /* Temas: Claro, Lino, Oscuro y Carbón (Nando, 10-nov-2026). Colores EXACTOS de gestion-hosteleria
    (app/core/static/core/themes.css): Claro y Oscuro son los de auryapp; Lino y Carbón, los propios.
    Cada tema solo define colores. --primary-text = el color principal usado como TEXTO.
+   --warning = el aviso de horas extra (ámbar).
    --tint-mix = cuánto color lleva cada turno: 10 % en los claros, 30 % en los oscuros (con 10 % casi no se veía). */
 
 /* ☀️ Claro (por defecto) */
@@ -15,6 +16,7 @@
   --border: rgba(0, 0, 0, 0.08);
   --error: #c0392b;
   --on-error: #ffffff;
+  --warning: #b45309;
   --tint-mix: 10%;
   color-scheme: light;
 }
@@ -31,6 +33,7 @@
   --border: #ddd8cf;
   --error: #b42318;
   --on-error: #ffffff;
+  --warning: #b45309;
   --tint-mix: 10%;
   color-scheme: light;
 }
@@ -47,6 +50,7 @@
   --border: rgba(255, 255, 255, 0.08);
   --error: #ef4444;
   --on-error: #ffffff;
+  --warning: #f59e0b;
   --tint-mix: 30%;
   color-scheme: dark;
 }
@@ -63,6 +67,7 @@
   --border: #333a46;
   --error: #f97066;
   --on-error: #14171c;
+  --warning: #f59e0b;
   --tint-mix: 30%;
   color-scheme: dark;
 }

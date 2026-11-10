@@ -112,6 +112,17 @@
         <button type="button" class="secondary" id="add-slot">+ Segundo tramo (turno partido)</button>
         <small class="help">Si el fin es anterior al inicio, termina al día siguiente (22:00–02:00).</small>
       </fieldset>
+      <!-- También solo si el estado cuenta como trabajo. Texto con teclado numérico (no type=number): así vale «1,5» -->
+      <fieldset class="slots" id="cell-overtime">
+        <legend>Horas extra</legend>
+        <div class="slot">
+          <input type="text" id="overtime-hours" class="overtime-hours" inputmode="decimal" maxlength="5" placeholder="0"
+                 autocomplete="off" aria-label="Horas extra">
+          <input type="text" id="overtime-reason" maxlength="80" placeholder="Motivo (opcional)" autocomplete="off"
+                 aria-label="Motivo de las horas extra">
+        </div>
+        <small class="help">Se redondean a medias horas. Vacío = sin horas extra.</small>
+      </fieldset>
       <p class="error" id="cell-error" role="alert" hidden></p>
       <div class="form-actions">
         <button type="submit">Guardar</button>

@@ -49,5 +49,8 @@ window.DEMO_DATA = (function () {
     });
   });
 
+  // Un ejemplo de horas extra: Diego, el sábado de esta semana
+  shifts["e4|" + window.Dates.toIso(window.Dates.addDays(thisMonday, 5))].overtime = { hours: 2, reason: "Cierre tarde" };
+
   return { version: 1, employees: employees, statuses: statuses, shifts: shifts };
 })();
