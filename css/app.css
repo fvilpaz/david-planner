@@ -179,27 +179,27 @@ button.danger { background: var(--error); color: var(--on-error); }
                font: inherit; font-weight: 600; border-radius: 8px; }
 .name-button:hover { outline: 2px solid var(--primary); }
 
-/* Ventana «Personal»: lista de personas y ficha con su paleta de colores */
-.staff-view { display: grid; gap: 1rem; }
-.staff-view[hidden] { display: none; }
-.staff-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
-.staff-row { width: 100%; display: flex; align-items: center; gap: .75rem; text-align: left; padding: 0 1rem;
+/* Ventanas «Personal» y «Estados»: lista ordenable (lists.js) y ficha con su paleta de colores */
+.dialog-view { display: grid; gap: 1rem; }
+.dialog-view[hidden] { display: none; }
+.sort-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.sort-row { width: 100%; display: flex; align-items: center; gap: .75rem; text-align: left; padding: 0 1rem;
              background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-.staff-row small { margin-left: auto; color: var(--muted); }
+.sort-row small { margin-left: auto; color: var(--muted); }
 /* Cada persona es una tarjeta con todo dentro: asa ⠿ a la izquierda (touch-action: none para que arrastrar no
    desplace la página), el nombre (abre la ficha) y el número del puesto a la derecha, en el hueco que sobraba */
-.staff-list li { display: flex; align-items: center; gap: .25rem; padding: 0 .5rem 0 .25rem; background: var(--surface);
+.sort-list li { display: flex; align-items: center; gap: .25rem; padding: 0 .5rem 0 .25rem; background: var(--surface);
                  border: 1px solid var(--border); border-radius: var(--radius); }
-.staff-list li .staff-row { flex: 1; min-width: 0; padding: 0 .5rem; background: transparent; border: 0; }
-.staff-list li.dragging { opacity: .6; }
+.sort-list li .sort-row { flex: 1; min-width: 0; padding: 0 .5rem; background: transparent; border: 0; }
+.sort-list li.dragging { opacity: .6; }
 .drag-handle { display: grid; place-items: center; min-width: 32px; min-height: 48px; color: var(--muted);
                font-size: 1.3rem; cursor: grab; touch-action: none; user-select: none; }
-.staff-list li.dragging .drag-handle { cursor: grabbing; }
+.sort-list li.dragging .drag-handle { cursor: grabbing; }
 /* El número del puesto: cajita más baja que la tarjeta (no la toca arriba ni abajo), en el color de acento del tema */
 .order-number { width: 2.6rem; min-height: 34px; height: 34px; padding: 0; text-align: center; font-weight: 700;
                 color: var(--primary-text); background: color-mix(in srgb, var(--primary) 10%, var(--surface));
                 border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--surface)); border-radius: 8px; }
-.staff-row.left { opacity: .65; }  /* de baja */
+.sort-row.left { opacity: .65; }  /* de baja */
 .swatch { display: inline-block; width: 16px; height: 16px; border-radius: 50%; flex: none; background: var(--swatch); }
 .palette { display: flex; flex-wrap: wrap; gap: .5rem; }
 .palette button { width: 44px; min-height: 44px; padding: 0; border-radius: 50%; background: var(--swatch);

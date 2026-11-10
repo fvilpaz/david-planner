@@ -39,27 +39,18 @@ window.Staff = (function () {
     listView.hidden = false;
     list.replaceChildren.apply(list, sorted().map(function (person, index) {
       const item = document.createElement("li");
-      item.dataset.employee = person.id;
-      // Orden (paso 6b): el asa ⠿ para arrastrar y el número del puesto (1, 2, 3…), como «Ordenar» de gestion-hosteleria
-      const handle = item.appendChild(document.createElement("span"));
-      handle.className = "drag-handle";
-      handle.textContent = "⠿";
-      handle.setAttribute("aria-hidden", "true");
+      item.dataset.id = person.id;
       const row = item.appendChild(document.createElement("button"));
       row.type = "button";
-      row.className = "staff-row" + (person.leftFrom ? " left" : "");
-      row.dataset.employee = person.id;
+      row.className = "sort-row" + (person.leftFrom ? " left" : "");
+      row.dataset.id = person.id;
       const dot = row.appendChild(document.createElement("span"));
       dot.className = "swatch";
       dot.style.setProperty("--swatch", person.color);
       row.append(person.name);  // texto, nunca HTML
       if (person.leftFrom) { row.appendChild(document.createElement("small")).textContent = "de baja desde el " + longDate(person.leftFrom); }
-      const number = item.appendChild(document.createElement("input"));
-      number.className = "order-number";
-      number.inputMode = "numeric";
-      number.maxLength = 2;
-      number.value = String(index + 1);
-      number.setAttribute("aria-label", "Puesto de " + person.name);
+      // Orden (paso 6b): el asa ⠿ y el número del puesto (lists.js), como «Ordenar» de gestion-hosteleria
+      window.Lists.decorate(item, index, person.name);
       return item;
     }));
   }
@@ -73,56 +64,7 @@ window.Staff = (function () {
     if (!saved) { showError("No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada."); }
   }
 
-  function listIds() { return Array.from(list.children).map(function (item) { return item.dataset.employee; }); }
-
-  // Escribir un número (y salir del campo o pulsar Intro) lleva a la persona a ese puesto
-  list.addEventListener("change", function (event) {
-    const input = event.target.closest(".order-number");
-    if (!input) { return; }
-    const ids = listIds();
-    const id = input.closest("li").dataset.employee;
-    const wanted = Math.min(Math.max(parseInt(input.value, 10) || 1, 1), ids.length) - 1;
-    ids.splice(ids.indexOf(id), 1);
-    ids.splice(wanted, 0, id);
-    saveOrder(ids);
-  });
-  list.addEventListener("keydown", function (event) {
-    if (event.key === "Enter" && event.target.closest(".order-number")) { event.preventDefault(); event.target.blur(); }
-  });
-  // Al tocar la cajita, el número se selecciona entero: lo que se escriba lo sustituye. Sin esto, el cursor quedaba
-  // al principio y escribir «1» sobre un «3» daba «13» (= al final): parecía que no se movía (lo vio Nando).
-  // En el clic y no solo al recibir el foco: al soltar el ratón, el navegador quitaba la selección.
-  list.addEventListener("click", function (event) { if (event.target.closest(".order-number")) { event.target.select(); } });
-  list.addEventListener("focusin", function (event) { if (event.target.closest(".order-number")) { event.target.select(); } });
-
-  // Arrastrar por el asa ⠿ (de gestion-hosteleria/schedule.js): el puntero sigue «agarrado» aunque salga del asa y, al
-  // pasar por encima de otra persona, se cambian de sitio. Vale con el dedo y con el ratón. Se guarda al soltar.
-  let dragged = null;
-  list.addEventListener("pointerdown", function (event) {
-    const handle = event.target.closest(".drag-handle");
-    if (!handle) { return; }
-    dragged = handle.closest("li");
-    dragged.classList.add("dragging");
-    handle.setPointerCapture(event.pointerId);
-    event.preventDefault();
-  });
-  list.addEventListener("pointermove", function (event) {
-    if (!dragged) { return; }
-    const below = document.elementFromPoint(event.clientX, event.clientY);
-    const target = below && below.closest(".staff-list li");
-    if (!target || target === dragged) { return; }
-    // Si venía de antes, queda detrás de la otra; si venía de después, delante
-    const comesFromBefore = dragged.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING;
-    list.insertBefore(dragged, comesFromBefore ? target.nextSibling : target);
-  });
-  function drop() {
-    if (!dragged) { return; }
-    dragged.classList.remove("dragging");
-    dragged = null;
-    saveOrder(listIds());
-  }
-  list.addEventListener("pointerup", drop);
-  list.addEventListener("pointercancel", drop);
+  window.Lists.sortable(list, saveOrder);  // arrastrar por ⠿ o escribir el número (lists.js)
 
   // Un color que no lleve nadie en activo; si están todos cogidos, se repite la paleta
   function freeColor() {
@@ -131,18 +73,7 @@ window.Staff = (function () {
       window.PALETTE[employees().length % window.PALETTE.length];
   }
 
-  function renderPalette() {
-    const colors = window.PALETTE.includes(color) ? window.PALETTE : [color].concat(window.PALETTE);  // el suyo, aunque no esté
-    palette.replaceChildren.apply(palette, colors.map(function (c, i) {
-      const swatch = document.createElement("button");
-      swatch.type = "button";
-      swatch.style.setProperty("--swatch", c);
-      swatch.setAttribute("aria-label", "Color " + (i + 1));
-      swatch.setAttribute("aria-pressed", String(c === color));
-      swatch.addEventListener("click", function () { color = c; renderPalette(); });
-      return swatch;
-    }));
-  }
+  function renderPalette() { window.Lists.palette(palette, color, function (c) { color = c; renderPalette(); }); }
 
   // El botón de abajo cambia según la persona: Quitar (sin turnos), Dar de baja (con turnos) o Volver a dar de alta
   function setupRemove() {
@@ -228,8 +159,8 @@ window.Staff = (function () {
   });
 
   list.addEventListener("click", function (event) {
-    const row = event.target.closest(".staff-row");
-    if (row) { showForm(employees().find(function (p) { return p.id === row.dataset.employee; })); }
+    const row = event.target.closest(".sort-row");
+    if (row) { showForm(employees().find(function (p) { return p.id === row.dataset.id; })); }
   });
   document.getElementById("staff-add").addEventListener("click", function () { showForm(null); });
   document.getElementById("staff-back").addEventListener("click", back);
