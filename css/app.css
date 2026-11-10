@@ -101,6 +101,18 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .auto-copies button { min-height: 40px; padding: 0 .6rem; white-space: nowrap; }
 /* El menú «Gestión» ya es largo: si no cabe en la pantalla (móvil en horizontal), se desliza por dentro */
 .manage-menu .menu-list { max-height: calc(100dvh - var(--topbar-height) - 6.5rem); overflow-y: auto; }
+/* En el PC hay sitio de sobra: el menú es más ancho y respira (el móvil se queda como estaba). Con «Copia de seguridad»
+   abierta, los dos botones van lado a lado y los textos no se parten en tantas líneas. */
+@media (min-width: 900px) {
+  .manage-menu .menu-list { min-width: 420px; padding: 1rem; gap: .5rem; }
+  .manage-menu .menu-list > button, .manage-menu .menu-group > summary { min-height: 52px; padding: 0 1.25rem; }
+  .manage-menu .copy-form { max-width: none; gap: .75rem; padding: .5rem .5rem 1rem; }
+  .manage-menu .copy-form .help { line-height: 1.5; }
+  .manage-menu #backup-group .copy-form { grid-template-columns: 1fr 1fr; }
+  .manage-menu #backup-group .copy-form > :not(button) { grid-column: 1 / -1; }
+  .manage-menu .auto-copies { gap: .5rem; font-size: .9rem; }
+  .manage-menu .theme-list { gap: .5rem; padding: .5rem; }
+}
 
 .print-only { display: none; }
 

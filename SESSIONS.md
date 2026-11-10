@@ -17,6 +17,10 @@
   chat se quedaba «super justo»): `.fervis-dialog`, hasta 860 px de ancho y 92 % del alto, mensajes ocupando lo que sobra.
   Verificado en PC (860 × 735 en una ventana de 1707 × 799) y a 390 px (ventana 28–671, casilla dentro, sin
   desplazamiento lateral). Para ver el vídeo: `ffmpeg` saca un fotograma cada 4 s.
+- Menú «Gestión» con más espacio **solo en el PC** (≥ 900 px; Nando, con una captura: columna estrecha y con barra de
+  desplazamiento al abrir «Copia de seguridad»): 420 px de ancho, más margen y filas de 52 px, y los botones Descargar y
+  Cargar lado a lado. Móvil sin cambios (menú de 260 px, botones de 48: medido). En una ventana de 799 px de alto aún
+  desplaza 26 px con la copia abierta; en la de Nando (1126) cabe entera.
 - Pruebas 30–34 (quién trabaja ahora, avisos, Groq de mentira con 429/401, solo modelos de la cuenta). **Controles:** turno
   de la medianoche, «ya no trabaja aquí» y salto de modelo (fallan justo esos); luego chat con aviso de clave y lista de
   modelos ignorada (fallan justo esos). Un primer control rompió el archivo (sed mal): no valía, rehecho. 33/33.
