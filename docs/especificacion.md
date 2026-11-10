@@ -50,7 +50,8 @@ de la app (manual, personal, estados, puntos de venta, quién trabaja ahora, est
 con la consulta `turnos_entre`, hasta 31 días); reconoce a las personas sin tildes ni mayúsculas; sin personal o sin
 turnos, lo dice. Usa solo los modelos que tiene la cuenta; debajo de cada respuesta, `groq · modelo` (y «(respaldo)»
 si el primero falló). Lo laboral es orientativo (nota en el pie). La papelera borra la conversación (y lo que Fervis recuerda de ella;
-la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «¿En qué te puedo ayudar?». Solo lee los turnos.
+la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «¿En qué te puedo ayudar?». La ventana es grande (hasta 860 px de ancho y el 92 % del alto), con los
+mensajes ocupando lo que sobra. Solo lee los turnos.
 
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.
 
@@ -72,7 +73,7 @@ la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «¿
 - [P] Fervis: quién trabaja ahora (también turnos que cruzan la medianoche), vacaciones, bajas; avisos sin personal o sin
   turnos; con un Groq de mentira: datos y clave en la petición, consulta de otras fechas, 429 → siguiente modelo con su
   etiqueta, 401 → aviso, solo modelos de la cuenta. [M] Con una clave real (10-nov): personas sin tildes, vacaciones,
-  baja, charla general. **Sin comprobar:** cuánto aguanta el límite gratuito con uso diario real.
+  baja, charla general; tamaño de la ventana en PC (vídeo de Nando) y a 390 px. **Sin comprobar:** cuánto aguanta el límite gratuito con uso diario real.
 - [P] Fervis: el robot se mueve y luego abre; el chat no habla de la clave (va en Ajustes); clave limpia, rechazada y
   quitada. [P] La clave no sale en la
   copia descargada ni en las automáticas. [M] Robot en los 4 temas; 390 px (robot y «Gestión» juntos, sin desplazar).

@@ -13,6 +13,10 @@
   clave (sin ella, preguntar abre Ajustes y deja la pregunta escrita). Nota laboral orientativa en el pie.
 - Papelera para empezar una conversación nueva (Nando, como la cartera; prueba 33, control: sin el olvido, la prueba
   falla). Saludo: «¿En qué te puedo ayudar?».
+- Ventana del chat más grande (Nando, con un vídeo de su pantalla de 2560 px: con 480 px y la lista a media altura, el
+  chat se quedaba «super justo»): `.fervis-dialog`, hasta 860 px de ancho y 92 % del alto, mensajes ocupando lo que sobra.
+  Verificado en PC (860 × 735 en una ventana de 1707 × 799) y a 390 px (ventana 28–671, casilla dentro, sin
+  desplazamiento lateral). Para ver el vídeo: `ffmpeg` saca un fotograma cada 4 s.
 - Pruebas 30–34 (quién trabaja ahora, avisos, Groq de mentira con 429/401, solo modelos de la cuenta). **Controles:** turno
   de la medianoche, «ya no trabaja aquí» y salto de modelo (fallan justo esos); luego chat con aviso de clave y lista de
   modelos ignorada (fallan justo esos). Un primer control rompió el archivo (sed mal): no valía, rehecho. 33/33.
