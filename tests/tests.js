@@ -587,10 +587,58 @@
     equal(now(at(10, 2, 0)), "Trabajando ahora mismo: nadie.", "martes 2:00, ya terminó");
     const noon = at(10, 12, 0);
     equal(now(noon), "Trabajando ahora mismo: Luis (10:00–18:00).", "martes 12:00");
-    ok(/martes, 10 de noviembre[^\n]*Marta: Vacaciones/.test(noon), "Marta de vacaciones el martes");
+    const days = w.Fervis.tool("turnos_entre", { desde: "2026-11-10", hasta: "2026-11-12" });
+    ok(/martes, 10 de noviembre[^\n]*Marta: Vacaciones/.test(days), "Marta de vacaciones el martes");
     ok(noon.includes("Marta (ya no trabaja aquí desde el 2026-11-12)"), "en el personal, con su fecha");
-    ok(/miércoles, 11 de noviembre[^\n]*Marta/.test(noon) && !/jueves, 12 de noviembre[^\n]*Marta/.test(noon), "no sale desde el jueves");
+    ok(/miércoles, 11 de noviembre[^\n]*Marta/.test(days) && !/jueves, 12 de noviembre[^\n]*Marta/.test(days), "no sale desde el jueves");
     ok(!noon.includes("AVISO"), "con personal y turnos, sin avisos");
+  });
+
+  test("Fervis: el resumen por persona lo cuenta la app (partido, seguido, libre) y separa fines de semana COMPLETOS de días sueltos", async function () {
+    const data = fixture();
+    data.statuses.push({ id: "vac", name: "Vacaciones", color: "#16a085", countsAsWork: false, position: 2 });
+    const split = { statusId: "work", slots: [{ start: "10:00", end: "14:00" }, { start: "18:00", end: "22:00" }], overtime: null };
+    const off = { statusId: "off", slots: [], overtime: null };
+    const vac = { statusId: "vac", slots: [], overtime: null };
+    data.shifts["e1|2026-11-09"] = split;                         // Ana: partido lun y mar, seguido el miércoles
+    data.shifts["e1|2026-11-10"] = split;
+    data.shifts["e1|2026-11-11"] = work("10:00", "18:00");
+    data.shifts["e1|2026-11-14"] = off;                           //   fin de semana del 14–15 libre entero
+    data.shifts["e1|2026-11-15"] = off;
+    data.shifts["e1|2026-11-21"] = work("10:00", "18:00");        //   el 21 trabaja; el domingo 22, libre (suelto)
+    data.shifts["e1|2026-11-22"] = off;
+    data.shifts["e2|2026-11-14"] = work("12:00", "20:00");        // Luis: sábado 14 trabaja, domingo 15 libre (suelto)
+    data.shifts["e2|2026-11-15"] = off;
+    data.shifts["e2|2026-11-21"] = off;                           //   y el 21–22 libre entero
+    data.shifts["e2|2026-11-22"] = off;
+    data.shifts["e3|2026-11-14"] = vac;                           // Marta: vacaciones el 14–15
+    data.shifts["e3|2026-11-15"] = vac;
+    const w = await open(data);
+    const text = w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-11-22" });
+    const line = function (name) { return text.split("\n").find(function (l) { return l.startsWith("- " + name + ": "); }); };
+    ok(line("Ana").includes("turno partido 2 días; turno seguido 2 días"), "Ana: partido y seguido: " + line("Ana"));
+    ok(/completos sin trabajar \(sábado y domingo\): 1 \(14–15 nov \(libre\)\)/.test(line("Ana")), "Ana: un fin de semana completo libre: " + line("Ana"));
+    ok(/dom\S* 22 nov \(libre\)/.test(line("Ana")) && !/sáb\S* 21 nov/.test(line("Ana")), "Ana: el domingo 22 suelto, y el sábado 21 trabaja");
+    ok(/completos sin trabajar \(sábado y domingo\): 1 \(21–22 nov \(libre\)\)/.test(line("Luis")) && /dom\S* 15 nov \(libre\)/.test(line("Luis")), "Luis: completo el 21–22 y suelto el domingo 15: " + line("Luis"));
+    ok(/: 1 \(14–15 nov \(vacaciones\)\)/.test(line("Marta")) && /vacaciones 2 días/.test(line("Marta")), "Marta: vacaciones el 14–15: " + line("Marta"));
+    // un período que acaba en sábado: el domingo queda fuera, así que no hay fin de semana COMPLETO
+    const cut = w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-11-14" });
+    ok(/completos sin trabajar \(sábado y domingo\): 0/.test(cut.split("\n")[0]), "sin el domingo dentro, no es un fin de semana completo");
+    // filtro por persona (sin tildes ni mayúsculas) y persona que no existe
+    const only = w.Fervis.tool("turnos_entre", { desde: "2026-11-09", hasta: "2026-11-09", persona: "ANA" });
+    ok(only.includes("Ana:") && !only.includes("Luis:"), "solo una persona");
+    ok(w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-11-10", persona: "zzz" }).includes("No encuentro a nadie que se llame «zzz»"), "persona que no existe");
+    ok(w.Fervis.tool("manual_app").includes("Gestión"), "el manual es una herramienta");
+    ok(w.Fervis.tool("turnos_entre", { desde: "2026-11-09", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "turnos: como mucho 31 días");
+    ok(!w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-12-31" }).includes("Como mucho"), "el resumen admite 93");
+  });
+
+  test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
+    const w = await open(fixture());
+    const ctx = w.Fervis.context(new w.Date(2026, 10, 10, 12, 0));
+    ok(!ctx.includes("lunes, 9 de noviembre") && !ctx.includes("Cómo se usa la app"), "ni turnos ni manual");
+    ok(ctx.includes("hoy 2026-11-10; esta semana 2026-11-09 a 2026-11-15; la semana que viene 2026-11-16 a 2026-11-22; este mes 2026-11-01 a 2026-11-30"), "las fechas: " + ctx.split("\n").pop());
+    ok(ctx.length < 1500, "mensaje de datos corto: " + ctx.length + " letras");
   });
 
   test("Fervis avisa si el personal es el de la primera vez, si no hay turnos o si no hay nadie", async function () {
@@ -671,6 +719,31 @@
     await wait(100);
     equal(bodies[1].messages.filter(function (m) { return m.role !== "system"; }).map(function (m) { return m.content; }), ["Segunda"],
       "Fervis ya no recuerda lo anterior");
+  });
+
+  test("Fervis: una respuesta vacía (el modelo se gasta todo en pensar) pasa al siguiente modelo y nunca sale «(sin respuesta)»; gpt-oss piensa poco", async function () {
+    const w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
+    const bodies = [];
+    const replies = [
+      { choices: [{ finish_reason: "length", message: { role: "assistant", content: "" } }] },
+      { choices: [{ finish_reason: "stop", message: { role: "assistant", content: "Ana tiene turno partido." } }] },
+    ];
+    w.fetch = function (url, options) {
+      if (url.endsWith("/models")) { return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ data: MODEL_IDS.map(function (id) { return { id: id }; }) }); } }); }
+      bodies.push(JSON.parse(options.body));
+      const reply = replies.shift();
+      return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve(reply); } });
+    };
+    w.Fervis.open();
+    $("#fervis-question").value = "¿Quién tiene turno partido?";
+    $("#fervis-form").requestSubmit();
+    await wait(300);
+    const last = $$(".fervis-msg").pop();
+    equal([last.firstChild.textContent, last.querySelector(".fervis-model").textContent], ["Ana tiene turno partido.", "groq · openai/gpt-oss-120b (respaldo)"], "contesta el siguiente");
+    ok(!$$(".fervis-msg").some(function (m) { return m.textContent.includes("(sin respuesta)"); }), "ni rastro de «(sin respuesta)»");
+    equal([bodies[0].model, bodies[0].reasoning_effort, bodies[1].model, bodies[1].reasoning_effort], ["llama-3.3-70b-versatile", undefined, "openai/gpt-oss-120b", "low"],
+      "esfuerzo bajo solo en gpt-oss");
+    ok(bodies.every(function (b) { return b.max_tokens >= 1500; }), "con margen de palabras: " + bodies.map(function (b) { return b.max_tokens; }));
   });
 
   test("Fervis usa solo los modelos que tiene la cuenta: si falta el primero, no lo prueba ni pone «respaldo»", async function () {

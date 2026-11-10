@@ -1,5 +1,40 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Fervis: las herramientas de la app calculan, el modelo solo las llama
+
+**Hecho**
+- Hallazgos de Nando con capturas: (1) «dime quién tiene turno seguido y quién partido» → «(sin respuesta)»; (2) con la
+  pregunta de un solo asunto sí contestaba bien; (3) «este mes quién ha librado los fines de semana y cuántos» → «2 días
+  libres» sin decir si eran días sueltos o fines de semana enteros, y miraba solo 2 semanas.
+- Causa de (1), medida con la petición real: `finish: "length"`, 700 de salida y 0 de contenido: `gpt-oss` gasta el tope
+  pensando. Arreglo: `max_tokens` 1500, `reasoning_effort: "low"` solo en gpt-oss, y una respuesta vacía **pasa al siguiente
+  modelo** (nunca «(sin respuesta)»). Pero con poco razonamiento contaba mal (decía que Diego trabajaba lunes a viernes cuando
+  libraba jueves y viernes).
+- Nando: «la app o las funciones que tenemos son las que tendrían que pasar la info al modelo; además así quitamos gasto de
+  tokens». **Rediseño:** el mensaje de datos baja a lo mínimo (personal, estados, sitios, quién trabaja ahora y las fechas de
+  hoy, esta semana, la siguiente y este mes) y el modelo pide el resto con tres herramientas: `turnos_entre` (con filtro
+  `persona`), `resumen_entre` (cuenta la app: partido, seguido, estados, **fines de semana completos** con su motivo y
+  sábados o domingos sueltos; un día sin nada puesto no es libre) y `manual_app` (el manual sale del mensaje). Medido con
+  clave real: entrada **1.035** (antes ~2.900, −65 %); «este mes» pide `resumen_entre` del 1 al 30; separa a Hugo (3 fines de
+  semana completos, de vacaciones) de «algunos sábados sueltos».
+- Un error 400 de Groq con `gpt-oss-120b` apareció una vez y no se repitió: se pasa al siguiente modelo, y ahora el motivo se
+  guarda en la consola (`console.warn`).
+- Pruebas 39–41: respuesta vacía → siguiente modelo y `reasoning_effort`; resumen contado por la app (completos frente a
+  sueltos, período que acaba en sábado, filtro por persona sin tildes, persona inexistente, límites de 31 y 93 días,
+  manual); mensaje pequeño. **Controles:** un día sin planificar como libre, y el filtro que no filtra → fallan justo esas.
+  41/41.
+
+**Decidido**
+- «Sin nada puesto» (día sin planificar) no se cuenta como libre ni como fin de semana libre: se dice aparte.
+- Fines de semana: SIEMPRE los completos y los sueltos por separado, con el motivo (libre, vacaciones, baja).
+
+**Aprendido**
+- Dos preguntas en una frase («seguido Y partido») obligan al modelo a pensar más. Mejor que la app dé los datos mascados.
+- Un tope bajo de `max_tokens` en un modelo que razona deja respuestas vacías sin ningún error: hay que mirar `finish_reason`.
+
+**Siguiente**
+- Cuenta de Groq de David y probar en su móvil.
+
 ## 10-nov-2026 — El robot de Fervis, a la barra de arriba
 
 **Hecho**

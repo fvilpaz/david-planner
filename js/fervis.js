@@ -79,17 +79,75 @@ window.Fervis = (function () {
     return text;
   }
 
-  function rangeLines(data, from, days) {
+  const norm = function (text) { return String(text || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); };
+
+  // El filtro opcional de las herramientas: una persona, por su nombre o parte (sin tildes ni mayúsculas)
+  function pick(people, name) {
+    if (!name) { return people; }
+    const wanted = norm(name);
+    return people.filter(function (e) { return norm(e.name).includes(wanted); });
+  }
+
+  function rangeLines(data, from, days, name) {
     const lines = [];
     for (let i = 0; i < days; i++) {
       const date = Dates.addDays(from, i);
       const iso = Dates.toIso(date);
-      const people = staffOn(data, iso);
+      const people = pick(staffOn(data, iso), name);
       lines.push("- " + DAY.format(date) + " (" + iso + "): " + (people.length ? people.map(function (e) {
         return e.name + ": " + shiftText(data, data.shifts[e.id + "|" + iso]);
       }).join("; ") : "nadie en el personal"));
     }
     return lines.join("\n");
+  }
+
+  // Resumen por persona, CONTADO POR LA APP (el modelo, contando a ojo, se equivocaba: decía que alguien trabajaba de lunes
+  // a viernes cuando libraba jueves y viernes, y contestaba «2 días libres» sin decir si eran días sueltos o fines de
+  // semana enteros). Días de turno partido (dos tramos), de turno seguido (uno) y de cada estado sin horario; y de los
+  // fines de semana: los COMPLETOS sin trabajar (sábado y domingo) aparte de los sábados o domingos sueltos.
+  const SHORT_DATE = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" });
+  const DAY_NUMBER = new Intl.DateTimeFormat("es-ES", { day: "numeric" });
+  const MONTH_SHORT = new Intl.DateTimeFormat("es-ES", { month: "short" });
+  function dayLabel(data, e, date) {  // cómo cuenta ese día: trabaja (con qué turno) o su estado
+    const shift = data.shifts[e.id + "|" + Dates.toIso(date)];
+    const status = statusOf(data, shift);
+    const works = !!(status && status.countsAsWork && shift.slots.length);
+    return { works: works, empty: !status, label: !status ? "sin nada puesto" : works ? (shift.slots.length > 1 ? "turno partido" : "turno seguido") : status.name.toLowerCase() };
+  }
+  // «Libre» de verdad: un estado sin horario puesto a propósito. Un día SIN NADA PUESTO es un día sin planificar, no libre.
+  function isOff(day) { return !day.works && !day.empty; }
+  function summaryLines(data, from, days, name) {
+    return pick(inOrder(data.employees), name).map(function (e) {
+      const counts = {};
+      const order = [];
+      const single = [];   // sábados o domingos sueltos sin trabajar
+      const full = [];     // fines de semana completos (sábado y domingo) sin trabajar
+      for (let i = 0; i < days; i++) {
+        const date = Dates.addDays(from, i);
+        if (e.leftFrom && e.leftFrom <= Dates.toIso(date)) { continue; }
+        const day = dayLabel(data, e, date);
+        if (!counts[day.label]) { counts[day.label] = 0; order.push(day.label); }
+        counts[day.label]++;
+        const weekday = date.getDay();
+        if (weekday === 6 && i + 1 < days) {  // sábado con su domingo dentro del período
+          const sunday = Dates.addDays(date, 1);
+          const second = dayLabel(data, e, sunday);
+          if (isOff(day) && isOff(second) && !(e.leftFrom && e.leftFrom <= Dates.toIso(sunday))) {
+            // con el motivo (libre, vacaciones, baja…): no es lo mismo librar que estar de vacaciones
+            const why = day.label === second.label ? day.label : day.label + " y " + second.label;
+            full.push(DAY_NUMBER.format(date) + "–" + DAY_NUMBER.format(sunday) + " " + MONTH_SHORT.format(sunday).replace(".", "") + " (" + why + ")");
+          }
+        }
+        if ((weekday === 6 || weekday === 0) && isOff(day)) { single.push(SHORT_DATE.format(date).replace(/\./g, "") + " (" + day.label + ")"); }
+      }
+      order.sort(function (a, b) {  // primero los de trabajo
+        const rank = function (l) { return l === "turno partido" ? 0 : l === "turno seguido" ? 1 : 2; };
+        return rank(a) - rank(b);
+      });
+      return "- " + e.name + ": " + (order.map(function (l) { return l + " " + counts[l] + (counts[l] === 1 ? " día" : " días"); }).join("; ") || "nada") +
+        " | fines de semana completos sin trabajar (sábado y domingo): " + full.length + (full.length ? " (" + full.join(", ") + ")" : "") +
+        " | sábados o domingos sin trabajar, sueltos o no: " + (single.join(", ") || "ninguno");
+    }).join("\n");
   }
 
   // Quién está trabajando AHORA: los tramos de hoy y los de ayer que cruzan la medianoche (22:00–02:00 acaba hoy)
@@ -139,19 +197,34 @@ window.Fervis = (function () {
       "Estados: " + inOrder(data.statuses).map(function (s) { return s.name + (s.countsAsWork ? " (con horario)" : ""); }).join(", ") + ".",
       "Puntos de venta: " + (inOrder(data.places).map(function (p) { return p.name; }).join(", ") || "ninguno") + ".",
       "Trabajando ahora mismo: " + (working.join("; ") || "nadie") + ".",
-      "Esta semana:\n" + rangeLines(data, monday, 7),
-      "La semana que viene:\n" + rangeLines(data, Dates.addDays(monday, 7), 7));
+      "Fechas: hoy " + Dates.toIso(now) + "; esta semana " + Dates.toIso(monday) + " a " + Dates.toIso(Dates.addDays(monday, 6)) +
+        "; la semana que viene " + Dates.toIso(Dates.addDays(monday, 7)) + " a " + Dates.toIso(Dates.addDays(monday, 13)) +
+        "; este mes " + Dates.toIso(new Date(now.getFullYear(), now.getMonth(), 1)) + " a " +
+        Dates.toIso(new Date(now.getFullYear(), now.getMonth() + 1, 0)) + ".");
     return lines.join("\n");
   }
 
-  // La consulta que Fervis puede pedir para otras fechas
-  function lookUp(args) {
+  // Las herramientas de Fervis: las funciones de la app calculan y le dan al modelo la respuesta ya hecha (así no recibe todos
+  // los turnos en cada pregunta —gasta muchos menos tokens— ni cuenta él a ojo). Las llama el modelo; también las pruebas.
+  const MAX_SUMMARY_DAYS = 93;
+  function range(args, max) {
     const from = Dates.parseIso(args && args.desde);
     const to = Dates.parseIso(args && args.hasta);
-    if (!from || !to || to < from) { return "Fechas no válidas: AAAA-MM-DD, y «hasta» no puede ser antes que «desde»."; }
+    if (!from || !to || to < from) { return { error: "Fechas no válidas: AAAA-MM-DD, y «hasta» no puede ser antes que «desde»." }; }
     const days = Math.round((to - from) / 86400000) + 1;  // redondeo: un día con cambio de hora no mide 24 h
-    if (days > MAX_DAYS) { return "Como mucho " + MAX_DAYS + " días de una vez."; }
-    return rangeLines(window.Schedule.getData(), from, days);
+    if (days > max) { return { error: "Como mucho " + max + " días de una vez." }; }
+    return { from: from, days: days };
+  }
+
+  function runTool(name, args) {
+    const data = window.Schedule.getData();
+    if (name === "manual_app") { return MANUAL; }
+    if (name !== "turnos_entre" && name !== "resumen_entre") { return "No existe esa herramienta."; }
+    const asked = range(args, name === "resumen_entre" ? MAX_SUMMARY_DAYS : MAX_DAYS);
+    if (asked.error) { return asked.error; }
+    const who = args && args.persona ? String(args.persona) : "";
+    if (who && !pick(inOrder(data.employees), who).length) { return "No encuentro a nadie que se llame «" + who + "» en el personal."; }
+    return name === "turnos_entre" ? rangeLines(data, asked.from, asked.days, who) : summaryLines(data, asked.from, asked.days, who);
   }
 
   const MANUAL = [
@@ -166,29 +239,41 @@ window.Fervis = (function () {
   ].join("\n");
 
   function system(model) {
-    return "Eres Fervis, el asistente de «David Planner», la app de turnos de este local de hostelería. Contesta en " +
-      "castellano, breve y claro, en texto normal: sin markdown (ni asteriscos ni almohadillas); para listas, una línea " +
-      "por punto empezando con «- ». Puedes charlar de cualquier tema general (por ejemplo, qué es un contrato fijo o " +
-      "fijo discontinuo, descansos u horas extra): da información general y, para un caso concreto, recomienda mirar el " +
-      "convenio o preguntar a la gestoría. Para los turnos usa SOLO los datos de abajo o la herramienta turnos_entre " +
-      "(fechas fuera de esta semana y la siguiente); nunca inventes turnos ni personas. Reconoce a cada persona aunque " +
-      "la escriban en minúsculas, sin tildes o solo con el nombre; si hay dos posibles, pregunta. «Trabajando ahora " +
-      "mismo» ya está calculado: úsalo tal cual. Solo lees: si piden cambiar un turno, explica cómo hacerlo en la app. " +
-      "Si hay un AVISO de que falta personal o turnos, dilo y ofrece explicar paso a paso cómo crearlos. Si preguntan " +
-      "qué IA eres: Fervis es tu nombre y te ejecuta el modelo " + model + " en Groq.\n\n" + MANUAL +
-      "\n\nDATOS DE LA APP:\n" + context(new Date());
+    return "Eres Fervis, el asistente personal de quien usa «David Planner», la app de turnos de este local de hostelería. " +
+      "Contesta en castellano, breve y claro, en texto normal: sin markdown (ni asteriscos ni almohadillas); para listas, " +
+      "una línea por punto empezando con «- ». Puedes charlar de cualquier tema general (por ejemplo, qué es un contrato " +
+      "fijo o fijo discontinuo, descansos u horas extra): da información general y, para un caso concreto, recomienda mirar " +
+      "el convenio o preguntar a la gestoría. Para CUALQUIER dato de los turnos llama a las herramientas, nunca lo " +
+      "inventes ni lo cuentes tú a ojo: turnos_entre da los turnos concretos (qué turno tiene alguien, quién trabaja un " +
+      "día; con «persona» solo los de esa persona), resumen_entre da lo ya contado por persona (días de turno partido o " +
+      "seguido, libres, vacaciones, bajas, fines de semana completos sin trabajar y sábados o domingos sueltos) y " +
+      "manual_app explica cómo se usa la app. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
+      "completos (sábado y domingo) y los días sueltos por separado, sin mezclarlos en «días libres». «Sin nada puesto» " +
+      "es un día sin planificar: no es libre, dilo aparte. «Esta semana», " +
+      "«este mes»… usa las fechas de abajo. Reconoce a cada persona aunque la escriban en minúsculas, sin tildes o solo " +
+      "con el nombre; si hay dos posibles, pregunta. «Trabajando ahora mismo» ya está calculado: úsalo tal cual. Solo " +
+      "lees: si piden cambiar un turno, explica cómo hacerlo en la app (manual_app). Si hay un AVISO de que falta personal " +
+      "o turnos, dilo y ofrece explicar paso a paso cómo crearlos. Si preguntan qué IA eres: Fervis es tu nombre y te " +
+      "ejecuta el modelo " + model + " en Groq.\n\nDATOS DE LA APP:\n" + context(new Date());
   }
 
   // ---------- Groq, con la clave de David. Si un modelo está saturado o falla, se prueba el siguiente ----------
   const GROQ = "https://api.groq.com/openai/v1/chat/completions";
   const GROQ_MODELS = "https://api.groq.com/openai/v1/models";
   const MODELS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"];
-  const TOOLS = [{ type: "function", function: {
-    name: "turnos_entre",
-    description: "Turnos de todo el personal, día a día, entre dos fechas (como mucho 31 días). Para fechas que no estén en «Esta semana» ni en «La semana que viene».",
-    parameters: { type: "object", required: ["desde", "hasta"], properties: {
-      desde: { type: "string", description: "AAAA-MM-DD" }, hasta: { type: "string", description: "AAAA-MM-DD" } } },
-  } }];
+  const DATE_PARAMS = { desde: { type: "string", description: "AAAA-MM-DD" }, hasta: { type: "string", description: "AAAA-MM-DD" },
+    persona: { type: "string", description: "opcional: nombre (o parte) de una persona; si no, todo el personal" } };
+  const TOOLS = [
+    { type: "function", function: { name: "turnos_entre",
+      description: "Turnos (horario, sitio, horas extra) día a día de todo el personal, o de una persona, entre dos fechas (hasta 31 días). Para saber QUÉ turno tiene alguien o QUIÉN trabaja un día.",
+      parameters: { type: "object", required: ["desde", "hasta"], properties: DATE_PARAMS } } },
+    { type: "function", function: { name: "resumen_entre",
+      description: "Resumen YA CONTADO por persona entre dos fechas (hasta 93 días): cuántos días de turno partido, de turno seguido y de cada estado (libre, vacaciones, baja…), cuántos fines de semana completos (sábado y domingo) no trabaja y qué sábados o domingos sueltos. Para CONTAR o comparar: «quién ha librado los fines de semana», «cuántos días libra cada uno», «quién tiene turno partido».",
+      parameters: { type: "object", required: ["desde", "hasta"], properties: DATE_PARAMS } } },
+    { type: "function", function: { name: "manual_app",
+      description: "Cómo se usa la app (casillas, intercambiar, copiar, personal, estados, copias de seguridad…). Para preguntas de «cómo hago…».",
+      parameters: { type: "object", properties: {} } } },
+  ];
   const history = [];  // la conversación, para entender «¿y mañana?» (hasta recargar la página)
   let busy = false;
 
@@ -206,23 +291,37 @@ window.Fervis = (function () {
         headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" } });
     } catch (error) { throw failure("No he podido conectar con Groq (¿sin internet?).", false); }
     if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en «🔑 Clave» que esté entera.", false); }
-    if (!response.ok) { throw failure("Groq ha fallado (código " + response.status + ").", true, response.status === 429); }
+    if (!response.ok) {
+      let detail = "";
+      try { if (typeof response.text === "function") { detail = (await response.text()).slice(0, 300); } } catch (error) { /* sin detalle */ }
+      console.warn("Fervis: Groq " + response.status + " → " + detail);  // el motivo, para quien mire la consola (no sale al chat)
+      throw failure("Groq ha fallado (código " + response.status + ").", true, response.status === 429);
+    }
     return response.json();
   }
 
   async function converse(key, model, conversation) {
     const turn = [{ role: "system", content: system(model) }].concat(conversation);
     for (let round = 0; round < 4; round++) {
-      const reply = await post(key, { model: model, temperature: 0.2, max_tokens: 700, tools: TOOLS, tool_choice: "auto", messages: turn });
+      // Los modelos «gpt-oss» piensan antes de contestar y ese pensamiento cuenta dentro de max_tokens: con 700 se lo
+      // gastaban todo en preguntas de repasar a todo el personal y salía una respuesta vacía. Esfuerzo bajo y más margen.
+      const request = { model: model, temperature: 0.2, max_tokens: 1500, tools: TOOLS, tool_choice: "auto", messages: turn };
+      if (model.startsWith("openai/gpt-oss")) { request.reasoning_effort = "low"; }
+      const reply = await post(key, request);
       const message = reply && reply.choices && reply.choices[0] && reply.choices[0].message;
       if (!message) { throw failure("Groq ha contestado algo vacío.", true); }
-      if (!message.tool_calls || !message.tool_calls.length) { return String(message.content || "").trim() || "(sin respuesta)"; }
+      if (!message.tool_calls || !message.tool_calls.length) {
+        const text = String(message.content || "").trim();
+        // Una respuesta vacía no se enseña: se prueba con el siguiente modelo (nunca «(sin respuesta)»)
+        if (!text) { throw failure("El modelo no ha escrito respuesta (se quedó pensando).", true); }
+        return text;
+      }
       turn.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
       message.tool_calls.forEach(function (call) {
         let args = null;
         try { args = JSON.parse(call.function.arguments || "{}"); } catch (error) { args = null; }
         turn.push({ role: "tool", tool_call_id: call.id,
-          content: call.function.name === "turnos_entre" ? lookUp(args) : "No existe esa herramienta." });
+          content: runTool(call.function.name, args) });
       });
     }
     throw failure("Demasiadas consultas para una sola pregunta.", true);
@@ -366,5 +465,5 @@ window.Fervis = (function () {
     if (key && window.matchMedia("(pointer: fine)").matches) { question.focus(); }
   }
 
-  return { open: open, context: context };  // context: para las pruebas (con una hora fija)
+  return { open: open, context: context, tool: runTool };  // context: para las pruebas (con una hora fija)
 })();

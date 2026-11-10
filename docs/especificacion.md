@@ -53,8 +53,12 @@ persona en pantallas menores; el nombre del local se abrevia con «…» antes d
 con «reducir movimiento») y abre el chat. Sin clave, lo dice y abre el campo; la clave pegada de un `.env` se limpia;
 lo que no parece una clave no se guarda; «Quitar la clave» la borra. Lo de la clave vive en Ajustes (icono de tres
 barras): el chat solo saluda, y preguntar sin clave abre Ajustes y deja la pregunta escrita. Contesta de lo general y
-de la app (manual, personal, estados, puntos de venta, quién trabaja ahora, esta semana y la siguiente; otras fechas,
-con la consulta `turnos_entre`, hasta 31 días); reconoce a las personas sin tildes ni mayúsculas; sin personal o sin
+de la app. Recibe un mensaje pequeño (personal, estados, puntos de venta, quién trabaja ahora, las fechas de hoy, de
+esta semana, la siguiente y el mes) y **pide lo demás a funciones de la app**, que le dan la respuesta ya calculada:
+`turnos_entre` (turnos día a día, hasta 31 días, de todos o de una persona), `resumen_entre` (por persona y hasta 93
+días: días de turno partido, seguido y de cada estado; **fines de semana completos** sin trabajar, con su motivo, aparte
+de los sábados o domingos sueltos; un día sin nada puesto no cuenta como libre) y `manual_app` (cómo se usa la app).
+Así gasta ~65 % menos de entrada y no cuenta a ojo; reconoce a las personas sin tildes ni mayúsculas; sin personal o sin
 turnos, lo dice. Usa solo los modelos que tiene la cuenta; debajo de cada respuesta, `groq · modelo` (y «(respaldo)»
 si el primero falló). Lo laboral es orientativo (nota en el pie). La papelera borra la conversación (y lo que Fervis recuerda de ella;
 la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?» (no «de los turnos»: suena a que
