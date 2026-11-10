@@ -69,6 +69,9 @@ un parpadeo del tema por defecto).
 - Avisar si los dos tramos de un turno partido se pisan (10–14 y 12–16); ahora no se comprueba.
 - En el móvil, abrir la semana actual desplazada hasta hoy (ahora empieza siempre en el lunes).
 - Color libre para personas y estados (un selector de cualquier color); hoy hay una paleta de 20 (Nando, 10-nov).
+- Guía: entrada «📖 Guía» también en el menú Gestión (hoy solo está dentro del chat de Fervis), para quien no use el bot ni tenga clave de Groq.
+- Guía: versión imprimible de una hoja (a partir de los mismos textos de `GUIDE`) para entregarla en la formación.
+- Guía: repasar los textos con ojos de quien no sabe de apps (frases como «la ventana de la casilla» o «Cuenta como trabajo»), con David.
 - Sitio por defecto de cada persona (que «Dónde» se rellene solo al poner un turno); hoy se elige en cada casilla
   (el copiar semanas lo arrastra).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
