@@ -1,5 +1,27 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 5: «Intercambiar con…»
+
+**Hecho**
+- Botón «⇄ Intercambiar con…» en la ventana; `js/swap.js` (aviso abajo, casilla de origen con borde discontinuo,
+  `dp_swap` en `sessionStorage` para cruzar semanas, «Deshacer» 8 s); `Schedule.swap()` cambia las dos casillas a la
+  vez (si no se puede guardar, ninguna). Con una casilla vacía, el turno se mueve.
+- Verificado: misma persona en dos días; dos personas el mismo día (turno partido); las horas extra viajan con el
+  turno (con su motivo); mover a una vacía; cancelar con la misma casilla, Escape y el botón (y no se abre la
+  ventana); Deshacer; navegador sin espacio → nada cambia; **entre semanas** (jueves 12 ↔ martes 3, recargando);
+  móvil: aviso dentro de pantalla y botones de la ventana sin salirse. Consola limpia.
+
+**Decidido**
+- «Deshacer» (no pedido, pero 5 líneas): en el móvil es fácil tocar la casilla de al lado.
+- Dos toques y no arrastrar (ya decidido): en el móvil arrastrar se confunde con desplazar.
+
+**Aprendido**
+- **`sessionStorage` vs `localStorage`:** el primero es solo de esta pestaña y se borra al cerrarla (ideal para
+  algo «a medias», como el intercambio); el segundo se queda para siempre.
+
+**Siguiente**
+- Paso 6: Personal (decidir si la primera vez se abre vacía o con el ejemplo).
+
 ## 10-nov-2026 — Paso 4: horas extra
 
 **Hecho**

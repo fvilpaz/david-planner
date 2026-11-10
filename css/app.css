@@ -165,6 +165,15 @@ select { font: inherit; min-height: 48px; border-radius: var(--radius); padding:
 .form-actions .danger { margin-left: auto; }  /* Vaciar, lejos de Guardar */
 button.danger { background: var(--error); color: var(--on-error); }
 
+/* «Intercambiar con…»: la casilla de origen con borde discontinuo y el aviso abajo, al alcance del pulgar */
+.cell.swap-source { outline: 3px dashed var(--primary); outline-offset: -3px; }
+.swap-bar { position: fixed; z-index: 60; left: 50%; bottom: 16px; transform: translateX(-50%);
+            width: min(560px, calc(100vw - 32px)); display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+            padding: .6rem .75rem .6rem 1rem; background: var(--surface); color: var(--text);
+            border: 2px solid var(--primary); border-radius: var(--radius); box-shadow: 0 8px 24px rgb(0 0 0 / .25); }
+.swap-bar[hidden], .swap-bar button[hidden] { display: none; }
+.swap-bar span { flex: 1; min-width: 12rem; }
+
 /* Footer de Nando, como el de health-tracker */
 .app-footer { text-align: center; padding: 16px 20px; font-size: .75rem; color: var(--muted);
               border-top: 1px solid var(--border); }

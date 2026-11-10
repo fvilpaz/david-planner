@@ -15,6 +15,7 @@ window.CellDialog = (function () {
   const clear = document.getElementById("cell-clear");
   const errorEl = document.getElementById("cell-error");
   const longDay = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  const shortDay = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" });
   const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;  // «HH:MM» de 00:00 a 23:59
   let current = null;  // la casilla abierta: { key, shift }
 
@@ -55,7 +56,8 @@ window.CellDialog = (function () {
     const statuses = sortedStatuses();
     const key = window.Schedule.shiftKey(employee.id, isoDay);
     const shift = window.Schedule.getData().shifts[key];
-    current = { key: key, shift: shift };
+    // label: cómo se nombra la casilla en el aviso de «Intercambiar con…» («Ana Castro · mar, 10 nov»)
+    current = { key: key, shift: shift, label: employee.name + " · " + shortDay.format(window.Dates.parseIso(isoDay)) };
     document.getElementById("cell-title").textContent = employee.name + " · " + longDay.format(window.Dates.parseIso(isoDay));
     statusSelect.replaceChildren.apply(statusSelect, statuses.map(function (s) { return new Option(s.name, s.id); }));
     statusSelect.value = shift && window.Schedule.statusOf(shift.statusId) ? shift.statusId : (statuses[0] || {}).id || "";
@@ -119,6 +121,11 @@ window.CellDialog = (function () {
   addSlot.addEventListener("click", function () { showSecond(true); slotInputs(2)[0].focus(); });
   document.getElementById("remove-slot").addEventListener("click", function () { showSecond(false); addSlot.focus(); });
   clear.addEventListener("click", function () { save(null); });
+  // «Intercambiar con…»: se cierra la ventana y se elige la otra casilla en el cuadrante (swap.js)
+  document.getElementById("cell-swap").addEventListener("click", function () {
+    dialog.close();
+    window.Swap.start(current.key, current.label);
+  });
   form.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
   // Tocar el fondo oscuro cierra (el formulario ocupa toda la ventana: solo el fondo es el propio <dialog>)
   dialog.addEventListener("click", function (event) { if (event.target === dialog) { dialog.close(); } });

@@ -63,7 +63,7 @@ window.Schedule = (function () {
     } else {
       slotsBox.append(el("span", "cell-empty", "+"));
     }
-    // Horas extra: borde de aviso y «+2 h extra» debajo; el motivo, al pasar el ratón y para el lector de pantalla
+    // Horas extra: borde de aviso y franja «+2 h / extra» a la derecha; el motivo, al pasar el ratón y para el lector de pantalla
     if (status && status.countsAsWork && shift.overtime) {
       const amount = "+" + hoursFormat.format(shift.overtime.hours) + " h";
       const extra = amount + " extra";
@@ -73,6 +73,7 @@ window.Schedule = (function () {
       if (shift.overtime.reason) { box.title = shift.overtime.reason; }
     }
     box.setAttribute("aria-label", employee.name + ", " + dayName.format(day) + ": " + (texts.join(", ") || "vacía"));
+    if (window.Swap && window.Swap.sourceKey() === key) { box.classList.add("swap-source"); }  // origen de «Intercambiar con…»
     return box;
   }
 
@@ -131,6 +132,20 @@ window.Schedule = (function () {
     return saved;
   }
 
+  // Intercambia dos casillas (de cualquier persona y día), horas extra incluidas. Las dos a la vez: si el navegador
+  // no deja guardar, no cambia ninguna. Si una está vacía, la otra se mueve a su sitio. Devuelve si se ha guardado.
+  function swap(keyA, keyB) {
+    const a = data.shifts[keyA];
+    const b = data.shifts[keyB];
+    function put(key, shift) { if (shift) { data.shifts[key] = shift; } else { delete data.shifts[key]; } }
+    put(keyA, b);
+    put(keyB, a);
+    const saved = window.Store.save(data);
+    if (!saved) { put(keyA, a); put(keyB, b); }
+    render();
+    return saved;
+  }
+
   // Tras cerrar la ventana, el foco vuelve a la casilla (la de antes se sustituyó al repintar)
   function focusCell(key) {
     const button = grid.querySelector('[data-key="' + CSS.escape(key) + '"]');
@@ -140,6 +155,7 @@ window.Schedule = (function () {
   grid.addEventListener("click", function (event) {
     const button = event.target.closest("button.cell");
     if (!button) { return; }
+    if (window.Swap && window.Swap.pick(button.dataset.key)) { return; }  // en modo «Intercambiar con…», no se abre la ventana
     const parts = button.dataset.key.split("|");
     const employee = data.employees.find(function (e) { return e.id === parts[0]; });
     if (employee) { window.CellDialog.open(employee, parts[1]); }
@@ -169,6 +185,8 @@ window.Schedule = (function () {
     statusOf: statusOf,
     getData: function () { return data; },
     update: update,
+    swap: swap,
+    render: render,
     focusCell: focusCell,
   };
 })();
