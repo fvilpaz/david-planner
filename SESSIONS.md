@@ -1,5 +1,18 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Decidido: «Baja» y «Dar de baja» se quedan como están
+
+**Hecho / Decidido**
+- Nando preguntó dónde estaba lo de cesar (con captura de Estados y de la ficha de Marcos Otero) y decidió: «una cosa es
+  dar de baja y otra estar de baja». Estado «Baja» = baja médica; «Dar de baja desde el…» (Personal) = cesar desde la
+  semana que se ve. **No se cambian los textos** (descartada la propuesta de «Cesar»). Punto 2 de «Para decidir» cerrado.
+- Aclarado también que «Asuntos propios» (estado sin horario) llevaba su propio color, un naranja casi igual al de Ana
+  (`#e67e22` frente a `#d35400`): no era un fallo. Sin hacer: que el color por defecto de un estado nuevo no coincida con el
+  de ninguna persona (pendiente de que Nando diga que sí).
+
+**Siguiente**
+- Cuenta de Groq de David y probar en su móvil.
+
 ## 10-nov-2026 — Paso 13: «Copiar a…»
 
 **Hecho**

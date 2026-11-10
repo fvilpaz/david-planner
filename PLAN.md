@@ -43,8 +43,10 @@ un parpadeo del tema por defecto).
 1. ✅ **Probado en el móvil por Nando (10-nov):** arrastrar ⠿ con el dedo funciona y, dice, «prácticamente todo». Queda
    sin confirmar al detalle: si el navegador acepta proteger los datos con la app instalada (`persist()`; en una
    pestaña de prueba lo rechaza) y abrirla sin conexión.
-2. **«Baja» significa dos cosas:** el estado «Baja» (baja médica, en una casilla) y «Dar de baja» en Personal (dejar
-   de trabajar aquí). Propuesta: en Personal, «Ya no trabaja aquí desde el…» / «Vuelve a trabajar aquí». Decides tú.
+2. ✅ **«Baja» vs «Dar de baja» — decidido por Nando (10-nov): se queda como está.** El estado «Baja» es la baja médica
+   (enfermedad o accidente, en una casilla: se **está** de baja); «Dar de baja» en Personal es cesar a la persona desde la
+   semana que se ve (se la **da** de baja; vuelve con «Volver a dar de alta»). Son dos cosas distintas y los verbos lo
+   dicen. No cambiar los textos.
 3. **Refactor de las tres ventanas** (Personal, Estados, Puntos de venta comparten esqueleto): ¿se junta ahora, con
    las 35 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
 4. **¿Qué ve David la primera vez?** Hoy, Camarero 1–4 sin turnos. ¿Le preparas tú su personal y le pasas el
