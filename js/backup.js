@@ -13,6 +13,8 @@ window.Backup = (function () {
   const SINCE = "dp_since";          // desde cuándo se usa la app (la primera semana no se avisa)
   const SNOOZE = "dp_backup_later";  // «Más tarde» (sessionStorage: hasta volver a abrir la app)
   const EVERY_DAYS = 7;
+  const COPIES = "dp_copias";  // copias automáticas (paso 9b): las 5 últimas, una por semana, dentro del navegador
+  const MAX_COPIES = 5;
   const MAX_FILE = 5 * 1024 * 1024;  // una copia real ocupa unos KB; esto evita que un archivo enorme congele la app
   const HEX = /^#[0-9a-fA-F]{6}$/;
   const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -154,7 +156,8 @@ window.Backup = (function () {
   function applyPending() {
     const copy = pending;
     pending = null;
-    download("david-planner-antes-de-cargar-");  // lo de ahora, por si te arrepientes
+    download("david-planner-antes-de-cargar-");  // lo de ahora, por si te arrepientes…
+    autoCopy(true);                              // …y también como copia automática
     if (!window.Store.save(copy.data)) {
       importDialog.close();
       result.textContent = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
@@ -163,6 +166,83 @@ window.Backup = (function () {
     SETTINGS.forEach(function (key) { set(key, key in copy.settings ? copy.settings[key] : null); });
     window.location.reload();  // todo vuelve a arrancar con los datos cargados
   }
+
+  // ---------- Copias automáticas (paso 9b, como health-tracker) ----------
+  // Dentro del navegador, junto a los datos: sirven si algo sale mal (un turno borrado, una carga equivocada), pero
+  // si se borran los datos del navegador se van con ellas. Para eso está «Descargar copia».
+  const whenFormat = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+  function autoCopies() {
+    try {
+      const list = JSON.parse(localStorage.getItem(COPIES));
+      return Array.isArray(list) ? list.filter(function (c) { return c && typeof c.at === "string" && c.data; }) : [];
+    } catch (e) { return []; }
+  }
+
+  // Guarda una copia si hay datos guardados y la última tiene 7 días o más (o siempre, con `always`). Si no cabe en
+  // el navegador, no pasa nada: la app sigue igual (por eso no se avisa).
+  function autoCopy(always) {
+    if (window.Store.DEMO || get(window.Store.KEY) === null) { return false; }
+    const list = autoCopies();
+    const age = list.length ? daysSince(list[list.length - 1].at) : null;
+    if (!always && age !== null && age < EVERY_DAYS) { return false; }
+    list.push({ at: new Date().toISOString(), data: window.Schedule.getData() });
+    return set(COPIES, JSON.stringify(list.slice(-MAX_COPIES)));
+  }
+
+  function renderAutoCopies() {
+    const list = autoCopies().reverse();  // la más reciente arriba
+    const box = document.getElementById("auto-copies");
+    if (!list.length) {
+      const empty = document.createElement("li");
+      empty.className = "help";
+      empty.textContent = "Aún no hay ninguna: se hace sola al abrir la app, una por semana.";
+      box.replaceChildren(empty);
+      return;
+    }
+    box.replaceChildren.apply(box, list.map(function (copy) {
+      const item = document.createElement("li");
+      const people = Array.isArray(copy.data.employees) ? copy.data.employees.length : 0;
+      const shifts = copy.data.shifts ? Object.keys(copy.data.shifts).length : 0;
+      item.append(whenFormat.format(new Date(copy.at)) + " · " + people + (people === 1 ? " persona, " : " personas, ") +
+        shifts + (shifts === 1 ? " turno" : " turnos"));
+      const button = item.appendChild(document.createElement("button"));
+      button.type = "button";
+      button.className = "secondary";
+      button.dataset.at = copy.at;
+      button.textContent = "Recuperar";
+      return item;
+    }));
+  }
+
+  // Recuperar pide un segundo toque. Antes, lo de ahora se guarda como otra copia (por si te arrepientes) y la copia
+  // pasa el mismo filtro que un archivo cargado.
+  function recover(at) {
+    const copy = autoCopies().find(function (c) { return c.at === at; });
+    if (!copy) { return; }
+    let cleaned;
+    try { cleaned = clean({ app: APP, version: VERSION, data: copy.data }); } catch (error) {
+      result.textContent = "Esa copia no se puede leer: " + error.message;
+      return;
+    }
+    autoCopy(true);
+    if (!window.Store.save(cleaned.data)) {
+      result.textContent = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+      return;
+    }
+    window.location.reload();
+  }
+
+  document.getElementById("auto-copies").addEventListener("click", function (event) {
+    const button = event.target.closest("button[data-at]");
+    if (!button) { return; }
+    if (!button.dataset.confirm) {
+      button.dataset.confirm = "1";
+      button.textContent = "¿Seguro? Toca otra vez";
+      return;
+    }
+    recover(button.dataset.at);
+  });
 
   // ---------- Franja y menú ----------
   function refresh() {
@@ -192,8 +272,13 @@ window.Backup = (function () {
   });
   document.getElementById("import-ok").addEventListener("click", applyPending);
   document.getElementById("import-cancel").addEventListener("click", function () { pending = null; importDialog.close(); });
-  document.getElementById("backup-group").addEventListener("toggle", function () { result.textContent = ""; refresh(); });
+  document.getElementById("backup-group").addEventListener("toggle", function () {
+    result.textContent = "";
+    refresh();
+    renderAutoCopies();
+  });
 
+  autoCopy(false);  // al abrir la app: la de esta semana, si toca
   refresh();
   return { refresh: refresh };
 })();

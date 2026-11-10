@@ -1,5 +1,24 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 9b: copias automáticas y menú en el móvil
+
+**Hecho**
+- En `backup.js`: `autoCopy()` al abrir (si hay datos guardados y la última tiene 7 días o más; las 5 últimas en
+  `dp_copias`), lista en «💾 Copia de seguridad» con «Recuperar» (doble toque; antes guarda lo de ahora como otra
+  copia; la copia pasa el mismo filtro `clean()` que un archivo). Al cargar un archivo también se hace copia
+  automática de lo de antes. Menú Gestión con alto máximo y desplazamiento por dentro.
+- Verificado: sin datos no copia; al abrir con datos, 1; misma semana no repite; 8 días después, 2; con 5 viejas se
+  queda en 5 (entra la de hoy); recuperar devuelve el turno y guarda lo de antes; copia estropeada → mensaje y nada
+  cambia. Menú: cabe en 800×390, 390×700 y 1280×720 (primero se salía 3 px en horizontal: corregido). Nando: le
+  gusta el fucsia en la franja de aviso.
+
+**Aprendido**
+- **Copiar el filtro, no la confianza:** una copia automática vive en el mismo navegador, pero podría venir de una
+  versión anterior o estar a medias; pasa por el mismo `clean()` que un archivo de fuera.
+
+**Siguiente**
+- Paso 10: PWA (manifiesto, iconos, service worker sin conexión, `navigator.storage.persist()`).
+
 ## 10-nov-2026 — Paso 9a: descargar y cargar la copia, franja de aviso
 
 **Hecho**
