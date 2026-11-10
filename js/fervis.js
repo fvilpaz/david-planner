@@ -117,37 +117,56 @@ window.Fervis = (function () {
   // «Libre» de verdad: un estado sin horario puesto a propósito. Un día SIN NADA PUESTO es un día sin planificar, no libre.
   function isOff(day) { return !day.works && !day.empty; }
   function summaryLines(data, from, days, name) {
-    return pick(inOrder(data.employees), name).map(function (e) {
+    const rows = pick(inOrder(data.employees), name).map(function (e) {
       const counts = {};
       const order = [];
-      const single = [];   // sábados o domingos sueltos sin trabajar
-      const full = [];     // fines de semana completos (sábado y domingo) sin trabajar
+      const off = [];                 // sábados y domingos sin trabajar: { iso, saturday, text }
+      const full = [];                // fines de semana completos (sábado y domingo) sin trabajar: { saturday, text }
       for (let i = 0; i < days; i++) {
         const date = Dates.addDays(from, i);
-        if (e.leftFrom && e.leftFrom <= Dates.toIso(date)) { continue; }
+        const iso = Dates.toIso(date);
+        if (e.leftFrom && e.leftFrom <= iso) { continue; }
         const day = dayLabel(data, e, date);
         if (!counts[day.label]) { counts[day.label] = 0; order.push(day.label); }
         counts[day.label]++;
         const weekday = date.getDay();
+        if ((weekday === 6 || weekday === 0) && isOff(day)) {
+          off.push({ saturday: weekday === 6 ? iso : Dates.toIso(Dates.addDays(date, -1)), text: SHORT_DATE.format(date).replace(/\./g, "") + " (" + day.label + ")" });
+        }
         if (weekday === 6 && i + 1 < days) {  // sábado con su domingo dentro del período
           const sunday = Dates.addDays(date, 1);
           const second = dayLabel(data, e, sunday);
           if (isOff(day) && isOff(second) && !(e.leftFrom && e.leftFrom <= Dates.toIso(sunday))) {
             // con el motivo (libre, vacaciones, baja…): no es lo mismo librar que estar de vacaciones
             const why = day.label === second.label ? day.label : day.label + " y " + second.label;
-            full.push(DAY_NUMBER.format(date) + "–" + DAY_NUMBER.format(sunday) + " " + MONTH_SHORT.format(sunday).replace(".", "") + " (" + why + ")");
+            full.push({ saturday: iso, text: DAY_NUMBER.format(date) + "–" + DAY_NUMBER.format(sunday) + " " + MONTH_SHORT.format(sunday).replace(".", "") + " (" + why + ")" });
           }
         }
-        if ((weekday === 6 || weekday === 0) && isOff(day)) { single.push(SHORT_DATE.format(date).replace(/\./g, "") + " (" + day.label + ")"); }
       }
       order.sort(function (a, b) {  // primero los de trabajo
         const rank = function (l) { return l === "turno partido" ? 0 : l === "turno seguido" ? 1 : 2; };
         return rank(a) - rank(b);
       });
-      return "- " + e.name + ": " + (order.map(function (l) { return l + " " + counts[l] + (counts[l] === 1 ? " día" : " días"); }).join("; ") || "nada") +
-        " | fines de semana completos sin trabajar (sábado y domingo): " + full.length + (full.length ? " (" + full.join(", ") + ")" : "") +
-        " | sábados o domingos sin trabajar, sueltos o no: " + (single.join(", ") || "ninguno");
-    }).join("\n");
+      const fullSaturdays = full.map(function (f) { return f.saturday; });
+      const loose = off.filter(function (d) { return !fullSaturdays.includes(d.saturday); });  // los que no forman un fin de semana completo
+      return { name: e.name, counts: counts, order: order, full: full, loose: loose };
+    });
+    const lines = rows.map(function (r) {
+      return "- " + r.name + ": " + (r.order.map(function (l) { return l + " " + r.counts[l] + (r.counts[l] === 1 ? " día" : " días"); }).join("; ") || "nada") +
+        " | fines de semana completos sin trabajar (sábado y domingo): " + r.full.length + (r.full.length ? " (" + r.full.map(function (f) { return f.text; }).join(", ") + ")" : "") +
+        " | sábados o domingos sueltos sin trabajar: " + r.loose.length + (r.loose.length ? " (" + r.loose.map(function (d) { return d.text; }).join(", ") + ")" : "");
+    });
+    if (rows.length > 1) {  // el ranking, ya hecho: el modelo lo repite, no ordena él
+      const rank = function (list, key, detail) {
+        const top = list.filter(function (r) { return r[key].length > 0; }).sort(function (a, b) { return b[key].length - a[key].length; });
+        return top.length ? top.map(function (r) { return r.name + " " + r[key].length + " (" + detail(r) + ")"; }).join(", ") : "nadie";
+      };
+      lines.push("RANKING de fines de semana completos sin trabajar (de más a menos; ojo al motivo: vacaciones o baja no es librar): " +
+        rank(rows, "full", function (r) { return r.full.map(function (f) { return f.text; }).join(", "); }));
+      lines.push("RANKING de sábados o domingos sueltos sin trabajar (de más a menos): " +
+        rank(rows, "loose", function (r) { return r.loose.map(function (d) { return d.text; }).join(", "); }));
+    }
+    return lines.join("\n");
   }
 
   // Quién está trabajando AHORA: los tramos de hoy y los de ayer que cruzan la medianoche (22:00–02:00 acaba hoy)
@@ -248,7 +267,8 @@ window.Fervis = (function () {
       "día; con «persona» solo los de esa persona), resumen_entre da lo ya contado por persona (días de turno partido o " +
       "seguido, libres, vacaciones, bajas, fines de semana completos sin trabajar y sábados o domingos sueltos) y " +
       "manual_app explica cómo se usa la app. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
-      "completos (sábado y domingo) y los días sueltos por separado, sin mezclarlos en «días libres». «Sin nada puesto» " +
+      "completos (sábado y domingo) y los días sueltos por separado, sin mezclarlos en «días libres». Para «quién tiene " +
+      "más…» usa las líneas RANKING ya calculadas y di siempre el motivo: vacaciones o baja NO es librar. «Sin nada puesto» " +
       "es un día sin planificar: no es libre, dilo aparte. «Esta semana», " +
       "«este mes»… usa las fechas de abajo. Reconoce a cada persona aunque la escriban en minúsculas, sin tildes o solo " +
       "con el nombre; si hay dos posibles, pregunta. «Trabajando ahora mismo» ya está calculado: úsalo tal cual. Solo " +
@@ -394,7 +414,23 @@ window.Fervis = (function () {
 
   keyToggle.addEventListener("click", function () { showKeyForm(keyForm.hidden); });
 
-  function greet() { say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?"); }
+  // Las preguntas de ejemplo, como botones redondos (chips) debajo del saludo: se tocan y se mandan solas. Así quien abre un chat
+  // vacío (David) ve qué puede preguntar sin escribir nada. Desaparecen al mandar la primera pregunta; la papelera las devuelve.
+  const CHIPS = ["¿Quién trabaja hoy?", "¿Quién libra este fin de semana?", "¿Quién tiene turno partido y quién seguido esta semana?", "¿Cómo copio un turno?"];
+
+  function greet() {
+    say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?");
+    const row = messages.appendChild(document.createElement("li"));
+    row.className = "fervis-chips";
+    CHIPS.forEach(function (text) {
+      const chip = row.appendChild(document.createElement("button"));
+      chip.type = "button";
+      chip.className = "secondary fervis-chip";
+      chip.textContent = text;
+      chip.addEventListener("click", function () { question.value = text; chat.requestSubmit(); });  // sin clave, abre Ajustes y deja la pregunta escrita
+    });
+    messages.scrollTop = messages.scrollHeight;
+  }
 
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
   // la respuesta llegaría a una conversación que ya no existe
@@ -416,6 +452,8 @@ window.Fervis = (function () {
       return;
     }
     question.value = "";
+    const chips = messages.querySelector(".fervis-chips");
+    if (chips) { chips.remove(); }
     say("david", text);
     busy = true;
     const reply = say("fervis", "Pensando…");

@@ -1,5 +1,34 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Fervis: ranking, chips y color libre
+
+**Hecho**
+- Hallazgo de Nando (captura): «quién tiene más fines de semana libres desde el día 2 hasta hoy» → «Hugo, 1 fin de semana
+  completo». Con los datos delante: del 2 al 10, nadie tuvo un fin de semana libre; Hugo estaba de **vacaciones** (no es
+  librar) y Sara y Carmen libraron solo el sábado 7. El modelo soltó el motivo que la herramienta sí traía y omitió los
+  sábados sueltos. Arreglo: `resumen_entre` trae **RANKING ya hecho por la app** (completos con su motivo; sueltos aparte, sin
+  repetir los de un completo), y el mensaje dice que vacaciones o baja no es librar.
+- Ejemplo (demo) con dos semanas distintas, a petición de Nando: Marcos libra 2 fines de semana, Lucía 1, Hugo de vacaciones
+  las dos semanas (`js/demo-data.js`: patrón propio por semana). Aplicado también a los 6 días del ejemplo guardado en su
+  navegador, sin tocar el resto (sus cambios, «Asuntos propios»…).
+- Con clave real, del 2 al 15: «Marcos 2, Lucía 1, Hugo 0 (vacaciones, no cuenta), Iván 0 (baja)» y «turno partido: Ana 5,
+  Sara 4, Carmen 4; seguido: Lucía 5, Marcos 3, Diego 5, Sara 1, Carmen 1, Iván 4»: **coincide con lo que cuenta la app**.
+- Saludo con **chips** (idea de Nando): cuatro preguntas de ejemplo que se tocan y se mandan solas; sin clave abren Ajustes
+  y dejan la pregunta escrita; desaparecen al mandar la primera; la papelera las devuelve. A 390 px, dentro de la ventana.
+- **Color por defecto de un estado nuevo** = el primero de la paleta que no lleve ninguna persona ni otro estado (así no se
+  repite lo de «Asuntos propios», naranja como Ana).
+- Pruebas 42 y 43; **controles** (uno a uno): ranking de sueltos que repite los completos, el color «siguiente por orden» y
+  los chips que no desaparecen → falla justo cada uno. 43/43.
+
+**Aprendido**
+- Con la clave real, `gpt-oss-120b` dio error 400 dos veces seguidas y luego contestó bien: es intermitente (Groq al montar la
+  llamada con herramientas). Se pasa al siguiente modelo y el motivo queda en `console.warn`.
+- Las herramientas del navegador bloquean devolver textos con `?`, `=` o `&` que parecen un parámetro de dirección: para leer
+  respuestas de Fervis hay que limpiarlas antes.
+
+**Siguiente**
+- Cuenta de Groq de David y probar en su móvil.
+
 ## 10-nov-2026 — Fervis: las herramientas de la app calculan, el modelo solo las llama
 
 **Hecho**

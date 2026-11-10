@@ -621,6 +621,12 @@
     ok(/dom\S* 22 nov \(libre\)/.test(line("Ana")) && !/sáb\S* 21 nov/.test(line("Ana")), "Ana: el domingo 22 suelto, y el sábado 21 trabaja");
     ok(/completos sin trabajar \(sábado y domingo\): 1 \(21–22 nov \(libre\)\)/.test(line("Luis")) && /dom\S* 15 nov \(libre\)/.test(line("Luis")), "Luis: completo el 21–22 y suelto el domingo 15: " + line("Luis"));
     ok(/: 1 \(14–15 nov \(vacaciones\)\)/.test(line("Marta")) && /vacaciones 2 días/.test(line("Marta")), "Marta: vacaciones el 14–15: " + line("Marta"));
+    // el ranking lo da la app, con el motivo (vacaciones no es librar): el fallo de «Hugo tiene 1 fin de semana libre»
+    const rankFull = text.split("\n").find(function (l) { return l.startsWith("RANKING de fines de semana completos"); });
+    const rankLoose = text.split("\n").find(function (l) { return l.startsWith("RANKING de sábados o domingos sueltos"); });
+    ok(/Ana 1 \(14–15 nov \(libre\)\), Luis 1 \(21–22 nov \(libre\)\), Marta 1 \(14–15 nov \(vacaciones\)\)/.test(rankFull), "ranking de completos, con su motivo: " + rankFull);
+    ok(/Ana 1 \(dom\S* 22 nov \(libre\)\), Luis 1 \(dom\S* 15 nov \(libre\)\)/.test(rankLoose) && !rankLoose.includes("Marta"), "ranking de sueltos, sin repetir los de un fin de semana completo: " + rankLoose);
+    ok(!w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-11-22", persona: "Ana" }).includes("RANKING"), "con una sola persona no hay ranking");
     // un período que acaba en sábado: el domingo queda fuera, así que no hay fin de semana COMPLETO
     const cut = w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-11-14" });
     ok(/completos sin trabajar \(sábado y domingo\): 0/.test(cut.split("\n")[0]), "sin el domingo dentro, no es un fin de semana completo");
@@ -631,6 +637,14 @@
     ok(w.Fervis.tool("manual_app").includes("Gestión"), "el manual es una herramienta");
     ok(w.Fervis.tool("turnos_entre", { desde: "2026-11-09", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "turnos: como mucho 31 días");
     ok(!w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-12-31" }).includes("Como mucho"), "el resumen admite 93");
+  });
+
+  test("Un estado nuevo nace con un color que no lleva ninguna persona ni otro estado", async function () {
+    await open(fixture());  // personas: #2c7be5 #e67e22 #27ae60; estados: #2f5d8a y #8e44ad
+    $("#status-button").click();
+    $("#status-add").click();
+    const pressed = $("#status-palette button[aria-pressed=true]");
+    equal(pressed.style.getPropertyValue("--swatch"), "#16a085", "el primero de la paleta que no usa nadie (no el siguiente por orden)");
   });
 
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
@@ -691,6 +705,31 @@
     await wait(300);
     ok($$(".fervis-msg").pop().textContent.includes("no acepta tu clave"), "401: aviso de la clave");
     equal(asked, ["Bearer " + FAKE_KEY], "la lista de modelos se pide una sola vez");
+  });
+
+  test("Fervis: preguntas de ejemplo como chips; al tocar una se manda sola (sin clave abre Ajustes y la deja escrita) y desaparecen; la papelera las devuelve", async function () {
+    let w = await open(fixture());  // sin clave
+    w.Fervis.open();
+    equal($$(".fervis-chip").map(function (c) { return c.textContent; }),
+      ["¿Quién trabaja hoy?", "¿Quién libra este fin de semana?", "¿Quién tiene turno partido y quién seguido esta semana?", "¿Cómo copio un turno?"], "los cuatro chips");
+    $$(".fervis-chip")[0].click();
+    ok(!$("#fervis-key-form").hidden && $("#fervis-question").value === "¿Quién trabaja hoy?" && $$(".fervis-chip").length === 4 && $$(".fervis-msg").length === 1,
+      "sin clave: abre Ajustes, deja la pregunta escrita y los chips siguen");
+    w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
+    const bodies = [];
+    w.fetch = function (url, options) {
+      if (url.endsWith("/models")) { return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ data: MODEL_IDS.map(function (id) { return { id: id }; }) }); } }); }
+      bodies.push(JSON.parse(options.body));
+      return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ choices: [{ finish_reason: "stop", message: { role: "assistant", content: "Nadie." } }] }); } });
+    };
+    w.Fervis.open();
+    $$(".fervis-chip")[3].click();
+    await wait(200);
+    equal($$(".fervis-chip").length, 0, "al mandar una pregunta, los chips desaparecen");
+    equal([$$(".fervis-msg").map(function (m) { return m.firstChild.textContent; }).slice(1, 3), bodies[0].messages[bodies[0].messages.length - 1].content],
+      [["¿Cómo copio un turno?", "Nadie."], "¿Cómo copio un turno?"], "la pregunta del chip se manda tal cual");
+    $("#fervis-clear").click();
+    equal($$(".fervis-chip").length, 4, "la papelera devuelve los chips");
   });
 
   test("Fervis: la papelera borra la conversación (también lo que recuerda) y deja la clave; con una respuesta en marcha no hace nada", async function () {

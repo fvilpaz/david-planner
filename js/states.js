@@ -71,11 +71,18 @@ window.States = (function () {
   }
   workInput.addEventListener("change", syncColor);
 
+  // El color de un estado nuevo: el primero de la paleta que no lleve ya ninguna persona ni otro estado (con el siguiente
+  // por orden, «Asuntos propios» salió naranja como Ana y parecían el mismo)
+  function freeColor() {
+    const used = window.Schedule.getData().employees.map(function (e) { return e.color; }).concat(statuses().map(function (s) { return s.color; }));
+    return window.PALETTE.find(function (c) { return !used.includes(c); }) || window.PALETTE[statuses().length % window.PALETTE.length];
+  }
+
   function showForm(status) {
     const uses = status ? window.Schedule.statusUses(status.id) : 0;
     editing = status;
     confirming = false;
-    color = status ? status.color : window.PALETTE[statuses().length % window.PALETTE.length];
+    color = status ? status.color : freeColor();
     title.textContent = status ? "Editar «" + status.name + "»" : "Nuevo estado";
     nameInput.value = status ? status.name : "";
     workInput.checked = status ? status.countsAsWork : false;

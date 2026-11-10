@@ -70,7 +70,6 @@ un parpadeo del tema por defecto).
 - Color libre para personas y estados (un selector de cualquier color); hoy hay una paleta de 20 (Nando, 10-nov).
 - Sitio por defecto de cada persona (que «Dónde» se rellene solo al poner un turno); hoy se elige en cada casilla
   (el copiar semanas lo arrastra).
-- Fervis: preguntas rápidas sugeridas (botones con «¿Quién trabaja ahora?», «¿Quién libra mañana?»…).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
 - Refactor (solo si Nando lo pide): las ventanas Personal, Estados y Puntos de venta repiten el esqueleto de abrir,
   cerrar, volver y guardar (la lista ordenable y la paleta ya son comunes en `lists.js`). Regla de tres: a la tercera

@@ -39,6 +39,7 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
   baja en la semana de destino; todo o nada.
 - Personal: la primera vez Camarero 1–4. Añadir, nombre, color (paleta de 20, sin rosa ni fucsia), orden (⠿ o número: la persona se
   cuela en ese puesto). Quitar: sin turnos se borra; con turnos, baja desde la semana que se ve; volver a dar de alta.
+- Un estado nuevo nace con el primer color de la paleta que no lleva ninguna persona ni otro estado.
 - Estados y Puntos de venta: crear, renombrar, ordenar. En uso no se quitan; un estado en uso tampoco cambia «cuenta
   como trabajo». Los estados con horario no enseñan paleta (su color no se ve).
 - Tema: Claro, Lino, Oscuro, Carbón; por aparato.
@@ -62,7 +63,9 @@ Así gasta ~65 % menos de entrada y no cuenta a ojo; reconoce a las personas sin
 turnos, lo dice. Usa solo los modelos que tiene la cuenta; debajo de cada respuesta, `groq · modelo` (y «(respaldo)»
 si el primero falló). Lo laboral es orientativo (nota en el pie). La papelera borra la conversación (y lo que Fervis recuerda de ella;
 la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?» (no «de los turnos»: suena a que
-no sirve para nada más). La ventana es grande (hasta 860 px de ancho y el 92 % del alto), con los
+no sirve para nada más) y debajo cuatro **chips** con preguntas de ejemplo que se tocan y se mandan solas (sin clave,
+abren Ajustes y dejan la pregunta escrita); desaparecen al mandar la primera y la papelera las devuelve. Para «quién
+tiene más…», `resumen_entre` trae un RANKING ya hecho por la app con el motivo (vacaciones o baja no es librar). La ventana es grande (hasta 860 px de ancho y el 92 % del alto), con los
 mensajes ocupando lo que sobra. Solo lee los turnos.
 
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.

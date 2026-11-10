@@ -2,7 +2,9 @@
 // aparte, en «dp_demo_data»). Abajo, PALETTE y STARTER_DATA: lo que ve David la primera vez.
 // Forma de los datos: la propuesta de PLAN.md. Los turnos se generan para esta semana y la anterior a partir de un
 // patrón semanal por persona (de lunes a domingo): «10-18» = un tramo, «10-14,18-22» = turno partido,
-// «18-02» = acaba al día siguiente, y si no es un horario, el id de un estado (off, vacation, sick).
+// «18-02» = acaba al día siguiente, y si no es un horario, el id de un estado (off, vacation, sick). El 3.er dato es el
+// patrón de esta semana; el 4.º, opcional, el de la semana pasada (si no, el mismo). Así hay quien libra dos fines de
+// semana (Marcos), uno (Lucía) y quien está de vacaciones (Hugo): para probar las preguntas de fines de semana de Fervis.
 window.DEMO_DATA = (function () {
   "use strict";
 
@@ -14,8 +16,8 @@ window.DEMO_DATA = (function () {
   ];
 
   const people = [
-    ["Lucía Ferreiro", "#2c7be5", "off off 10-18 10-18 10-18 10-18 10-18"],
-    ["Marcos Otero", "#e67e22", "12-20 off off 12-20 12-20 12-20 12-20"],
+    ["Lucía Ferreiro", "#2c7be5", "off off 10-18 10-18 10-18 10-18 10-18", "off off 10-18 10-18 10-18 off off"],
+    ["Marcos Otero", "#e67e22", "12-20 off off 12-20 12-20 off off"],
     ["Ana Castro", "#d35400", "10-14,18-22 10-14,18-22 off off 10-14,18-22 10-14,18-22 10-14,18-22"],
     ["Diego Barreiro", "#8e44ad", "12-20 12-20 12-20 off off 18-02 18-02"],
     ["Sara Lema", "#c0392b", "10-14,18-22 10-14,18-22 10-14,18-22 10-14,18-22 off off 12-20"],
@@ -48,9 +50,9 @@ window.DEMO_DATA = (function () {
   people.forEach(function (person, index) {
     const id = "e" + (index + 1);
     employees.push({ id: id, name: person[0], color: person[1], position: index, leftFrom: null });
-    const week = person[2].split(" ");
-    [-7, 0].forEach(function (offset) {
-      week.forEach(function (code, day) {
+    [[-7, person[3] || person[2]], [0, person[2]]].forEach(function (pair) {
+      const offset = pair[0];
+      pair[1].split(" ").forEach(function (code, day) {
         const date = window.Dates.addDays(thisMonday, offset + day);
         const shift = parseDay(code);
         shift.slots.forEach(function (slot) { slot.placeId = places[index % places.length].id; });
