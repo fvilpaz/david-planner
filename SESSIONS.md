@@ -1,5 +1,19 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 11: publicado y auditado
+
+**Hecho**
+- Publicado en GitHub Pages por Nando: `https://fvilpaz.github.io/david-planner/` responde con el último commit
+  (comprobado: `pwa.js`, `sw.js`, manifiesto con `application/manifest+json`, iconos).
+- `audit` (nando-toolkit), en primer plano, desde WSL, con `< /dev/null` (HALLAZGOS nº 11 y 2-nov). **Control antes**:
+  copia del proyecto con `innerHTML = location.hash` → ESLint lo caza (error). Resultado real: git ✅, python
+  (`servidor.py`) ✅, semgrep ✅, ESLint **25 avisos y 0 errores**.
+- **Los 25 revisados a mano, todos falsos positivos:** `data.shifts[key]` (clave `persona|fecha` hecha por la app),
+  `data[name]` (solo «employees», «statuses», «places»), `settings[key]` (lista fija `SETTINGS`), claves de un archivo
+  cargado (solo se guardan con forma `persona|fecha` válida: un `__proto__` se descarta) y la regex de horas extra
+  (anclada, limitada, campo de 5 letras). **Referencia: 25.** Si otra auditoría da más, el nuevo es el que se mira.
+- `audit` creó `.gitignore` con `docs/audit-*` (el repo es público: el informe no se sube).
+
 ## 10-nov-2026 — Paso 10: instalable (PWA) y puerto propio
 
 **Hecho**
