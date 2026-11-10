@@ -557,9 +557,11 @@ window.Fervis = (function () {
   // el título con su subtítulo («5 pasos», «3 temas») y el triangulito de desplegable a la derecha (lo pone el CSS).
   function guideSummary(icon, title, subtitle) {
     const summary = document.createElement("summary");
-    summary.appendChild(document.createElement("span")).className = "fervis-guide-badge";
-    summary.lastChild.textContent = icon;
-    const text = summary.appendChild(document.createElement("span"));
+    const card = summary.appendChild(document.createElement("span"));  // la tarjeta; el triangulito queda fuera, a su derecha (CSS)
+    card.className = "fervis-guide-card";
+    card.appendChild(document.createElement("span")).className = "fervis-guide-badge";
+    card.lastChild.textContent = icon;
+    const text = card.appendChild(document.createElement("span"));
     text.className = "fervis-guide-text";
     text.appendChild(document.createElement("strong")).className = "fervis-guide-title";
     text.lastChild.textContent = title;

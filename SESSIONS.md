@@ -34,6 +34,9 @@
 - Nando enseña las filas de health-tracker («me mola más cómo has puesto los botones»): cada fila del glosario pasa a **tarjeta**: círculo
   con el emoji a la izquierda, título con su subtítulo («5 temas», «6 pasos») y el triangulito ▼ azul a la derecha, que gira al abrir.
   Probado en claro y oscuro y a 390 px (sin desbordes). 46/46.
+  Nando aclara que de health-tracker solo quería «la idea de la flecha desplegable» (el círculo verde de la derecha es el de «hecho» y no
+  tiene que ver) y, comparando, que en health-tracker la flecha queda **fuera de la tarjeta**: «es más elegante». Hecho así: la tarjeta es
+  un envoltorio dentro del `summary` y el triangulito ▼ va suelto a su derecha.
 
 **Decidido (pendiente de Nando)**
 - Pega de negocio que apunta Nando: una guía que enseña sola puede cerrar la vía de ir él a dar formación a los locales. Sin decidir;
