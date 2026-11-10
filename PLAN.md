@@ -16,7 +16,7 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 6a | ✅ **Personal**: la primera vez Camarero 1–4 (idea de Nando); ventana Personal (lista, añadir, nombre, color de una paleta **sin fucsia**); tocar un nombre del cuadrante abre su ficha; quitar (sin turnos se borra; con turnos, baja desde la semana que se ve) y volver a dar de alta; modo ejemplo con `?demo` en su propia clave | Dar de baja y ver que sigue en semanas anteriores |
 | 6b | ✅ **Orden del personal** dentro de la misma ventana Personal (Nando: sin botón aparte como auryapp): en cada tarjeta, asa ⠿ para arrastrar y el número del puesto; se guarda al soltar o al escribir el número | Reordenar y que el cuadrante y el PDF salgan en ese orden |
 | 7 | ✅ **Estados**: misma ventana que Personal (lista ordenable común en `lists.js`); nombre, color (solo los sin horario), si cuenta como trabajo; en uso no se quita ni cambia «cuenta como trabajo»; el primero es el de por defecto | Crear «Formación», usarlo y ver que no se deja borrar |
-| 7b | 🔲 **Puntos de venta** (Nando, 10-nov): lista editable en Gestión (Chiringuito, Cafetería, Pub…); en la ventana, un «Dónde» **por tramo**; en la casilla, el nombre pequeño **debajo de la hora** (como «Terraza» en gestion-hosteleria), no colores con leyenda. Con la lista vacía, «Dónde» no aparece | Crear 3 puntos, poner a cada camarero en uno y verlo en pantalla y en el PDF |
+| 7b | ✅ **Puntos de venta** (Nando, 10-nov): lista editable en Gestión (Chiringuito, Cafetería, Pub…); en la ventana, un «Dónde» **por tramo**; en la casilla, el nombre pequeño **debajo de la hora** (como «Terraza» en gestion-hosteleria), no colores con leyenda. Con la lista vacía, «Dónde» no aparece | Crear 3 puntos, poner a cada camarero en uno y verlo en pantalla y en el PDF |
 | 8 | 🔲 **Copiar la semana anterior** en 1–8 semanas (solo vacías, sin extras, sin quien esté de baja) | Copiar a 4 semanas sin pisar lo puesto |
 | 9 | 🔲 **Copia de seguridad** (como health-tracker, `src/js/copia.js`): exportar e importar JSON con todas las claves `dp_` (datos, `dp_name`…; no las copias automáticas) (`app`, `version`, `exportedAt`, `data`; confirmación y copia previa); **copias automáticas** dentro del navegador (una por semana al abrir, las 5 últimas en `dp_copias`, con «Recuperar»); **franja de aviso que no bloquea** si hace 7 días o más de la última descarga | Exportar, borrar, importar y que todo vuelva; ver la franja y que desaparezca al descargar |
 | 10 | 🔲 **PWA**: manifiesto, iconos, service worker (funciona sin conexión) y `navigator.storage.persist()` (que el navegador no borre los datos por su cuenta) | Instalarla en el móvil y abrirla sin conexión |
@@ -29,6 +29,7 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
   statuses:  [{ id, name, color, countsAsWork, position }],
   shifts:    { "<employeeId>|AAAA-MM-DD": { statusId,
                                             slots: [{ start: "10:00", end: "18:00", placeId? }],  // placeId: paso 7b
+  places:    [{ id, name, position }],  // paso 7b; los datos de antes sin «places» se completan al cargar
                                             overtime: { hours: 2, reason: "" } | null } } }
 ```
 El tema va aparte, en `dp_theme`: es de cada aparato y se tiene que leer antes de pintar la página (si no, se ve
@@ -42,5 +43,10 @@ un parpadeo del tema por defecto).
 - Avisar si los dos tramos de un turno partido se pisan (10–14 y 12–16); ahora no se comprueba.
 - En el móvil, abrir la semana actual desplazada hasta hoy (ahora empieza siempre en el lunes).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
+- Refactor (solo si Nando lo pide): las ventanas Personal, Estados y Puntos de venta repiten el esqueleto de abrir,
+  cerrar, volver y guardar (la lista ordenable y la paleta ya son comunes en `lists.js`). Regla de tres: a la tercera
+  se podría sacar; no se hace por no tocar dos ventanas que funcionan.
+- En una fila con turno partido, una casilla de un solo tramo (p. ej. «Libre») no ocupa todo el alto y deja hueco.
+  Viene del paso 1 (la casilla no estira hasta el alto de la fila); visto en el PDF del paso 7b.
 - Color propio por turno (en gestion-hosteleria existe; aquí la casilla toma el color de la persona o del estado).
 - Para gestion-hosteleria (no es de este repo): en la ventana de la casilla, la casilla de marcar «color propio» parece un segundo selector de color roto.

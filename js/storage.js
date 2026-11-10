@@ -15,18 +15,25 @@ window.Store = (function () {
       !Array.isArray(data.shifts);
   }
 
+  // Lo que se añadió después de guardar los primeros datos (paso 7b: puntos de venta) se completa al cargar,
+  // para que unos datos de antes sigan sirviendo sin perder nada
+  function complete(data) {
+    if (!Array.isArray(data.places)) { data.places = []; }
+    return data;
+  }
+
   function load() {
     let raw = null;
     try { raw = localStorage.getItem(KEY); } catch (e) { /* sin almacenamiento (modo privado): los de ejemplo */ }
     if (raw !== null) {
       try {
         const data = JSON.parse(raw);
-        if (looksValid(data)) { return data; }
+        if (looksValid(data)) { return complete(data); }
       } catch (e) { /* ilegible: se aparta abajo */ }
       try { localStorage.setItem(BROKEN, raw); } catch (e) { /* no cabe: al menos no se ha tocado dp_data aún */ }
     }
     // Una copia: los de arranque y los de ejemplo no se modifican nunca
-    return JSON.parse(JSON.stringify(DEMO ? window.DEMO_DATA : window.STARTER_DATA));
+    return complete(JSON.parse(JSON.stringify(DEMO ? window.DEMO_DATA : window.STARTER_DATA)));
   }
 
   // Devuelve si se ha podido guardar (el navegador puede negarse: modo privado o sin espacio)

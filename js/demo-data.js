@@ -35,6 +35,13 @@ window.DEMO_DATA = (function () {
     return { statusId: "work", slots: slots, overtime: null };
   }
 
+  // Puntos de venta del ejemplo (paso 7b): cada persona trabaja siempre en el mismo
+  const places = [
+    { id: "p1", name: "Chiringuito", position: 0 },
+    { id: "p2", name: "Cafetería", position: 1 },
+    { id: "p3", name: "Pub", position: 2 },
+  ];
+
   const employees = [];
   const shifts = {};
   const thisMonday = window.Dates.weekStart(new Date());
@@ -45,7 +52,9 @@ window.DEMO_DATA = (function () {
     [-7, 0].forEach(function (offset) {
       week.forEach(function (code, day) {
         const date = window.Dates.addDays(thisMonday, offset + day);
-        shifts[id + "|" + window.Dates.toIso(date)] = parseDay(code);
+        const shift = parseDay(code);
+        shift.slots.forEach(function (slot) { slot.placeId = places[index % places.length].id; });
+        shifts[id + "|" + window.Dates.toIso(date)] = shift;
       });
     });
   });
@@ -53,7 +62,7 @@ window.DEMO_DATA = (function () {
   // Un ejemplo de horas extra: Diego, el sábado de esta semana
   shifts["e4|" + window.Dates.toIso(window.Dates.addDays(thisMonday, 5))].overtime = { hours: 2, reason: "Cierre tarde" };
 
-  return { version: 1, employees: employees, statuses: statuses, shifts: shifts };
+  return { version: 1, employees: employees, statuses: statuses, places: places, shifts: shifts };
 })();
 
 // Los colores que se ofrecen para el personal: bien distintos entre sí y sin fucsia ni rosas (son el aviso de horas extra)
@@ -67,5 +76,6 @@ window.STARTER_DATA = {
   employees: [1, 2, 3, 4].map(function (n) {
     return { id: "e" + n, name: "Camarero " + n, color: window.PALETTE[n - 1], position: n - 1, leftFrom: null };
   }),
+  places: [],  // sin puntos de venta: «Dónde» no aparece hasta que David cree alguno
   shifts: {},
 };

@@ -33,7 +33,22 @@ window.CellDialog = (function () {
   function showSecond(on) {
     second.hidden = !on;
     addSlot.hidden = on;
-    if (!on) { slotInputs(2).forEach(function (input) { input.value = ""; }); }
+    if (!on) { slotInputs(2).forEach(function (input) { input.value = ""; }); placeSelect(2).value = ""; }
+  }
+
+  // «Dónde» de cada tramo (paso 7b): «—» y los puntos de venta en su orden. Sin puntos de venta, no se enseña.
+  function placeSelect(n) { return form.querySelector('[data-slot="' + n + '"] .slot-place'); }
+
+  function fillPlaces(slots) {
+    const places = window.Schedule.getData().places.slice().sort(function (a, b) { return a.position - b.position; });
+    [1, 2].forEach(function (n) {
+      const select = placeSelect(n);
+      select.replaceChildren.apply(select, [new Option("Dónde: —", "")].concat(places.map(function (p) {
+        return new Option(p.name, p.id);
+      })));
+      select.value = (slots[n - 1] && slots[n - 1].placeId) || "";
+      select.hidden = !places.length;
+    });
   }
 
   // El horario y las horas extra solo se ven si el estado elegido cuenta como trabajo
@@ -68,6 +83,7 @@ window.CellDialog = (function () {
       inputs[1].value = slots[n - 1] ? slots[n - 1].end : "";
     });
     showSecond(slots.length > 1);
+    fillPlaces(slots);
     const extra = shift && shift.overtime;
     overtimeHours.value = extra ? String(extra.hours).replace(".", ",") : "";
     overtimeReason.value = extra ? extra.reason : "";
@@ -87,7 +103,9 @@ window.CellDialog = (function () {
       return { error: n === 1 ? "Pon la hora de inicio y la de fin." : "Pon el inicio y el fin del segundo tramo, o quítalo." };
     }
     if (start === end) { return { error: "El fin no puede ser igual al inicio." }; }
-    return { slot: { start: start, end: end } };
+    const slot = { start: start, end: end };
+    if (placeSelect(n).value) { slot.placeId = placeSelect(n).value; }  // sin «Dónde», el tramo no lo lleva
+    return { slot: slot };
   }
 
   function save(shift) {

@@ -139,6 +139,8 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
         white-space: nowrap; }  /* «10:00–14:00» nunca partida en dos líneas: si no cabe, la columna se ensancha */
 /* Teñido con el color de la persona o del estado (--tint, lo pone app.js), mezclado con los colores del tema
    para que se lea igual en los claros y en los oscuros */
+.chip { flex-direction: column; }  /* la hora y, debajo, el punto de venta */
+.chip-place { display: block; font-size: .7rem; font-weight: 500; opacity: .85; line-height: 1.2; }
 .chip[data-tint] { background: color-mix(in srgb, var(--tint) var(--tint-mix), var(--surface));
                    color: color-mix(in srgb, var(--tint) 35%, var(--text));
                    border-color: color-mix(in srgb, var(--tint) 35%, var(--surface)); }
@@ -158,6 +160,9 @@ select { font: inherit; min-height: 48px; border-radius: var(--radius); padding:
 .slots legend { padding: 0; margin-bottom: .35rem; font-weight: 500; }
 .slot { display: flex; align-items: center; gap: .5rem; }
 .slot input { flex: 1; min-width: 0; padding: 0 .5rem; }
+.slot { flex-wrap: wrap; }
+.slot-place { flex: 1 0 100%; }  /* «Dónde», en su propia línea debajo de las horas del tramo */
+.slot-place[hidden] { display: none; }
 .slots[hidden], .slot[hidden], .error[hidden], .slots button[hidden], .form-actions button[hidden] { display: none; }
 .help { color: var(--muted); font-size: .85rem; }
 .error { margin: 0; color: var(--error); font-weight: 500; }

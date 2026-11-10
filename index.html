@@ -60,6 +60,7 @@
           <button type="button" class="secondary" id="print-button">🖨️ Imprimir / PDF</button>
           <button type="button" class="secondary" id="staff-button">👥 Personal</button>
           <button type="button" class="secondary" id="status-button">🏷️ Estados</button>
+          <button type="button" class="secondary" id="place-button">📍 Puntos de venta</button>
           <!-- Plegado: con las fichas siempre a la vista, un toque que iba a otro sitio caía en un tema -->
           <details class="menu-group">
             <summary>🎨 Tema</summary>
@@ -103,13 +104,16 @@
       <!-- Solo si el estado cuenta como trabajo: se oculta al momento al elegir Libre, Vacaciones… -->
       <fieldset class="slots" id="cell-hours">
         <legend>Horario</legend>
+        <!-- «Dónde» (paso 7b): el punto de venta de cada tramo; solo aparece si hay puntos de venta creados -->
         <div class="slot" data-slot="1">
           <input type="time" aria-label="Inicio"> <span aria-hidden="true">–</span> <input type="time" aria-label="Fin">
+          <select class="slot-place" aria-label="Dónde (primer tramo)"></select>
         </div>
         <div class="slot" data-slot="2" id="slot-2" hidden>
           <input type="time" aria-label="Inicio del segundo tramo"> <span aria-hidden="true">–</span>
           <input type="time" aria-label="Fin del segundo tramo">
           <button type="button" class="secondary" id="remove-slot" aria-label="Quitar el segundo tramo">✕</button>
+          <select class="slot-place" aria-label="Dónde (segundo tramo)"></select>
         </div>
         <button type="button" class="secondary" id="add-slot">+ Segundo tramo (turno partido)</button>
         <small class="help">Si el fin es anterior al inicio, termina al día siguiente (22:00–02:00).</small>
@@ -202,6 +206,33 @@
     </div>
   </dialog>
 
+  <!-- Ventana «Puntos de venta» (places.js, paso 7b): la misma forma, solo con nombre y orden -->
+  <dialog id="place-dialog" class="dialog" aria-labelledby="place-title">
+    <div class="dialog-form">
+      <div class="dialog-head">
+        <h2 id="place-title">Puntos de venta</h2>
+        <button type="button" class="secondary" data-close>Cerrar</button>
+      </div>
+      <div id="place-list-view" class="dialog-view">
+        <ul class="sort-list" id="place-list"></ul>
+        <small class="help" id="place-empty">Si no creas ninguno, en las casillas no sale «Dónde».</small>
+        <button type="button" id="place-add">+ Añadir punto de venta</button>
+      </div>
+      <form id="place-form" class="dialog-view" hidden novalidate>
+        <label class="field">Nombre
+          <input id="place-name" maxlength="30" autocomplete="off" required>
+        </label>
+        <p class="help" id="place-note" hidden></p>
+        <div class="form-actions">
+          <button type="submit">Guardar</button>
+          <button type="button" class="secondary" id="place-back">‹ Volver</button>
+          <button type="button" class="danger" id="place-remove">Quitar</button>
+        </div>
+      </form>
+      <p class="error" id="place-error" role="alert" hidden></p>
+    </div>
+  </dialog>
+
   <!-- Aviso de «Intercambiar con…» (swap.js): abajo, al alcance del pulgar en el móvil -->
   <div id="swap-bar" class="swap-bar no-print" role="status" hidden>
     <span id="swap-text"></span>
@@ -228,5 +259,6 @@
   <script src="js/lists.js"></script>
   <script src="js/staff.js"></script>
   <script src="js/states.js"></script>
+  <script src="js/places.js"></script>
 </body>
 </html>

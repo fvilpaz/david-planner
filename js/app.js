@@ -25,6 +25,8 @@ window.Schedule = (function () {
 
   function statusOf(id) { return data.statuses.find(function (status) { return status.id === id; }); }
 
+  function placeOf(id) { return data.places.find(function (place) { return place.id === id; }); }
+
   function shownMonday() {
     const asked = Dates.parseIso(new URLSearchParams(window.location.search).get("week"));
     return Dates.weekStart(asked || new Date());
@@ -38,8 +40,10 @@ window.Schedule = (function () {
   }
 
   // Un tramo pintado en su color: trabajando, el de la persona; libre, vacaciones…, el del estado (como gestion-hosteleria)
-  function chip(text, color) {
+  // `place` (opcional): el punto de venta, pequeño debajo de la hora (paso 7b; como «Terraza» en gestion-hosteleria)
+  function chip(text, color, place) {
     const node = el("span", "chip", text);
+    if (place) { node.append(el("small", "chip-place", place)); }
     node.dataset.tint = color;
     node.style.setProperty("--tint", color);
     return node;
@@ -59,8 +63,9 @@ window.Schedule = (function () {
     if (status && status.countsAsWork) {
       shift.slots.forEach(function (slot) {
         const text = slot.start + "–" + slot.end;
-        texts.push(text);
-        slotsBox.append(chip(text, employee.color));
+        const place = slot.placeId && placeOf(slot.placeId);
+        texts.push(text + (place ? " en " + place.name : ""));
+        slotsBox.append(chip(text, employee.color, place && place.name));
       });
     } else if (status) {
       texts.push(status.name);
@@ -174,6 +179,14 @@ window.Schedule = (function () {
   }
   function saveEmployees(change) { return saveList("employees", change); }
   function saveStatuses(change) { return saveList("statuses", change); }
+  function savePlaces(change) { return saveList("places", change); }
+
+  // ¿En cuántos tramos se usa un punto de venta? (en uso no se puede quitar; sí renombrar)
+  function placeUses(placeId) {
+    return Object.keys(data.shifts).reduce(function (total, key) {
+      return total + data.shifts[key].slots.filter(function (slot) { return slot.placeId === placeId; }).length;
+    }, 0);
+  }
 
   // ¿En cuántas casillas se usa un estado? (en uso no se puede quitar ni cambiar si cuenta como trabajo)
   function statusUses(statusId) {
@@ -230,6 +243,8 @@ window.Schedule = (function () {
     saveEmployees: saveEmployees,
     saveStatuses: saveStatuses,
     statusUses: statusUses,
+    savePlaces: savePlaces,
+    placeUses: placeUses,
     hasShifts: hasShifts,
     statusOf: statusOf,
     getData: function () { return data; },

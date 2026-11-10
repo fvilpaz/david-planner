@@ -1,5 +1,29 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 7b: puntos de venta
+
+**Hecho**
+- `js/places.js` (ventana con la misma forma, solo nombre y orden), lista `places` en los datos, «Dónde» por tramo en
+  la ventana de la casilla (oculto si no hay puntos), el nombre pequeño bajo la hora en el cuadrante y el PDF,
+  `savePlaces()` y `placeUses()` en `app.js`. `storage.js` completa al cargar los datos de antes (sin `places`).
+  Ejemplo (`?demo`) con Chiringuito, Cafetería y Pub.
+- Verificado: datos con la forma de antes → se abren con su turno y `places: []`; sin puntos no sale «Dónde»; crear
+  tres; turno partido con Chiringuito y Pub (guardado y leído para el lector de pantalla: «10:00–18:00 en
+  Chiringuito, 20:00–02:00 en Pub»); en uso → sin «Quitar» y su explicación; renombrar se ve en la casilla; quitar
+  uno sin usar; «Dónde: —» quita el sitio del tramo; móvil; PDF del ejemplo en una hoja. Consola limpia.
+
+**Decidido**
+- Un punto de venta en uso no se quita (sus tramos se quedarían sin sitio); renombrar sí.
+- No se junta todavía el esqueleto de las tres ventanas (regla de tres cumplida, pero tocaría dos que funcionan):
+  apuntado en «Aparcado».
+
+**Aprendido**
+- **Datos que crecen:** al añadir algo nuevo a los datos (aquí `places`), lo ya guardado no lo tiene. Se completa al
+  cargar (`complete()` en `storage.js`) en vez de romper o borrar.
+
+**Siguiente**
+- Paso 8: copiar la semana anterior en 1–8 semanas.
+
 ## 10-nov-2026 — Paso 7: Estados
 
 **Hecho**
