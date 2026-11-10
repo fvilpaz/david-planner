@@ -330,26 +330,29 @@ button.danger { background: var(--error); color: var(--on-error); }
 /* Imprimir / Guardar como PDF: A4 apaisado, solo el título y el cuadrante entero (sin la caja que se desliza).
    Siempre en colores claros aunque en pantalla haya un tema oscuro (si no, casillas oscuras y texto que no se lee). */
 @media print {
-  @page { size: A4 landscape; margin: 10mm; }
+  /* Sin margen de página, Chrome no tiene dónde poner el encabezado y el pie (fecha, título, dirección, «1/1»): el margen
+     de 10 mm lo pone el cuerpo */
+  @page { size: A4 landscape; margin: 0; }
   html[data-theme] { --bg: #fff; --surface: #fff; --text: #000; --muted: #5d6470; --border: #b0b5bc;
                      --tint-mix: 10%; color-scheme: light; }
-  body { background: #fff; display: block; font-size: 10pt; }
+  body { background: #fff; display: block; font-size: 10pt; padding: 10mm; box-sizing: border-box; }
   .topbar, .no-print, .section-header { display: none !important; }
   .page { padding: 0; }
   .print-only { display: block; font-size: 14pt; margin: 0 0 4mm; }
   .schedule-scroll { overflow: visible; max-height: none; border: 0; border-radius: 0; margin: 0; }
   /* Rejilla propia para el papel: bordes separados (con los unidos, el PDF perdía rayas sueltas) — el marco (arriba e
      izquierda) en la tabla y derecha y abajo en cada celda, así ninguna raya se dobla — y más oscura que en pantalla */
-  .schedule-table { font-size: 8pt; border-collapse: separate; border-spacing: 0; border-top: .4mm solid #6f757c;
-                    border-left: .4mm solid #6f757c; }
-  .schedule-table th, .schedule-table td { border: 0; border-right: .4mm solid #6f757c; border-bottom: .4mm solid #6f757c; }
-  .schedule-table thead th { border-color: #6f757c; }  /* la cabecera también lleva rayas entre días (en pantalla son azul sobre azul) */
+  .schedule-table { font-size: 8pt; border-collapse: separate; border-spacing: 0; border-top: .5mm solid #4f545a;
+                    border-left: .5mm solid #4f545a; }
+  .schedule-table th, .schedule-table td { border: 0; border-right: .5mm solid #4f545a; border-bottom: .5mm solid #4f545a; }
+  .schedule-table thead th { border-color: #4f545a; }  /* la cabecera también lleva rayas entre días (en pantalla son azul sobre azul) */
   /* En papel nada se desliza: sin «sticky». Con él, Chrome pierde las rayas de las celdas fijas (el nombre de cada persona
      salía sin líneas entre filas) */
   .schedule-table th, .schedule-table thead th, .schedule-table th[scope=row], .schedule-table thead th:first-child {
     position: static; box-shadow: none; }
   .schedule-table td, .schedule-table thead th:not(:first-child) { min-width: 0; }  /* en papel cabe la semana entera */
   .schedule-table td { height: 34px; }
+  .chip[data-tint] { border-color: color-mix(in srgb, var(--tint) 45%, #3a3f45); }  /* borde de cada casilla más marcado: en blanco y negro el tono se pierde y queda el contorno */
   .schedule-table tr { break-inside: avoid; }  /* una persona nunca partida entre dos hojas */
   .cell-empty { visibility: hidden; }  /* el «+» de las casillas vacías no va al papel */
   .schedule-table th, .chip, .cell.has-overtime { -webkit-print-color-adjust: exact; print-color-adjust: exact; }  /* que se impriman los colores */

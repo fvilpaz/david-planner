@@ -32,7 +32,9 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
   navegador, no copia y lo dice.
 
 **Gestión**
-- Imprimir / PDF: A4 apaisado, una hoja, siempre en colores claros, con «Turnos · local · semana».
+- Imprimir / PDF: A4 apaisado, una hoja, siempre en colores claros, con «Turnos · local · semana». Rejilla con rayas
+  de 0,5 mm (también en la cabecera), contorno en cada casilla (en blanco y negro se lee igual; se pierde el color por
+  persona) y **sin** encabezado ni pie del navegador (fecha, dirección, «1/1»).
 - Copiar la semana anterior en 1–8 semanas: solo casillas vacías, sin horas extra, con su sitio, sin quien esté de
   baja en la semana de destino; todo o nada.
 - Personal: la primera vez Camarero 1–4. Añadir, nombre, color (paleta sin fucsia), orden (⠿ o número: la persona se

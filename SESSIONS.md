@@ -40,7 +40,15 @@
 - Nando, con otra captura: «en las celdas de lunes, martes, miércoles, jueves no tiene bordes» = las de la **cabecera
   azul** (sus rayas eran azul sobre azul, y la de debajo también). Medida su captura: sus rayas eran ya las del último
   arreglo (gris 111 = #6f757c). En impresión la cabecera lleva ahora las mismas rayas que el resto; vistos los PDF del
-  ejemplo y el vacío. 37/37. Pendiente de preguntarle: que el PDF salga siempre sin encabezado ni pie del navegador.
+  ejemplo y el vacío. 37/37.
+- Nando: «si no tienen impresora a color, ¿se vería bien en blanco y negro?» → PDF pasado a grises: textos legibles, cabecera
+  gris oscuro, horas extra con borde oscuro y «+2 h extra»; se pierde el color por persona/estado (todas las casillas, el
+  mismo gris claro). «Sí, arréglalo y deja copia en el escritorio en b/n»: rayas de 0,5 mm (#4f545a), contorno más
+  marcado en cada casilla de turno (`color-mix` del tono con gris oscuro, solo en impresión) y **sin encabezado ni pie del
+  navegador** (`@page { margin: 0 }` y el margen de 10 mm en el `body`: sin margen de página Chrome no tiene dónde
+  ponerlos; comprobado generando el PDF SIN la opción que los oculta). Una hoja, ejemplo y vacío. Copia de prueba en b/n
+  en el escritorio (`David Planner - blanco y negro (prueba).pdf`: es una imagen en grises, solo para verlo).
+- Todo lo del PDF está dentro de `@media print`: la pantalla no cambia (comprobado en el diff).
 
 **Decidido**
 - Rayas más oscuras en papel que en pantalla: en pantalla acompañan el diseño; en papel son lo que separa a las personas.
