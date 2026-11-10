@@ -345,7 +345,11 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-table { font-size: 8pt; border-collapse: separate; border-spacing: 0; border-top: .5mm solid #4f545a;
                     border-left: .5mm solid #4f545a; }
   .schedule-table th, .schedule-table td { border: 0; border-right: .5mm solid #4f545a; border-bottom: .5mm solid #4f545a; }
-  .schedule-table thead th { border-color: #4f545a; }  /* la cabecera también lleva rayas entre días (en pantalla son azul sobre azul) */
+  /* Cabecera clara y con letras oscuras: las rayas entre días se ven (gris oscuro sobre azul oscuro no se distinguía), se
+     gasta menos tinta y en blanco y negro sale gris claro. El día de hoy, un poco más marcado. Siempre el mismo azul,
+     sea cual sea el tema de la pantalla. */
+  .schedule-table thead th { border-color: #4f545a; background: #d9e6fb; color: #0f2a52; }
+  .schedule-table thead th.today { background: #aac6f3; }
   /* En papel nada se desliza: sin «sticky». Con él, Chrome pierde las rayas de las celdas fijas (el nombre de cada persona
      salía sin líneas entre filas) */
   .schedule-table th, .schedule-table thead th, .schedule-table th[scope=row], .schedule-table thead th:first-child {

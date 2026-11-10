@@ -49,6 +49,10 @@
   ponerlos; comprobado generando el PDF SIN la opción que los oculta). Una hoja, ejemplo y vacío. Copia de prueba en b/n
   en el escritorio (`David Planner - blanco y negro (prueba).pdf`: es una imagen en grises, solo para verlo).
 - Todo lo del PDF está dentro de `@media print`: la pantalla no cambia (comprobado en el diff).
+- Nando: «intenta que en la impresión el azul sea más claro… pero sigue sin verse» (las divisiones de la cabecera: gris
+  oscuro sobre el azul del tema no se distinguía). **Cabecera clara en papel** (#d9e6fb, letras #0f2a52; hoy, #aac6f3), el
+  mismo azul sea cual sea el tema de la pantalla; las rayas se ven y se gasta menos tinta. Vista a 3×; copia en b/n del
+  escritorio rehecha. 37/37.
 
 **Decidido**
 - Rayas más oscuras en papel que en pantalla: en pantalla acompañan el diseño; en papel son lo que separa a las personas.
