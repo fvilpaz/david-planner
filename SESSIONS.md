@@ -30,6 +30,17 @@
 - Fallos míos cazados al repasar antes de lanzar: `obj.__proto__ = …` no crea una clave (cambia el prototipo) y
   los eventos se crean con el `Event` del marco.
 
+### Arreglo: el hueco del turno partido (venía del paso 1)
+- En una fila con turno partido, una casilla de un solo tramo («Libre») medía 40 px en una fila de 75. Arreglo de
+  una línea: `.cell { min-height: 100% }` (antes 40 px). «min» y no «height»: gestion-hosteleria probó
+  `td{height:1px}` + `height:100%` y en Firefox el 2.º tramo pisaba la fila de abajo; con `min-height`, en el peor
+  caso la casilla crece con su contenido (no pisa nada). No se usa posición absoluta: la columna dejaría de
+  ensancharse con el contenido.
+- Verificado en Chrome: «Libre» de Ana pasa de 40 a 68 px (como sus turnos partidos), ninguna casilla se sale de su
+  fila, filas normales iguales; PDF en una hoja sin huecos; 26/26 pruebas. **Firefox, sin probar** (no está en
+  este PC): lo esperado es que se quede como antes, sin romperse.
+- **No hecho:** juntar el esqueleto de las tres ventanas (refactor): pendiente de que Nando decida (PLAN, ❓ 3).
+
 ## 10-nov-2026 — Paso 10: instalable (PWA) y puerto propio
 
 **Hecho**

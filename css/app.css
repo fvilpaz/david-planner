@@ -140,7 +140,11 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .schedule-table .empty { color: var(--muted); padding: 2rem; }
 
 /* Casilla: un botón con uno o dos tramos, uno debajo de otro; si hay uno, ocupa toda la casilla. Vacía, un «+» */
-.cell { display: flex; gap: .25rem; width: 100%; min-height: 40px; padding: 0; border: 0;
+/* min-height: 100% = todo el alto de la fila, también cuando otra casilla de la fila tiene turno partido (antes
+   quedaba un hueco debajo). «min» y no «height»: si un navegador no resuelve el 100 % en una tabla (Firefox lo
+   toma como los 48 px de la celda), la casilla crece con su contenido y no pisa la fila de abajo, que es lo que
+   le pasó a gestion-hosteleria con el truco td{height:1px} + height:100%. */
+.cell { display: flex; gap: .25rem; width: 100%; min-height: 100%; padding: 0; border: 0;
         border-radius: 8px; background: transparent; color: inherit; font-size: inherit; }
 .cell-slots { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
 .cell:hover { outline: 2px solid var(--primary); }

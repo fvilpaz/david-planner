@@ -61,7 +61,5 @@ un parpadeo del tema por defecto).
 - Refactor (solo si Nando lo pide): las ventanas Personal, Estados y Puntos de venta repiten el esqueleto de abrir,
   cerrar, volver y guardar (la lista ordenable y la paleta ya son comunes en `lists.js`). Regla de tres: a la tercera
   se podría sacar; no se hace por no tocar dos ventanas que funcionan.
-- En una fila con turno partido, una casilla de un solo tramo (p. ej. «Libre») no ocupa todo el alto y deja hueco.
-  Viene del paso 1 (la casilla no estira hasta el alto de la fila); visto en el PDF del paso 7b.
 - Color propio por turno (en gestion-hosteleria existe; aquí la casilla toma el color de la persona o del estado).
 - Para gestion-hosteleria (no es de este repo): en la ventana de la casilla, la casilla de marcar «color propio» parece un segundo selector de color roto.
