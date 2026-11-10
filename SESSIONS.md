@@ -1,5 +1,29 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 2: menú «Gestión», temas e imprimir
+
+**Hecho**
+- `js/theme.js` (tema en `dp_theme`, aplicado en el `<head>`), menú «Gestión» con Imprimir / PDF y Tema (4 fichas,
+  plegado), cierre al tocar fuera o con Escape, CSS de impresión.
+- Verificado: Carbón se aplica, se marca y se recuerda al recargar; el menú se cierra al tocar fuera; consola limpia.
+  Impresión: PDF real con Chrome sin ventana (`--headless --print-to-pdf`): A4 apaisado, una hoja, en claro, sin
+  barra ni botones. Con Carbón en pantalla, las reglas de impresión ponen el fondo en blanco.
+
+**Decidido**
+- Copias (paso 9): automáticas dentro del navegador como health-tracker **y** franja que no bloquea para descargar
+  el archivo si hace 7 días o más. Sin dominio propio (Nando): el aviso y el archivo son la protección real.
+- El tema va en su propia clave (`dp_theme`) y no dentro de los datos: es de cada aparato.
+
+**Aprendido**
+- **Copias automáticas ≠ copia de seguridad**: las de health-tracker viven en el mismo navegador (borradores en el
+  mismo cajón); solo el archivo descargado sobrevive a «borrar datos del sitio» o a perder el móvil.
+- **El tema se aplica en el `<head>`** para que no se vea un parpadeo del tema por defecto al cargar.
+- Probar la impresión sin pulsar «Imprimir»: el cuadro del navegador bloquea la herramienta; Chrome sin ventana
+  genera el PDF con las mismas reglas.
+
+**Siguiente**
+- Paso 2b: nombre de la barra editable con un lápiz (Nando). Después, paso 3: editar la casilla.
+
 ## 10-nov-2026 — Paso 1: cuadrante de solo lectura
 
 **Hecho**

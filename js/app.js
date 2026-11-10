@@ -53,6 +53,7 @@
     const today = Dates.toIso(new Date());
 
     title.textContent = shortDate.format(days[0]) + " — " + shortDate.format(days[6]) + " " + days[6].getFullYear();
+    document.getElementById("print-title").textContent = "Turnos · " + title.textContent;
     picker.value = Dates.toIso(monday);
     document.getElementById("prev-week").href = weekLink(Dates.addDays(monday, -7));
     document.getElementById("next-week").href = weekLink(Dates.addDays(monday, 7));
@@ -92,4 +93,35 @@
   });
 
   render();
+})();
+
+// Menú «Gestión»: Imprimir / PDF y Tema. Se cierra al tocar fuera o con Escape (como en gestion-hosteleria).
+(function () {
+  "use strict";
+  const menu = document.querySelector(".manage-menu");
+  const themeButtons = menu.querySelectorAll("[data-theme-choice]");
+
+  function markTheme() {
+    const now = window.Theme.current();
+    themeButtons.forEach(function (button) { button.setAttribute("aria-pressed", String(button.dataset.themeChoice === now)); });
+  }
+
+  themeButtons.forEach(function (button) {
+    button.addEventListener("click", function () { window.Theme.apply(button.dataset.themeChoice); markTheme(); });
+  });
+
+  // Imprimir abre el cuadro del navegador, que ya trae «Guardar como PDF». El menú se cierra antes para no salir en papel.
+  document.getElementById("print-button").addEventListener("click", function () {
+    menu.open = false;
+    window.print();
+  });
+
+  document.addEventListener("click", function (event) {
+    if (menu.open && !menu.contains(event.target)) { menu.open = false; }
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && menu.open) { menu.open = false; menu.querySelector("summary").focus(); }
+  });
+
+  markTheme();
 })();

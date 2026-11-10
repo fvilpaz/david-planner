@@ -7,15 +7,15 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 |---|---|---|
 | 0 | ✅ Repositorio clonado, `CLAUDE.md`, `PLAN.md`, `SESSIONS.md` | Los tres archivos en el repo |
 | 1 | ✅ Cuadrante de solo lectura con datos inventados: semana lunes–domingo, nombres y cabecera fijos, hoy marcado, ‹ Hoy ›, selector de fecha, footer | En localhost, en móvil (vertical y apaisado) y en PC |
-| 2 | 🔲 Menú «Gestión» con **Tema** (Claro, Lino, Oscuro, Carbón; se recuerda) e **Imprimir / PDF** (A4 apaisado, en claro) | Cambiar de tema; vista previa de impresión en una hoja |
+| 2 | ✅ Menú «Gestión» con **Tema** (Claro, Lino, Oscuro, Carbón; se recuerda) e **Imprimir / PDF** (A4 apaisado, en claro) | Cambiar de tema; vista previa de impresión en una hoja |
 | 3 | 🔲 Guardar en el navegador y **editar la casilla** (ventana de gestion-hosteleria mejorada): estado, horario, segundo tramo, vaciar; **un solo Guardar**; si el estado no cuenta como trabajo, el horario **se oculta al momento**; sin «Dónde» | Cambiar un turno, recargar y que siga ahí |
 | 4 | 🔲 **Horas extra** en la casilla: borde de aviso + «+2 h extra», motivo opcional; también en el PDF | Marcar extras y verlas en pantalla y en la impresión |
 | 5 | 🔲 **Intercambiar con…** (dos toques) | Cambiar dos días de una persona y dos personas el mismo día |
 | 6 | 🔲 **Personal**: añadir, nombre, color, orden (número y ⠿), baja desde una semana y volver a dar de alta | Dar de baja y ver que sigue en semanas anteriores |
 | 7 | 🔲 **Estados**: crear, nombre, color, si cuenta como trabajo, orden; uno en uso no se borra | Crear «Formación», usarlo y ver que no se deja borrar |
 | 8 | 🔲 **Copiar la semana anterior** en 1–8 semanas (solo vacías, sin extras, sin quien esté de baja) | Copiar a 4 semanas sin pisar lo puesto |
-| 9 | 🔲 **Copia de seguridad**: exportar e importar JSON (versión del formato, confirmación y copia previa) | Exportar, borrar, importar y que todo vuelva |
-| 10 | 🔲 **PWA**: manifiesto, iconos, service worker (funciona sin conexión), aviso si hace días que no se exporta y `navigator.storage.persist()` (que el navegador no borre los datos por su cuenta) | Instalarla en el móvil y abrirla sin conexión |
+| 9 | 🔲 **Copia de seguridad** (como health-tracker, `src/js/copia.js`): exportar e importar JSON (`app`, `version`, `exportedAt`, `data`; confirmación y copia previa); **copias automáticas** dentro del navegador (una por semana al abrir, las 5 últimas en `dp_copias`, con «Recuperar»); **franja de aviso que no bloquea** si hace 7 días o más de la última descarga | Exportar, borrar, importar y que todo vuelva; ver la franja y que desaparezca al descargar |
+| 10 | 🔲 **PWA**: manifiesto, iconos, service worker (funciona sin conexión) y `navigator.storage.persist()` (que el navegador no borre los datos por su cuenta) | Instalarla en el móvil y abrirla sin conexión |
 | 11 | 🔲 Publicar en **GitHub Pages** + `audit` (nando-toolkit) | Abrirla desde la dirección pública e instalarla |
 
 ## Propuesta de datos (a confirmar en el paso 3; código en inglés)
@@ -25,9 +25,10 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
   statuses:  [{ id, name, color, countsAsWork, position }],
   shifts:    { "<employeeId>|AAAA-MM-DD": { statusId,
                                             slots: [{ start: "10:00", end: "18:00" }],
-                                            overtime: { hours: 2, reason: "" } | null } },
-  settings:  { theme: "claro" } }
+                                            overtime: { hours: 2, reason: "" } | null } } }
 ```
+El tema va aparte, en `dp_theme`: es de cada aparato y se tiene que leer antes de pintar la página (si no, se ve
+un parpadeo del tema por defecto).
 
 ## 💡 Aparcado
 - Sincronizar entre aparatos con un gist de GitHub (ver «Decisiones» en `CLAUDE.md` por qué no ahora).

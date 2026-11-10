@@ -7,6 +7,7 @@
   <title>David Planner</title>
   <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="css/app.css">
+  <script src="js/theme.js"></script>
 </head>
 <body>
   <!-- Barra de arriba, como la de gestion-hosteleria y auryapp: cuadrado con las iniciales y el nombre -->
@@ -20,9 +21,27 @@
   <main class="page">
     <div class="section-header">
       <span class="section-header-title">Cuadrante semanal</span>
+      <!-- «Gestión», como en gestion-hosteleria: todo lo que no es el cuadrante. Se cierra al tocar fuera o con Escape -->
+      <details class="menu manage-menu no-print">
+        <summary>Gestión</summary>
+        <div class="menu-list">
+          <button type="button" class="secondary" id="print-button">🖨️ Imprimir / PDF</button>
+          <!-- Plegado: con las fichas siempre a la vista, un toque que iba a otro sitio caía en un tema -->
+          <details class="menu-group">
+            <summary>🎨 Tema</summary>
+            <div class="theme-list">
+              <button type="button" class="secondary" data-theme-choice="claro">☀️ Claro</button>
+              <button type="button" class="secondary" data-theme-choice="lino">Lino</button>
+              <button type="button" class="secondary" data-theme-choice="oscuro">🌙 Oscuro</button>
+              <button type="button" class="secondary" data-theme-choice="carbon">Carbón</button>
+            </div>
+          </details>
+        </div>
+      </details>
     </div>
+    <h1 class="print-only" id="print-title"></h1>
     <!-- La semana entre dos flechas; en medio, «Hoy» y el selector para ir a cualquier semana -->
-    <nav class="section-nav" aria-label="Semana">
+    <nav class="section-nav no-print" aria-label="Semana">
       <a class="button secondary" id="prev-week" aria-label="Semana anterior">‹</a>
       <div class="section-nav-center">
         <span class="section-nav-title" id="week-title"></span>
@@ -36,7 +55,7 @@
     <div id="schedule-grid" class="schedule-scroll"></div>
   </main>
 
-  <footer class="app-footer">
+  <footer class="app-footer no-print">
     <span>David Planner &copy; 2026 · <strong>Fernando Vilas Paz</strong></span>
     <div class="footer-links">
       <a href="https://github.com/fvilpaz" target="_blank" rel="noopener">GitHub</a>

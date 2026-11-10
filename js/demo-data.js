@@ -49,5 +49,5 @@ window.DEMO_DATA = (function () {
     });
   });
 
-  return { version: 1, employees: employees, statuses: statuses, shifts: shifts, settings: { theme: "claro" } };
+  return { version: 1, employees: employees, statuses: statuses, shifts: shifts };
 })();
