@@ -14,6 +14,22 @@
   (anclada, limitada, campo de 5 letras). **Referencia: 25.** Si otra auditoría da más, el nuevo es el que se mira.
 - `audit` creó `.gitignore` con `docs/audit-*` (el repo es público: el informe no se sube).
 
+### Pruebas automáticas (Nando se fue a dormir: «dale a lo que te dé tiempo»)
+- `tests/index.html` + `tests/tests.js` (26 pruebas) + `tests/tests.css`. Página en el navegador y no Node: la lógica
+  vive en la página (DOM, `localStorage`, ventanas) y simularla obligaba a cambiar el código antes de tener tests.
+  Cargan la app de verdad en un marco, con datos conocidos y semana fija (9 nov 2026).
+- Cubren: fechas (lunes, imposibles, cambio de hora y de año, hora local), datos (arranque, ilegibles apartados,
+  datos de antes sin `places`, `?demo` aparte), casilla (guardar y recargar, medianoche, inicio = fin, horas extra,
+  Libre limpia, sin espacio no cambia nada, bajas), intercambiar (extras y sitio viajan, todo o nada), copiar semanas
+  (vacías, sin extras, con sitio, varias semanas, bajas, semana vacía), Personal (borrar/baja, ordenar por número),
+  Estados y Puntos de venta en uso, copia de seguridad (descargar, cargar con trampas incluida una clave
+  `__proto__`, copias automáticas, franja) y la barra (iniciales, HTML como texto).
+- Verificado: 26/26; **control**: rotas a propósito tres reglas (extras al copiar, revisión de horas al cargar,
+  filtro de iniciales) → fallan exactamente esas 3 con su explicación; devuelto el código → 26/26. Un centinela en
+  `dp_name` demuestra que la página devuelve los datos del navegador.
+- Fallos míos cazados al repasar antes de lanzar: `obj.__proto__ = …` no crea una clave (cambia el prototipo) y
+  los eventos se crean con el `Event` del marco.
+
 ## 10-nov-2026 — Paso 10: instalable (PWA) y puerto propio
 
 **Hecho**

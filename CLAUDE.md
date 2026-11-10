@@ -56,6 +56,13 @@ ocupado, `servidor.py` avisa y para. Le dice al navegador que **no guarde copias
 `python -m http.server`, Chrome usaba CSS viejos y parecía que faltaban cosas. (Con doble clic en `index.html` no funciona la parte
 instalable: necesita `localhost` o `https`.)
 
+## Pruebas automáticas
+Con el servidor encendido, abrir **`http://localhost:8731/tests/`**: carga la app de verdad en un marco y pasa las
+pruebas (`tests/tests.js`, sacadas de las reglas de este archivo). Verde = todo bien; en rojo, cada fallo dice qué
+esperaba y qué salió. **Pasarlas antes de cada commit** y añadir la prueba de cada regla nueva. Guardan los datos
+`dp_*` del navegador y los devuelven al terminar; en la web publicada no se ejecutan (podrían tocar datos de David).
+Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
+
 ## Estructura (prevista; se crea paso a paso)
 `index.html` · `css/` (estilos y temas) · `js/` (un archivo por pieza: `app.js` cuadrante, `cell.js` casilla,
 `swap.js` intercambiar, `staff.js`/`states.js`/`places.js` ventanas con `lists.js` común, `backup.js` copias,
