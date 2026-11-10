@@ -22,6 +22,8 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 9b | ✅ **Copias automáticas** dentro del navegador (una por semana al abrir, las 5 últimas en `dp_copias`, con «Recuperar»). Revisar que el menú «Gestión» (ya largo) quepa en un móvil en horizontal | Ver la copia de la semana y recuperarla |
 | 10 | ✅ **PWA**: manifiesto, iconos, service worker (funciona sin conexión) y `navigator.storage.persist()` (que el navegador no borre los datos por su cuenta) | Instalarla en el móvil y abrirla sin conexión |
 | 11 | ✅ Publicar en **GitHub Pages** + `audit` (nando-toolkit) | Abrirla desde la dirección pública e instalarla |
+| 12a | 🔲 **Fervis** (Nando, 10-nov), ventana y clave: botón que abre un chat; David pega **su** clave gratuita de Groq (`dp_groq_key`, fuera de la copia de seguridad; limpieza al pegar como en `Crypto_Portafolio/js/fervis.js`). Sin clave, solo explica cómo conseguirla | Pegar una clave, recargar y que siga; descargar copia y que la clave no salga |
+| 12b | 🔲 **Fervis contesta**: IA normal (charla general: «¿qué es un contrato fijo?») y además sabe de la app: un manual corto de cómo se usa + los datos (personal, estados, puntos de venta y turnos de esta semana y la siguiente; para otras fechas, una consulta). **Solo lee, no cambia turnos.** Sin personal o sin turnos, lo dice y ofrece explicar cómo crearlos. Errores claros (clave mala, límite gratuito, sin internet) | Preguntar «¿quién cierra el sábado?» y «¿qué es un contrato fijo?» con una clave de verdad; en las pruebas, un Groq de mentira |
 
 ## Propuesta de datos (a confirmar en el paso 3; código en inglés)
 ```
