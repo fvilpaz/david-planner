@@ -14,11 +14,17 @@
        las iniciales del cuadrado salen solas del nombre); a la derecha, la persona en un círculo (se cambia al tocarlo) -->
   <header class="topbar">
     <div class="brand editor">
-      <span class="brand-avatar" id="brand-avatar" aria-hidden="true">DP</span>
-      <div class="brand-text" data-view>
-        <strong id="brand-name">David Planner</strong>
-        <span class="brand-sub" id="brand-city"></span>
-      </div>
+      <!-- Todo el bloque se toca para cambiar local y ciudad; el lápiz pequeño de la esquina lo indica -->
+      <button type="button" class="brand-button" data-open data-view aria-label="Cambiar el nombre del local y la ciudad">
+        <span class="avatar-wrap">
+          <span class="brand-avatar" id="brand-avatar" aria-hidden="true">DP</span>
+          <span class="pencil-badge" aria-hidden="true"><svg class="pencil" viewBox="0 0 24 24" focusable="false"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg></span>
+        </span>
+        <span class="brand-text">
+          <strong id="brand-name">David Planner</strong>
+          <span class="brand-sub" id="brand-city"></span>
+        </span>
+      </button>
       <form class="edit-form" hidden>
         <span class="edit-fields">
           <input data-key="dp_name" maxlength="40" placeholder="David Planner" autocomplete="off" aria-label="Nombre del local">
@@ -26,14 +32,11 @@
         </span>
         <button type="submit" aria-label="Guardar">✓</button>
       </form>
-      <button type="button" class="brand-edit" data-open aria-label="Cambiar el nombre del local y la ciudad">
-        <svg class="pencil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg>
-      </button>
     </div>
     <div class="person editor">
       <button type="button" class="person-button" data-open data-view aria-label="Cambiar tu nombre">
         <span class="person-name" id="person-name"></span>
-        <span class="person-avatar-wrap">
+        <span class="avatar-wrap">
           <span class="person-avatar" id="person-avatar" aria-hidden="true">👤</span>
           <span class="pencil-badge" aria-hidden="true"><svg class="pencil" viewBox="0 0 24 24" focusable="false"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg></span>
         </span>

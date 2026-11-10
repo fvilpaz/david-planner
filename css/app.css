@@ -33,14 +33,13 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .brand-text strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand-sub { opacity: .8; }
 /* Lápiz (izquierda) y círculo de la persona (derecha): sobre el color de la barra, sin fondo propio */
-/* Lápiz de línea en el color del texto de la barra: discreto, se ilumina al pasar por encima (zona táctil de 48 px) */
+/* Los dos bloques de la barra (local y persona) se tocan para editarlos; un lápiz pequeñito en la esquina del
+   cuadrado y del círculo lo indica, como el de cambiar la foto de perfil */
 .pencil { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round;
           stroke-linejoin: round; }
-.brand-edit { display: inline-grid; place-items: center; background: transparent; color: inherit; border: 0;
-              min-width: 48px; padding: 0; opacity: .55; }
-.brand-edit:hover, .brand-edit:focus-visible { opacity: 1; }
-/* El de la persona: pequeñito en la esquina del círculo, como el de cambiar la foto de perfil */
-.person-avatar-wrap { position: relative; display: inline-grid; }
+.brand-button { display: flex; align-items: center; gap: .6rem; min-width: 0; background: transparent; color: inherit;
+                padding: 0; text-align: left; }
+.avatar-wrap { position: relative; display: inline-grid; flex: none; }
 .pencil-badge { position: absolute; right: -3px; bottom: -3px; display: grid; place-items: center; width: 20px;
                 height: 20px; border-radius: 50%; background: var(--primary); color: var(--on-primary);
                 border: 2px solid var(--surface); }
@@ -56,7 +55,7 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .edit-fields { display: grid; gap: .25rem; }
 .edit-form input { min-height: 36px; width: min(50vw, 260px); padding: 0 .6rem; }
 .edit-form button { min-height: 40px; padding: 0 .8rem; background: var(--surface); color: var(--primary-text); }
-.edit-form[hidden], .brand-text[hidden], .topbar button[hidden] { display: none; }  /* display:flex/grid pesaría más que hidden */
+.edit-form[hidden], .topbar button[hidden] { display: none; }  /* display:flex/grid pesaría más que hidden */
 
 .page { padding: 1.5rem; }
 @media (max-width: 600px) { .page { padding: 1rem; } }
