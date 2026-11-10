@@ -544,7 +544,7 @@
     await wait(1100);  // el movimiento más largo dura 1 s
     ok($("#fervis-dialog").open && !$("#fervis-key-form").hidden, "se abre el chat y, sin clave, el panel de Ajustes");
     equal($$(".fervis-msg").map(function (m) { return m.textContent; }),
-      ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?"], "el chat solo saluda");
+      ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar? Si tienes dudas, pulsa el botón «📖 Guía» de arriba."], "el chat solo saluda");
     ok($("#fervis-key-state").textContent.includes("Fervis la necesita para contestarte"), "el aviso está en el panel");
     $("#fervis-key-toggle").click();
     ok($("#fervis-key-form").hidden, "el botón de Ajustes cierra el panel");
@@ -654,6 +654,9 @@
     w.Fervis.open();
     const before = $$(".fervis-msg").length;
     ok($("#fervis-guide-view").hidden && !$("#fervis-messages").hidden, "al abrir, el chat");
+    equal($("#fervis-guide").textContent.trim(), "Guía", "el botón de la guía lleva su nombre escrito");
+    equal($("#fervis-messages").scrollTop, 0, "el saludo se ve desde su primera línea");
+    ok($(".fervis-msg").textContent.includes("pulsa el botón «📖 Guía» de arriba"), "el saludo remite a la guía");
     $("#fervis-guide").click();
     ok(!$("#fervis-guide-view").hidden && $("#fervis-messages").hidden && $("#fervis-form").hidden && $("#fervis-key-form").hidden, "se ve el glosario y se esconde el chat");
     equal($$("#fervis-guide-view > details > summary").map(function (x) { return x.textContent; }),
@@ -661,12 +664,23 @@
     const group = $("#fervis-guide-view > details");
     ok(!group.open, "cerrado al principio");
     group.querySelector("summary").click();
+    await wait(50);  // «toggle» llega un instante después
     ok(group.open, "al tocar el grupo se despliega");
     equal($$("#fervis-guide-view > details:first-child > details > summary").map(function (x) { return x.textContent; }),
       ["🧭 Moverse por el cuadrante", "✏️ Poner o cambiar un turno", "⏱️ Horas extra", "⇄ Intercambiar dos turnos", "📋 Copiar un turno a otras casillas"], "y salen sus temas");
     const topic = $$("#fervis-guide-view .fervis-guide-topic").find(function (d) { return d.querySelector("summary").textContent.includes("Copiar un turno"); });
     topic.querySelector("summary").click();
+    await wait(50);
     ok(topic.open && topic.querySelectorAll("li").length === 5 && topic.querySelector("li").textContent.startsWith("Abre una casilla con turno"), "al tocar el tema, sus pasos");
+    // acordeón: al abrir otro tema del grupo, el anterior se pliega; y al abrir otro grupo, el primero
+    const other = $$("#fervis-guide-view > details:first-child .fervis-guide-topic")[0];
+    other.querySelector("summary").click();
+    await wait(50);
+    ok(other.open && !topic.open, "al abrir otro tema, el anterior se pliega");
+    const secondGroup = $$("#fervis-guide-view > details")[1];
+    secondGroup.querySelector("summary").click();
+    await wait(50);
+    ok(secondGroup.open && !group.open, "al abrir otro grupo, el primero se pliega");
     equal($$("#fervis-guide-view .fervis-guide-topic").length, w.Fervis.tool("manual_app").split("»): ")[1].split("; ").length, "los grupos cubren todos los temas de la guía");
     equal([$$(".fervis-msg").length, calls], [before, 0], "no añade nada a la conversación ni llama a Groq");
     $("#fervis-guide").click();
@@ -692,6 +706,32 @@
     ok(buttons.length >= 11, "se leyeron los botones: " + buttons.join(" | "));
     const missing = buttons.filter(function (b) { return !guide.includes(b.replace(/^\+ /, "").replace(/^⇄ /, "").replace(/ \(turno partido\)?$/, "")); });
     equal(missing, [], "botones que la guía no nombra");
+  });
+
+  test("Fervis: a una pregunta de «cómo se hace», la app le pone delante la guía que toca (no contesta de memoria que algo «no se puede»)", async function () {
+    const w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
+    const color = w.Fervis.guideFor("como cambio el color de una persona");
+    ok(color.includes("Personal:") && color.includes("cambiar su nombre y su color"), "el color de una persona sale del tema Personal: " + color.slice(0, 80));
+    ok(w.Fervis.guideFor("¿Cómo copio un turno?").startsWith("Copiar un turno a otras casillas:"), "copiar un turno");
+    ok(w.Fervis.guideFor("donde descargo la copia de seguridad").includes("Descargar copia"), "copia de seguridad");
+    equal([w.Fervis.guideFor("quien trabaja hoy"), w.Fervis.guideFor("¿quién libra este fin de semana?")], ["", ""], "las preguntas de datos no llevan guía");
+    const sent = [];
+    w.fetch = function (url, options) {
+      if (url.endsWith("/models")) { return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ data: MODEL_IDS.map(function (id) { return { id: id }; }) }); } }); }
+      sent.push(JSON.parse(options.body));
+      return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ choices: [{ finish_reason: "stop", message: { role: "assistant", content: "En Personal." } }] }); } });
+    };
+    w.Fervis.open();
+    $("#fervis-question").value = "como cambio el color de una persona";
+    $("#fervis-form").requestSubmit();
+    await wait(300);
+    const system = sent[0].messages[0].content;
+    ok(system.includes("GUÍA DE LA APP RELEVANTE") && system.includes("Personal: Gestión → «Personal»"), "la guía relevante va en el mensaje de sistema");
+    ok(system.includes("Nunca digas que algo «no se puede hacer»"), "y la orden de no decir que algo no se puede sin comprobarlo");
+    $("#fervis-question").value = "quien trabaja hoy";
+    $("#fervis-form").requestSubmit();
+    await wait(300);
+    ok(!sent[1].messages[0].content.includes("GUÍA DE LA APP RELEVANTE"), "una pregunta de datos no la lleva");
   });
 
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
@@ -744,6 +784,7 @@
     equal(sent.map(function (s) { return s.body.model; }), ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-120b"], "modelos");
     ok(sent.every(function (s) { return s.auth === "Bearer " + FAKE_KEY && s.url.startsWith("https://api.groq.com/"); }), "clave y dirección");
     ok(sent[1].body.messages[0].content.includes("Personal (3): Ana, Luis, Marta."), "los datos van en el mensaje de sistema");
+    ok(sent[1].body.messages[0].content.includes("glosario (botón 📖 de arriba)"), "el modelo sabe remitir al glosario");
     const tool = sent[2].body.messages.find(function (m) { return m.role === "tool"; });
     ok(tool && tool.content.includes("Ana: Trabajo 09:00–17:00"), "la consulta devuelve el 1 de diciembre");
     replies.push({ status: 401 });
@@ -798,7 +839,7 @@
     release();
     await wait(100);
     $("#fervis-clear").click();
-    equal($$(".fervis-msg").map(function (m) { return m.textContent; }), ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?"], "solo el saludo");
+    equal($$(".fervis-msg").map(function (m) { return m.textContent; }), ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar? Si tienes dudas, pulsa el botón «📖 Guía» de arriba."], "solo el saludo");
     equal(localStorage.getItem("dp_groq_key"), FAKE_KEY, "la clave sigue");
     await ask("Segunda");
     release();

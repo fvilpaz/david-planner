@@ -333,14 +333,23 @@ button.danger { background: var(--error); color: var(--on-error); }
 /* El glosario: grupos y temas que se despliegan (details); ocupa el sitio de la conversación mientras está abierto */
 .fervis-dialog [hidden] { display: none !important; }  /* los display de abajo pesarían más que hidden */
 .fervis-icon[aria-expanded=true] { border: 2px solid var(--primary); }
-/* Con cuatro botones arriba, en el móvil el título no cabía: «Cerrar» pasa a ser una ✕ (el texto sigue ahí para los lectores de pantalla) */
+/* El botón de la guía lleva su nombre escrito («Guía»): tiene que verse claramente que es la guía. En el móvil, la cabecera pasa a dos
+   filas (el título arriba y los botones debajo, con la guía a la izquierda) para que quepa todo con su texto */
+.fervis-icon.fervis-guide-button { width: auto; padding: 0 1rem; gap: .45rem; font-weight: 600; }
 @media (max-width: 600px) {
-  .fervis-dialog .dialog-head [data-close] { font-size: 0; width: 48px; padding: 0; }
-  .fervis-dialog .dialog-head [data-close]::before { content: "✕"; font-size: 1.1rem; }
-  .fervis-dialog .dialog-head h2 { white-space: nowrap; }
+  .fervis-dialog .dialog-head { flex-wrap: wrap; row-gap: .5rem; }
+  .fervis-dialog .dialog-head h2 { width: 100%; }
+  .fervis-dialog .fervis-actions { width: 100%; }
+  .fervis-dialog .fervis-guide-button { margin-right: auto; }
+}
 }
 .fervis-guide { flex: 1; min-height: 6rem; overflow-y: auto; display: grid; gap: .5rem; align-content: start; }
-.fervis-guide summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding: 0 .9rem; font-weight: 600; }
+.fervis-guide summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: .5rem; padding: 0 .9rem; font-weight: 600;
+                        list-style: none; }
+.fervis-guide summary::-webkit-details-marker { display: none; }
+/* La flechita de desplegable: apunta a la derecha y se gira hacia abajo cuando está abierto */
+.fervis-guide summary::before { content: "▸"; flex: none; width: 1em; color: var(--muted); transition: transform .15s ease; }
+.fervis-guide details[open] > summary::before { transform: rotate(90deg); }
 .fervis-guide summary:focus-visible { outline: 3px solid var(--primary); outline-offset: -3px; }
 .fervis-guide-group { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .fervis-guide-group[open] > summary { border-bottom: 1px solid var(--border); }

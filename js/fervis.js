@@ -344,7 +344,28 @@ window.Fervis = (function () {
     return "Temas de la guía (pídelos uno a uno con manual_app y «tema»): " + GUIDE.map(function (item) { return item[0] + " (" + item[2] + ")"; }).join("; ") + ".";
   }
 
-  function system(model) {
+  // Cuando la pregunta es de «cómo se hace…», la APP busca en la guía los temas que tocan y se los pone delante al modelo (el modelo, solo,
+  // contestó de memoria que «no se puede cambiar el color de una persona», y sí se puede). Se comparan las palabras de la pregunta con las
+  // de cada tema (por sus 4 primeras letras: cambio/cambiar, copio/copiar, persona/personal) y salen los 2 que más coinciden.
+  const HOW_TO = /\b(como|donde|se puede|puedo|puede|manual|guia|ayuda|funcion|opcion|para que sirve|que hace|que puedes)\b/;
+  const STOP = ["para", "como", "donde", "puedo", "puede", "quiero", "tengo", "hacer", "esta", "este", "esto", "unas", "unos", "tiene", "tienen", "sobre", "desde", "hasta"];
+  const stems = function (text) {
+    return norm(text).split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 4 && !STOP.includes(w); }).map(function (w) { return w.slice(0, 4); });
+  };
+  function guideFor(asked) {
+    if (!HOW_TO.test(norm(asked))) { return ""; }
+    const words = stems(asked);
+    const scored = GUIDE.map(function (item) {
+      const own = stems(item[0].replace(/_/g, " ") + " " + item[2] + " " + item[3].join(" "));
+      return { item: item, score: words.filter(function (w) { return own.includes(w); }).length };
+    }).filter(function (x) { return x.score >= 2; }).sort(function (a, b) { return b.score - a.score; }).slice(0, 2);
+    return scored.map(function (x) { return x.item[2] + ": " + x.item[3].join(" "); }).join("\n");
+  }
+
+  function system(model, asked) {
+    const found = guideFor(asked);
+    // Lo que va por delante: si la app ha encontrado en la guía lo que toca, el modelo explica SOLO con eso
+    const help = found ? "\n\nGUÍA DE LA APP RELEVANTE PARA ESTA PREGUNTA (explica con esto; no digas que algo no se puede si no lo has visto aquí o en manual_app):\n" + found : "";
     return "Eres Fervis, el asistente personal de quien usa «David Planner», la app de turnos de este local de hostelería. " +
       "Contesta en castellano, breve y claro, en texto normal: sin markdown (ni asteriscos ni almohadillas); para listas, " +
       "una línea por punto empezando con «- ». Puedes charlar de cualquier tema general (por ejemplo, qué es un contrato " +
@@ -353,7 +374,7 @@ window.Fervis = (function () {
       "inventes ni lo cuentes tú a ojo: turnos_entre da los turnos concretos (qué turno tiene alguien, quién trabaja un " +
       "día; con «persona» solo los de esa persona), resumen_entre da lo ya contado por persona (días de turno partido o " +
       "seguido, libres, vacaciones, bajas, fines de semana completos sin trabajar y sábados o domingos sueltos) y " +
-      "manual_app(tema) es la guía de la app: cómo se hace cada cosa y qué puede hacer cada parte (úsala para todo «cómo hago…» y «qué puedes hacer»; si dudas del tema, sin tema da el índice). Si piden la guía o el manual en general, no la recites: di en una línea que pulsen el botón 📖 de arriba (el glosario de la app, por temas) y, si preguntan algo concreto, explícalo con manual_app. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
+      "manual_app(tema) es la guía de la app: cómo se hace cada cosa y qué puede hacer cada parte (úsala para todo «cómo hago…» y «qué puedes hacer»; si dudas del tema, sin tema da el índice). Si piden la guía o el manual en general, no la recites: di en una línea que pulsen el botón 📖 de arriba (el glosario de la app, por temas) y, si preguntan algo concreto, explícalo con manual_app. Nunca digas que algo «no se puede hacer» en la app si no lo has comprobado en la guía (manual_app o la guía relevante): si no estás seguro, dilo y remite al glosario. Cuando expliques cómo se hace algo de la app, termina con una línea breve: «Tienes más detalle en el glosario (botón 📖 de arriba).» Solo en esas respuestas. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
       "completos (sábado y domingo) y los días sueltos por separado, sin mezclarlos en «días libres». Para «quién tiene " +
       "más…» usa las líneas RANKING ya calculadas y di siempre el motivo: vacaciones o baja NO es librar. «Sin nada puesto» " +
       "es un día sin planificar: no es libre, dilo aparte. «Esta semana», " +
@@ -361,7 +382,7 @@ window.Fervis = (function () {
       "con el nombre; si hay dos posibles, pregunta. «Trabajando ahora mismo» ya está calculado: úsalo tal cual. Solo " +
       "lees: si piden cambiar un turno, explica cómo hacerlo en la app (manual_app). Si hay un AVISO de que falta personal " +
       "o turnos, dilo y ofrece explicar paso a paso cómo crearlos. Si preguntan qué IA eres: Fervis es tu nombre y te " +
-      "ejecuta el modelo " + model + " en Groq.\n\nDATOS DE LA APP:\n" + context(new Date());
+      "ejecuta el modelo " + model + " en Groq.\n\nDATOS DE LA APP:\n" + context(new Date()) + help;
   }
 
   // ---------- Groq, con la clave de David. Si un modelo está saturado o falla, se prueba el siguiente ----------
@@ -408,7 +429,8 @@ window.Fervis = (function () {
   }
 
   async function converse(key, model, conversation) {
-    const turn = [{ role: "system", content: system(model) }].concat(conversation);
+    const lastUser = conversation.slice().reverse().find(function (m) { return m.role === "user"; });
+    const turn = [{ role: "system", content: system(model, lastUser ? lastUser.content : "") }].concat(conversation);
     for (let round = 0; round < 4; round++) {
       // Los modelos «gpt-oss» piensan antes de contestar y ese pensamiento cuenta dentro de max_tokens: con 700 se lo
       // gastaban todo en preguntas de repasar a todo el personal y salía una respuesta vacía. Esfuerzo bajo y más margen.
@@ -548,6 +570,16 @@ window.Fervis = (function () {
     });
   }
 
+  // Acordeón (Nando: «si se despliega una que se pliegue otra, para que no ocupe toda la pantalla»): al abrir un grupo se cierran los
+  // otros grupos, y al abrir un tema se cierran los demás temas de ese grupo. «toggle» no sube por el árbol: se escucha en captura.
+  guideView.addEventListener("toggle", function (event) {
+    const opened = event.target;
+    if (!opened.open || opened.tagName !== "DETAILS") { return; }
+    Array.from(opened.parentElement.children).forEach(function (sibling) {
+      if (sibling !== opened && sibling.tagName === "DETAILS" && sibling.open) { sibling.open = false; }
+    });
+  }, true);
+
   function showGuide(show) {  // el glosario o el chat: uno u otro
     if (show && !guideView.children.length) { buildGuide(); }
     guideView.hidden = !show;
@@ -561,10 +593,11 @@ window.Fervis = (function () {
     ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"], ["📋", "¿Cómo copio un turno?"]];
 
   function greet() {
-    say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?");
+    say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar? Si tienes dudas, pulsa el botón «📖 Guía» de arriba.");
     chipRow(QUESTIONS.map(function (pair) {
       return [pair[0], pair[1], function () { question.value = pair[1]; chat.requestSubmit(); }];  // sin clave, abre Ajustes y deja la pregunta escrita
     }).concat([["📖", "Guía de la app", function () { showGuide(true); }]]));
+    messages.scrollTop = 0;  // el saludo se lee desde su primera línea (los chips lo bajarían al final)
   }
 
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
@@ -641,5 +674,5 @@ window.Fervis = (function () {
     if (key && window.matchMedia("(pointer: fine)").matches) { question.focus(); }
   }
 
-  return { open: open, context: context, tool: runTool };  // context: para las pruebas (con una hora fija)
+  return { open: open, context: context, tool: runTool, guideFor: guideFor };  // context: para las pruebas (con una hora fija)
 })();

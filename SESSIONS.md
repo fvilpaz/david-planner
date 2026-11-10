@@ -18,6 +18,17 @@
   guardián. **Controles:** el glosario sin esconder el chat → falla (y, en la versión de chips, no apilar el mismo mensaje).
   45/45.
 
+- **Alucinación encontrada con la clave real:** a «cómo cambio el color de una persona» Fervis contestó de memoria que «no se puede»
+  (sí se puede: Gestión → Personal). Arreglo de raíz: si la pregunta es de «cómo/dónde/se puede…», **la app busca en la guía los 2
+  temas que más coinciden** (por las 4 primeras letras de las palabras: cambio/cambiar, copio/copiar) y se los pone delante al
+  modelo, con la orden de no decir que algo no se puede si no lo ha visto ahí. Al final remite al glosario. Pruebas: qué tema sale
+  para cada pregunta, que las de datos no lleven guía y que el mensaje de sistema la lleve. **Control:** sin la búsqueda → falla.
+- Glosario: **flechita ▸ que gira** y **acordeón** (al abrir uno se pliegan los otros: no ocupa toda la pantalla). El botón de la
+  cabecera lleva su nombre escrito, «📖 Guía» (en el móvil la cabecera pasa a dos filas); saludo nuevo: quién es, qué hace y que, si
+  hay dudas, se pulse la guía. Nando: el chip «Guía de la app» del saludo «es perfecto»; pero el saludo largo («te digo quién trabaja, cuento
+  turnos…») es **redundante con los chips**: vuelve al corto de antes («¿En qué te puedo ayudar?») y se queda solo la coletilla «Si tienes
+  dudas, pulsa el botón «📖 Guía» de arriba». 46/46.
+
 **Decidido (pendiente de Nando)**
 - Pega de negocio que apunta Nando: una guía que enseña sola puede cerrar la vía de ir él a dar formación a los locales. Sin decidir;
   la guía está en un solo sitio (`GUIDE`, `GUIDE_GROUPS`), fácil de recortar o quitar. Opinión mía: la guía quita lo aburrido (dónde
