@@ -23,8 +23,18 @@
 - Responsabilidad única (la S de SOLID): cada archivo tiene una sola razón para cambiar. Cambiar un texto de la guía ya no
   obliga a abrir el archivo que habla con Groq.
 
+- Punto 5 (juntar el esqueleto de Personal, Estados y Puntos de venta): **no se hace**. Nando: mejor tres con el mismo
+  molde. Queda en «💡 Aparcado» para cuando haya una cuarta lista.
+
+**Aprendido** (punto 5)
+- Partir Fervis y juntar las listas no son cosas contrarias: las dos buscan que cada cosa tenga una sola razón para
+  cambiar. Fervis mezclaba tres trabajos; las listas repiten uno solo con datos distintos.
+- Dos formas de reutilizar: **herencia** (una plantilla madre con huecos que rellenan las hijas: «Método plantilla») y
+  **composición** (cada una coge piezas sueltas, como `lists.js`). «Mejor composición que herencia»: un teléfono solo
+  en Personal se pone en `staff.js` sin abrirle un hueco a la madre.
+
 **Siguiente**
-- Punto 5 (juntar el esqueleto de Personal, Estados y Puntos de venta): explicado a Nando, sin tocar hasta que decida.
+- Auditoría cerrada. Pendiente de Nando (no es código): la cuenta de Groq de David en su móvil y probar Fervis allí.
 
 ## 10-nov-2026 — Auditoría entera (Opus): fases 1 y 2
 

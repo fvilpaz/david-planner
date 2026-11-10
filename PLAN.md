@@ -73,9 +73,9 @@ un parpadeo del tema por defecto).
 - Sitio por defecto de cada persona (que «Dónde» se rellene solo al poner un turno); hoy se elige en cada casilla
   (el copiar semanas lo arrastra).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
-- Refactor (solo si Nando lo pide): las ventanas Personal, Estados y Puntos de venta repiten el esqueleto de abrir,
-  cerrar, volver y guardar (la lista ordenable y la paleta ya son comunes en `lists.js`). Regla de tres: a la tercera
-  se podría sacar; no se hace por no tocar dos ventanas que funcionan.
+- Juntar el esqueleto de las listas (Personal, Estados y Puntos de venta repiten abrir, cerrar, volver y guardar):
+  **solo si aparece una cuarta lista**. Nando, 10-nov: mejor tres con el mismo molde; cada una tiene sus excepciones
+  y lo común ya está en `lists.js` (composición: cada ventana coge las piezas que le sirven).
 - Color propio por turno (en gestion-hosteleria existe; aquí la casilla toma el color de la persona o del estado).
 - Para Crypto_Portafolio (no es de este repo): que su Fervis, sin activos o sin cartera, lo diga y ofrezca explicar cómo
   se montaría una cartera de forma segura (qué es un ETF, un bono, la estructura habitual) sin recomendar compras.
