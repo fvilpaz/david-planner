@@ -1,6 +1,6 @@
 # PLAN — david-planner
 
-Cada paso termina con algo que se ve en `http://localhost:8000` y un commit. Los pasos grandes se parten (1a, 1b…)
+Cada paso termina con algo que se ve en `http://localhost:8731` y un commit. Los pasos grandes se parten (1a, 1b…)
 cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 
 | # | Paso | Se ve funcionando |
@@ -21,7 +21,7 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 9a | ✅ **Copia de seguridad** (como health-tracker, `src/js/copia.js`): descargar JSON (`app`, `version`, `exportedAt`, `data` y la barra/tema); cargar revisando campo a campo (lo ilegible se descarta y se cuenta), con confirmación y **descarga previa de lo de antes**; **franja que no bloquea** si hace 7 días o más (no la primera semana, ni en `?demo`), con «Más tarde» | Exportar, borrar, importar y que todo vuelva; ver la franja y que desaparezca al descargar |
 | 9b | ✅ **Copias automáticas** dentro del navegador (una por semana al abrir, las 5 últimas en `dp_copias`, con «Recuperar»). Revisar que el menú «Gestión» (ya largo) quepa en un móvil en horizontal | Ver la copia de la semana y recuperarla |
 | 10 | ✅ **PWA**: manifiesto, iconos, service worker (funciona sin conexión) y `navigator.storage.persist()` (que el navegador no borre los datos por su cuenta) | Instalarla en el móvil y abrirla sin conexión |
-| 11 | 🔲 Publicar en **GitHub Pages** + `audit` (nando-toolkit) | Abrirla desde la dirección pública e instalarla |
+| 11 | ✅ Publicar en **GitHub Pages** + `audit` (nando-toolkit) | Abrirla desde la dirección pública e instalarla |
 
 ## Propuesta de datos (a confirmar en el paso 3; código en inglés)
 ```
