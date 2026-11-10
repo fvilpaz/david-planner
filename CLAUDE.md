@@ -7,6 +7,7 @@
 Un cuadrante de turnos semanal para un local de hostelería (lo usará David). **Sustituye al PDF colgado en la
 pared**: se abre y se ve el cuadrante, se toca una casilla para cambiarla y se imprime o se guarda en PDF.
 Nada más. Sin servidor, sin cuentas y sin base de datos: los datos viven en el navegador del aparato de David.
+Con un añadido opcional: **Fervis**, un chat que contesta sobre los turnos con la clave de Groq que David ponga (paso 12).
 
 Origen: las reglas del cuadrante (turnos que cruzan la medianoche, turno partido, copiar semanas, nombres fijos,
 impresión A4) están probadas en `gestion-hosteleria` (WSL: `~/code/github/gestion-hosteleria`, app `scheduling`

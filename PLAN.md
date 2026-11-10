@@ -45,12 +45,17 @@ un parpadeo del tema por defecto).
 2. **«Baja» significa dos cosas:** el estado «Baja» (baja médica, en una casilla) y «Dar de baja» en Personal (dejar
    de trabajar aquí). Propuesta: en Personal, «Ya no trabaja aquí desde el…» / «Vuelve a trabajar aquí». Decides tú.
 3. **Refactor de las tres ventanas** (Personal, Estados, Puntos de venta comparten esqueleto): ¿se junta ahora, con
-   las 27 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
+   las 35 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
 4. **¿Qué ve David la primera vez?** Hoy, Camarero 1–4 sin turnos. ¿Le preparas tú su personal y le pasas el
    archivo de copia para que lo cargue, o lo rellena él?
 5. **Saltos de línea (CRLF):** git avisa en cada commit («LF will be replaced by CRLF»). Un `.gitattributes` con
    `* text=auto eol=lf` lo dejaría fijo para Windows y WSL. No lo he añadido: es configuración del repo.
 6. **Cierra cualquier pestaña en `localhost:8000`** para que termine de irse el service worker de las pruebas.
+7. **La cuenta de Groq de David (para Fervis).** Tiene que ser **suya** (el límite gratuito es de la cuenta, no de la
+   clave): en su móvil, con su correo y tú al lado; el enlace de acceso de Groq solo vale una vez y en el navegador
+   donde se pidió (no reenviarlo por WhatsApp). La clave se pega en Ajustes (icono de tres barras) del chat.
+8. **Probar Fervis en el móvil** con su clave: el chat a 390 px, el teclado y el robot con el dedo. Y ver cuánto aguanta
+   el límite gratuito con uso normal (seis preguntas seguidas dieron 429).
 
 ## 💡 Aparcado
 - Sincronizar entre aparatos con un gist de GitHub (ver «Decisiones» en `CLAUDE.md` por qué no ahora).
@@ -59,10 +64,14 @@ un parpadeo del tema por defecto).
 - Arrastrar para intercambiar en PC (en móvil se confunde con desplazar).
 - Avisar si los dos tramos de un turno partido se pisan (10–14 y 12–16); ahora no se comprueba.
 - En el móvil, abrir la semana actual desplazada hasta hoy (ahora empieza siempre en el lunes).
+- Sitio por defecto de cada persona (que «Dónde» se rellene solo al poner un turno); hoy se elige en cada casilla
+  (el copiar semanas lo arrastra).
 - Fervis: preguntas rápidas sugeridas (botones con «¿Quién trabaja ahora?», «¿Quién libra mañana?»…).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
 - Refactor (solo si Nando lo pide): las ventanas Personal, Estados y Puntos de venta repiten el esqueleto de abrir,
   cerrar, volver y guardar (la lista ordenable y la paleta ya son comunes en `lists.js`). Regla de tres: a la tercera
   se podría sacar; no se hace por no tocar dos ventanas que funcionan.
 - Color propio por turno (en gestion-hosteleria existe; aquí la casilla toma el color de la persona o del estado).
+- Para Crypto_Portafolio (no es de este repo): que su Fervis, sin activos o sin cartera, lo diga y ofrezca explicar cómo
+  se montaría una cartera de forma segura (qué es un ETF, un bono, la estructura habitual) sin recomendar compras.
 - Para gestion-hosteleria (no es de este repo): en la ventana de la casilla, la casilla de marcar «color propio» parece un segundo selector de color roto.

@@ -1,6 +1,6 @@
 # David Planner — especificación
 
-Estado: **construida y verificada** (pasos 0–11, 10-nov-2026). Escrita al final, a partir de las decisiones de
+Estado: **construida y verificada** (pasos 0–12, 10-nov-2026). Escrita al final, a partir de las decisiones de
 `CLAUDE.md`, lo verificado en cada paso (`SESSIONS.md`) y las pruebas automáticas (`tests/tests.js`).
 Las **decisiones y su porqué** están en `CLAUDE.md`; aquí, **qué tiene que pasar** y cómo se comprueba.
 
