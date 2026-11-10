@@ -34,10 +34,17 @@ window.Staff = (function () {
 
   function showList() {
     title.textContent = "Personal";
+    showError("");
     form.hidden = true;
     listView.hidden = false;
-    list.replaceChildren.apply(list, sorted().map(function (person) {
+    list.replaceChildren.apply(list, sorted().map(function (person, index) {
       const item = document.createElement("li");
+      item.dataset.employee = person.id;
+      // Orden (paso 6b): el asa ⠿ para arrastrar y el número del puesto (1, 2, 3…), como «Ordenar» de gestion-hosteleria
+      const handle = item.appendChild(document.createElement("span"));
+      handle.className = "drag-handle";
+      handle.textContent = "⠿";
+      handle.setAttribute("aria-hidden", "true");
       const row = item.appendChild(document.createElement("button"));
       row.type = "button";
       row.className = "staff-row" + (person.leftFrom ? " left" : "");
@@ -47,9 +54,69 @@ window.Staff = (function () {
       dot.style.setProperty("--swatch", person.color);
       row.append(person.name);  // texto, nunca HTML
       if (person.leftFrom) { row.appendChild(document.createElement("small")).textContent = "de baja desde el " + longDate(person.leftFrom); }
+      const number = item.appendChild(document.createElement("input"));
+      number.className = "order-number";
+      number.inputMode = "numeric";
+      number.value = String(index + 1);
+      number.setAttribute("aria-label", "Puesto de " + person.name);
       return item;
     }));
   }
+
+  // Guarda el orden de la lista tal como está ahora (de arriba abajo: 0, 1, 2…) y la vuelve a pintar con sus números
+  function saveOrder(ids) {
+    const saved = window.Schedule.saveEmployees(function (people) {
+      ids.forEach(function (id, position) { people.find(function (p) { return p.id === id; }).position = position; });
+    });
+    showList();  // con el orden guardado o, si no se pudo, con el de antes
+    if (!saved) { showError("No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada."); }
+  }
+
+  function listIds() { return Array.from(list.children).map(function (item) { return item.dataset.employee; }); }
+
+  // Escribir un número (y salir del campo o pulsar Intro) lleva a la persona a ese puesto
+  list.addEventListener("change", function (event) {
+    const input = event.target.closest(".order-number");
+    if (!input) { return; }
+    const ids = listIds();
+    const id = input.closest("li").dataset.employee;
+    const wanted = Math.min(Math.max(parseInt(input.value, 10) || 1, 1), ids.length) - 1;
+    ids.splice(ids.indexOf(id), 1);
+    ids.splice(wanted, 0, id);
+    saveOrder(ids);
+  });
+  list.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" && event.target.closest(".order-number")) { event.preventDefault(); event.target.blur(); }
+  });
+
+  // Arrastrar por el asa ⠿ (de gestion-hosteleria/schedule.js): el puntero sigue «agarrado» aunque salga del asa y, al
+  // pasar por encima de otra persona, se cambian de sitio. Vale con el dedo y con el ratón. Se guarda al soltar.
+  let dragged = null;
+  list.addEventListener("pointerdown", function (event) {
+    const handle = event.target.closest(".drag-handle");
+    if (!handle) { return; }
+    dragged = handle.closest("li");
+    dragged.classList.add("dragging");
+    handle.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+  list.addEventListener("pointermove", function (event) {
+    if (!dragged) { return; }
+    const below = document.elementFromPoint(event.clientX, event.clientY);
+    const target = below && below.closest(".staff-list li");
+    if (!target || target === dragged) { return; }
+    // Si venía de antes, queda detrás de la otra; si venía de después, delante
+    const comesFromBefore = dragged.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING;
+    list.insertBefore(dragged, comesFromBefore ? target.nextSibling : target);
+  });
+  function drop() {
+    if (!dragged) { return; }
+    dragged.classList.remove("dragging");
+    dragged = null;
+    saveOrder(listIds());
+  }
+  list.addEventListener("pointerup", drop);
+  list.addEventListener("pointercancel", drop);
 
   // Un color que no lleve nadie en activo; si están todos cogidos, se repite la paleta
   function freeColor() {

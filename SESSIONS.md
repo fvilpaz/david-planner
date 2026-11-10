@@ -1,5 +1,25 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 6b: orden del personal (y servidor sin caché)
+
+**Hecho**
+- `servidor.py`: como `python -m http.server` pero con `Cache-Control: no-store` (tercera vez que Chrome usaba un CSS
+  viejo: a Nando le salía la lista de Personal sin estilos y parecía que se había borrado algo).
+- Orden en la misma ventana Personal (Nando: no como el «Ordenar» aparte de auryapp): cada tarjeta lleva el asa ⠿, el
+  nombre y el número del puesto, en el hueco que sobraba a la derecha (idea de Nando). Arrastrar: la lógica de
+  gestion-hosteleria (`setPointerCapture`, `elementFromPoint`). Se guarda al soltar o al escribir el número.
+- Verificado: arrastrando **con el ratón de verdad** (Camarero 1 al 3.º), tecleando de verdad «1» + Intro (Camarero 2
+  al 1.º; Intro no cierra ni abre la ficha), número fuera de rango (99 → al final), sin espacio → aviso visible y
+  orden sin cambiar; el cuadrante sale en el orden. Consola limpia. **Sin probar: arrastrar con el dedo en un móvil
+  de verdad** (la herramienta solo simula ratón).
+
+**Aprendido**
+- **Un valor puesto por código no dispara `change`:** la primera prueba de «escribir un número» no hizo nada y
+  parecía un fallo; tecleando de verdad funciona. Otra herramienta que miente: probar como lo haría una persona.
+
+**Siguiente**
+- Paso 7: Estados (crear, nombre, color, si cuenta como trabajo, orden; uno en uso no se borra).
+
 ## 10-nov-2026 — Paso 6a: Personal
 
 **Hecho**
