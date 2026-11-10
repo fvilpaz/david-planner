@@ -66,7 +66,11 @@ window.DEMO_DATA = (function () {
 })();
 
 // Los colores que se ofrecen para el personal: bien distintos entre sí y sin fucsia ni rosas (son el aviso de horas extra)
-window.PALETTE = ["#2c7be5", "#e67e22", "#27ae60", "#8e44ad", "#16a085", "#d35400", "#c0392b", "#7f8c8d", "#2c3e50", "#b7950b"];
+// Los colores de las personas y de los estados. Los 10 primeros no se mueven de sitio (los cuatro camareros de la
+// primera vez y los datos ya guardados dependen de su orden); los 10 siguientes (Nando, 10-nov) se añaden al final.
+// Ninguno rosa ni fucsia: ese tono es solo del aviso de horas extra.
+window.PALETTE = ["#2c7be5", "#e67e22", "#27ae60", "#8e44ad", "#16a085", "#d35400", "#c0392b", "#7f8c8d", "#2c3e50", "#b7950b",
+                  "#0ea5c6", "#7cb518", "#8d5524", "#4f46e5", "#6b8e23", "#9b7fd4", "#1e6b43", "#7b2d26", "#3d5a80", "#c2b280"];
 
 // Lo que ve David la primera vez: los estados y cuatro camareros genéricos sin turnos, para que vea la forma del
 // cuadrante y solo tenga que cambiar los nombres (tocando el nombre). Idea de Nando, 10-nov-2026.

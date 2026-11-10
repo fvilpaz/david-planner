@@ -67,6 +67,7 @@ un parpadeo del tema por defecto).
 - Arrastrar para intercambiar en PC (en móvil se confunde con desplazar).
 - Avisar si los dos tramos de un turno partido se pisan (10–14 y 12–16); ahora no se comprueba.
 - En el móvil, abrir la semana actual desplazada hasta hoy (ahora empieza siempre en el lunes).
+- Color libre para personas y estados (un selector de cualquier color); hoy hay una paleta de 20 (Nando, 10-nov).
 - Sitio por defecto de cada persona (que «Dónde» se rellene solo al poner un turno); hoy se elige en cada casilla
   (el copiar semanas lo arrastra).
 - Fervis: preguntas rápidas sugeridas (botones con «¿Quién trabaja ahora?», «¿Quién libra mañana?»…).

@@ -1,5 +1,22 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paleta de colores de 10 a 20
+
+**Hecho**
+- Nando: «igual podríamos meter más opciones en la paleta de colores» (tras chocar el naranja de «Asuntos propios» con el
+  de Ana). `PALETTE` (`js/demo-data.js`) pasa de 10 a 20: los 10 primeros no se mueven (Camarero 1–4 y lo guardado
+  dependen del orden) y 10 nuevos al final (cian, lima, marrón, índigo, oliva, lila, verde oscuro, granate, azul acero,
+  arena). Ninguno rosa ni fucsia (el fucsia es del aviso de horas extra).
+- Prueba 38: 20 distintos y válidos, ninguno con tono rosa/fucsia (se calcula el tono), los cuatro primeros fijos, el
+  selector de Personal los pinta todos. **Control:** un fucsia en la paleta → falla justo esa. Vista la ficha: 20 en 3
+  filas. 38/38.
+
+**Decidido**
+- Sin cambiar el color por defecto de un estado nuevo (sigue siendo el siguiente de la paleta): Nando no lo pidió.
+
+**Siguiente**
+- Cuenta de Groq de David y probar en su móvil.
+
 ## 10-nov-2026 — Decidido: «Baja» y «Dar de baja» se quedan como están
 
 **Hecho / Decidido**

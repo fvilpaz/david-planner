@@ -37,7 +37,7 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
   persona) y **sin** encabezado ni pie del navegador (fecha, dirección, «1/1»).
 - Copiar la semana anterior en 1–8 semanas: solo casillas vacías, sin horas extra, con su sitio, sin quien esté de
   baja en la semana de destino; todo o nada.
-- Personal: la primera vez Camarero 1–4. Añadir, nombre, color (paleta sin fucsia), orden (⠿ o número: la persona se
+- Personal: la primera vez Camarero 1–4. Añadir, nombre, color (paleta de 20, sin rosa ni fucsia), orden (⠿ o número: la persona se
   cuela en ese puesto). Quitar: sin turnos se borra; con turnos, baja desde la semana que se ve; volver a dar de alta.
 - Estados y Puntos de venta: crear, renombrar, ordenar. En uso no se quitan; un estado en uso tampoco cambia «cuenta
   como trabajo». Los estados con horario no enseñan paleta (su color no se ve).

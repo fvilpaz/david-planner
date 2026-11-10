@@ -499,6 +499,26 @@
 
   // =================================================================================================================
   // La barra (brand.js)
+  test("La paleta de colores: 20 distintos y válidos, ninguno rosa ni fucsia (es del aviso de horas extra), y el selector los pinta todos", async function () {
+    const w = await open(null);
+    const colors = w.PALETTE;
+    ok(colors.length >= 20, "al menos 20 colores: " + colors.length);
+    ok(colors.every(function (c) { return /^#[0-9a-f]{6}$/i.test(c); }), "todos con formato #rrggbb");
+    equal(new Set(colors.map(function (c) { return c.toLowerCase(); })).size, colors.length, "sin repetidos");
+    const pink = colors.filter(function (c) {  // tono entre 295° y 350° con color vivo = rosa o fucsia
+      const r = parseInt(c.slice(1, 3), 16) / 255, g = parseInt(c.slice(3, 5), 16) / 255, b = parseInt(c.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+      if (d === 0) { return false; }
+      const hue = (max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4) * 60;
+      const light = (max + min) / 2, sat = d / (1 - Math.abs(2 * light - 1));
+      return hue >= 295 && hue <= 350 && sat > 0.35;
+    });
+    equal(pink, [], "ningún rosa ni fucsia");
+    equal(colors.slice(0, 4), ["#2c7be5", "#e67e22", "#27ae60", "#8e44ad"], "los cuatro primeros (Camarero 1-4) no se mueven");
+    $(".name-button").click();
+    equal($$("#staff-palette button").length, colors.length, "el selector de color de una persona pinta todos");
+  });
+
   test("Iniciales del local: «Beach Club Marea» → BC; «<b>Bar</b>» → BB y se ve como texto; «🍹🍹» → DP", async function () {
     await open(null);
     function name(text) {
