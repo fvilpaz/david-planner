@@ -1,5 +1,12 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Saludo de Fervis
+
+**Hecho / Decidido**
+- Nando: «el asistente de los turnos suena a que no lo saques de ahí». Saludo: «Hola, soy Fervis, tu asistente personal.
+  ¿En qué te puedo ayudar?» (`js/fervis.js` y sus dos pruebas). Lo que sabe y lo que hace no cambia: sigue contestando de lo
+  general y de la app, y solo lee los turnos. 38/38.
+
 ## 10-nov-2026 — Paleta de colores de 10 a 20
 
 **Hecho**

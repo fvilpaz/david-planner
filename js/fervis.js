@@ -295,7 +295,7 @@ window.Fervis = (function () {
 
   keyToggle.addEventListener("click", function () { showKeyForm(keyForm.hidden); });
 
-  function greet() { say("fervis", "Hola, soy Fervis, el asistente de los turnos. ¿En qué te puedo ayudar?"); }
+  function greet() { say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?"); }
 
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
   // la respuesta llegaría a una conversación que ya no existe

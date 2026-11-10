@@ -544,7 +544,7 @@
     await wait(1100);  // el movimiento más largo dura 1 s
     ok($("#fervis-dialog").open && !$("#fervis-key-form").hidden, "se abre el chat y, sin clave, el panel de Ajustes");
     equal($$(".fervis-msg").map(function (m) { return m.textContent; }),
-      ["Hola, soy Fervis, el asistente de los turnos. ¿En qué te puedo ayudar?"], "el chat solo saluda");
+      ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?"], "el chat solo saluda");
     ok($("#fervis-key-state").textContent.includes("Fervis la necesita para contestarte"), "el aviso está en el panel");
     $("#fervis-key-toggle").click();
     ok($("#fervis-key-form").hidden, "el botón de Ajustes cierra el panel");
@@ -664,7 +664,7 @@
     release();
     await wait(100);
     $("#fervis-clear").click();
-    equal($$(".fervis-msg").map(function (m) { return m.textContent; }), ["Hola, soy Fervis, el asistente de los turnos. ¿En qué te puedo ayudar?"], "solo el saludo");
+    equal($$(".fervis-msg").map(function (m) { return m.textContent; }), ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?"], "solo el saludo");
     equal(localStorage.getItem("dp_groq_key"), FAKE_KEY, "la clave sigue");
     await ask("Segunda");
     release();
