@@ -167,6 +167,43 @@ window.Schedule = (function () {
     return saved;
   }
 
+  // «Copiar la semana anterior» (paso 8, como gestion-hosteleria/scheduling/week.py): la semana anterior a la que se
+  // ve se repite en esta y en las siguientes (`weeks`, de 1 a 8), SOLO en casillas vacías, SIN horas extra (son de un
+  // día concreto) y SIN quien esté de baja en la semana de destino. Los puntos de venta sí se copian. Todo o nada: si
+  // no se puede guardar, no se copia ninguna. Devuelve { copied, sourceEmpty } (copied = -1 si no se pudo guardar).
+  function copyPreviousWeek(weeks) {
+    const monday = shownMonday();
+    const source = Dates.addDays(monday, -7);
+    const before = JSON.stringify(data.shifts);
+    let copied = 0;
+    let sourceEmpty = true;
+    for (let w = 0; w < weeks; w++) {
+      const target = Dates.addDays(monday, 7 * w);
+      const targetIso = Dates.toIso(target);
+      data.employees.forEach(function (employee) {
+        if (employee.leftFrom && employee.leftFrom <= targetIso) { return; }  // de baja en esa semana
+        for (let day = 0; day < 7; day++) {
+          const from = data.shifts[shiftKey(employee.id, Dates.toIso(Dates.addDays(source, day)))];
+          if (!from) { continue; }
+          sourceEmpty = false;
+          const toKey = shiftKey(employee.id, Dates.toIso(Dates.addDays(target, day)));
+          if (data.shifts[toKey]) { continue; }  // no pisa lo ya puesto
+          data.shifts[toKey] = { statusId: from.statusId, slots: JSON.parse(JSON.stringify(from.slots)), overtime: null };
+          copied++;
+        }
+      });
+    }
+    if (copied && !window.Store.save(data)) {
+      data.shifts = JSON.parse(before);
+      copied = -1;
+    }
+    render();
+    return { copied: copied, sourceEmpty: sourceEmpty };
+  }
+
+  // «9–15 nov 2026» de la semana que empieza en `monday`
+  function weekLabel(monday) { return weekRange.formatRange(monday, Dates.addDays(monday, 6)); }
+
   // Cambios en una lista de los datos («employees» o «statuses»): `change` la modifica; si el navegador no deja
   // guardar, se deshace. Lo usan staff.js (personal) y states.js (estados).
   function saveList(name, change) {
@@ -240,6 +277,8 @@ window.Schedule = (function () {
   return {
     shiftKey: shiftKey,
     shownMonday: shownMonday,
+    copyPreviousWeek: copyPreviousWeek,
+    weekLabel: weekLabel,
     saveEmployees: saveEmployees,
     saveStatuses: saveStatuses,
     statusUses: statusUses,
@@ -268,6 +307,38 @@ window.Schedule = (function () {
 
   themeButtons.forEach(function (button) {
     button.addEventListener("click", function () { window.Theme.apply(button.dataset.themeChoice); markTheme(); });
+  });
+
+  // «Copiar la semana anterior»: al abrir el apartado se dice qué semana se copia; el resultado sale ahí mismo
+  const copyGroup = document.getElementById("copy-group");
+  const copyResult = document.getElementById("copy-result");
+  copyGroup.addEventListener("toggle", function () {
+    if (!copyGroup.open) { return; }
+    const monday = window.Schedule.shownMonday();
+    document.getElementById("copy-source").textContent = "Copia la semana del " +
+      window.Schedule.weekLabel(window.Dates.addDays(monday, -7)) + " en la del " + window.Schedule.weekLabel(monday) +
+      " y, si quieres, en las siguientes. Solo en casillas vacías y sin horas extra.";
+    copyResult.textContent = "";
+  });
+  // Al tocar el número de semanas se selecciona entero (con 1 cifra como máximo, si no, no dejaría escribir otra)
+  const copyWeeks = document.getElementById("copy-weeks");
+  copyWeeks.addEventListener("click", function () { copyWeeks.select(); });
+  copyWeeks.addEventListener("focus", function () { copyWeeks.select(); });
+  document.getElementById("copy-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const weeks = Math.min(Math.max(parseInt(document.getElementById("copy-weeks").value, 10) || 1, 1), 8);
+    document.getElementById("copy-weeks").value = String(weeks);
+    const result = window.Schedule.copyPreviousWeek(weeks);
+    const inWeeks = weeks === 1 ? "esta semana" : weeks + " semanas";
+    if (result.copied < 0) {
+      copyResult.textContent = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha copiado nada.";
+    } else if (result.sourceEmpty) {
+      copyResult.textContent = "La semana anterior está vacía: no hay nada que copiar.";
+    } else if (!result.copied) {
+      copyResult.textContent = "No había casillas vacías en " + inWeeks + ": no se ha cambiado nada.";
+    } else {
+      copyResult.textContent = "Copiados " + result.copied + (result.copied === 1 ? " turno" : " turnos") + " en " + inWeeks + ".";
+    }
   });
 
   // Imprimir abre el cuadro del navegador, que ya trae «Guardar como PDF». El menú se cierra antes para no salir en papel.

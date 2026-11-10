@@ -1,5 +1,24 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 8: copiar la semana anterior
+
+**Hecho**
+- `copyPreviousWeek()` en `app.js` (regla de gestion-hosteleria/scheduling/week.py) y el apartado plegable
+  «📋 Copiar la semana anterior» en Gestión: dice qué semana copia, número de semanas (1–8) y el resultado ahí mismo.
+- Verificado con `?demo` (semana del 16): 2 semanas → 112 turnos; sin horas extra (Diego, sábado 21) y con su sitio;
+  turno partido entero; repetir → «No había casillas vacías»; Lucía de baja desde el 23 no recibe turnos esa semana
+  y Marcos sí; semana anterior vacía → aviso; sin espacio → aviso y nada copiado. Tecleando de verdad «3» → 168.
+
+**Decidido**
+- Todo o nada: si no se puede guardar, no se copia ninguna semana.
+
+**Aprendido**
+- **El mismo fallo en otra cajita:** un campo de 1 cifra con un «1» dentro no deja escribir otro número si no se
+  selecciona al tocarlo (como el «13» del paso 6b). Lo vi en la captura antes de que llegara a Nando.
+
+**Siguiente**
+- Paso 9: copia de seguridad (exportar e importar JSON, copias automáticas y franja de aviso).
+
 ## 10-nov-2026 — Paso 7b: puntos de venta
 
 **Hecho**

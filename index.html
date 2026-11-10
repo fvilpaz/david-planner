@@ -58,6 +58,19 @@
         <summary>Gestión</summary>
         <div class="menu-list">
           <button type="button" class="secondary" id="print-button">🖨️ Imprimir / PDF</button>
+          <!-- Paso 8: plegado como Tema; el texto y el resultado los pone app.js -->
+          <details class="menu-group" id="copy-group">
+            <summary>📋 Copiar la semana anterior</summary>
+            <form class="copy-form" id="copy-form">
+              <p class="help" id="copy-source"></p>
+              <div class="copy-row">
+                <label class="copy-weeks">En <input id="copy-weeks" inputmode="numeric" maxlength="1" value="1"
+                  aria-label="Número de semanas, de 1 a 8"> semana(s)</label>
+                <button type="submit">Copiar</button>
+              </div>
+              <p class="help" id="copy-result" role="status"></p>
+            </form>
+          </details>
           <button type="button" class="secondary" id="staff-button">👥 Personal</button>
           <button type="button" class="secondary" id="status-button">🏷️ Estados</button>
           <button type="button" class="secondary" id="place-button">📍 Puntos de venta</button>
