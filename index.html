@@ -167,6 +167,9 @@
         </div>
         <button type="button" class="secondary" id="add-slot">+ Segundo tramo (turno partido)</button>
         <small class="help">Si el fin es anterior al inicio, termina al día siguiente (22:00–02:00).</small>
+        <!-- Solo mientras no haya puntos de venta: «Dónde» no sale hasta crear el primero y no se descubría solo -->
+        <small class="help" id="cell-places-hint" hidden>¿Trabaja en un sitio concreto? Crea los puntos de venta en
+          Gestión → Puntos de venta y aquí aparecerá «Dónde».</small>
       </fieldset>
       <!-- También solo si el estado cuenta como trabajo. Texto con teclado numérico (no type=number): así vale «1,5» -->
       <fieldset class="slots" id="cell-overtime">

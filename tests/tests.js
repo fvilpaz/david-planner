@@ -346,6 +346,17 @@
     $("#status-dialog").close();
   });
 
+  test("La casilla explica dónde se crean los puntos de venta mientras no haya ninguno, y entonces sale «Dónde»", async function () {
+    await open(null);  // la primera vez: sin puntos de venta
+    $('[data-key="e1|' + WEEK + '"]').click();
+    ok(!$("#cell-places-hint").hidden && $("#cell-places-hint").textContent.includes("Gestión → Puntos de venta"), "sin puntos, la ayuda");
+    ok($$(".slot-place").every(function (s) { return s.hidden; }), "y sin «Dónde»");
+    $("#cell-dialog").close();
+    await open(fixture());  // con un punto de venta
+    $('[data-key="e1|' + WEEK + '"]').click();
+    ok($("#cell-places-hint").hidden && !$$(".slot-place")[0].hidden, "con puntos, sin ayuda y con «Dónde»");
+  });
+
   test("Un punto de venta en uso no se puede quitar, y se cuenta por tramos", async function () {
     const data = fixture();
     data.shifts["e1|2026-11-10"] = { statusId: "work", slots: [{ start: "10:00", end: "14:00", placeId: "p1" }, { start: "18:00", end: "22:00", placeId: "p1" }], overtime: null };

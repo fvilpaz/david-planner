@@ -21,6 +21,9 @@
   desplazamiento al abrir «Copia de seguridad»): 420 px de ancho, más margen y filas de 52 px, y los botones Descargar y
   Cargar lado a lado. Móvil sin cambios (menú de 260 px, botones de 48: medido). En una ventana de 799 px de alto aún
   desplaza 26 px con la copia abierta; en la de Nando (1126) cabe entera.
+- Ayuda en la ventana de la casilla mientras no haya puntos de venta («Crea los puntos de venta en Gestión → Puntos de
+  venta»): Nando preguntó dónde se añadían y «Dónde» no sale hasta crear el primero (7b), así que no se descubría solo.
+  Prueba 35 con control. 35/35.
 - Pruebas 30–34 (quién trabaja ahora, avisos, Groq de mentira con 429/401, solo modelos de la cuenta). **Controles:** turno
   de la medianoche, «ya no trabaja aquí» y salto de modelo (fallan justo esos); luego chat con aviso de clave y lista de
   modelos ignorada (fallan justo esos). Un primer control rompió el archivo (sed mal): no valía, rehecho. 33/33.

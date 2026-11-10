@@ -49,6 +49,7 @@ window.CellDialog = (function () {
       select.value = (slots[n - 1] && slots[n - 1].placeId) || "";
       select.hidden = !places.length;
     });
+    document.getElementById("cell-places-hint").hidden = places.length > 0;
   }
 
   // El horario y las horas extra solo se ven si el estado elegido cuenta como trabajo
