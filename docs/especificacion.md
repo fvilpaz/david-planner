@@ -48,7 +48,8 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 
 **Barra**: local y ciudad (un lápiz) y persona (círculo); iniciales automáticas solo con letras y números.
 
-**Fervis** (paso 12): el robot (acento del tema) hace un movimiento al azar, nunca el mismo dos veces seguidas (quieto
+**Fervis** (paso 12): el robot, en la barra de arriba (blanco; centrado desde 900 px de ancho, y junto al círculo de la
+persona en pantallas menores; el nombre del local se abrevia con «…» antes de llegar a él), hace un movimiento al azar, nunca el mismo dos veces seguidas (quieto
 con «reducir movimiento») y abre el chat. Sin clave, lo dice y abre el campo; la clave pegada de un `.env` se limpia;
 lo que no parece una clave no se guarda; «Quitar la clave» la borra. Lo de la clave vive en Ajustes (icono de tres
 barras): el chat solo saluda, y preguntar sin clave abre Ajustes y deja la pregunta escrita. Contesta de lo general y

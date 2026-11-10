@@ -1,5 +1,24 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — El robot de Fervis, a la barra de arriba
+
+**Hecho**
+- Idea de Nando: robot «entre los iconos de nombre y establecimiento» (la barra). Medido antes: hueco libre de 774 px en
+  PC, 140 px en móvil con nombre normal, 23 px con nombre largo (aprieta). Primero junto al círculo de la persona;
+  Nando lo vio («me gusta») y pidió **centrado en pantalla grande**, y en el móvil como estaba.
+- Ahora: en la barra (`.topbar-right`, blanco sobre el color del tema, ya no el acento del tema); desde 900 px,
+  `position: absolute` en el centro exacto (con `left`, no con `transform`: los movimientos del robot lo usan) y el
+  nombre del local limitado al 50 % − 48 px para que se abrevie con «…»; por debajo de 900 px, junto a la persona. La ciudad
+  también se abrevia con «…».
+- Medido en 1707, 1100, 900, 899 y 390 px (con nombre largo en la mitad): el centro del robot coincide con el de la
+  barra, sin solapes ni desbordes. Capturas en el escritorio. 38/38.
+- Medir con nombre largo: primero escribí nombre y ciudad en el almacenamiento (el del origen real) y los borré; en las
+  capturas de Nando el local salía siempre sin ciudad y con «David Planner», o sea sin valores previos. Después, para
+  medir, se cambia el texto de la página, sin tocar el almacenamiento.
+
+**Siguiente**
+- Cuenta de Groq de David y probar en su móvil.
+
 ## 10-nov-2026 — Saludo de Fervis
 
 **Hecho / Decidido**

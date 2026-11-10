@@ -39,6 +39,14 @@
         <button type="submit" aria-label="Guardar">✓</button>
       </form>
     </div>
+    <div class="topbar-right">
+    <!-- Fervis (Nando, 10-nov): el robot de Crypto_Portafolio, siempre a mano en la barra, al lado de la persona; al
+         tocarlo hace un movimiento y abre el chat -->
+    <button type="button" class="fervis-button no-print" id="fervis-button" title="Hablar con Fervis"
+            aria-label="Abrir el chat con Fervis"><span class="fervis-face"><svg viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+      focusable="false"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V5"/><circle cx="12" cy="3.6"
+      r="1.1"/><path d="M9 14h.01M15 14h.01"/><path d="M2 13v3M22 13v3"/></svg></span></button>
     <div class="person editor">
       <button type="button" class="person-button" data-open data-view aria-label="Cambiar tu nombre">
         <span class="person-name" id="person-name"></span>
@@ -54,6 +62,7 @@
         <button type="submit" aria-label="Guardar">✓</button>
       </form>
     </div>
+    </div>
   </header>
 
   <main class="page">
@@ -65,14 +74,6 @@
     </div>
     <div class="section-header">
       <span class="section-header-title">Cuadrante semanal</span>
-      <!-- El robot y «Gestión» van juntos a la derecha (en el móvil, si no caben, bajan los dos) -->
-      <div class="section-actions">
-      <!-- Fervis: el robot de Crypto_Portafolio, con el color del acento del tema; al tocarlo hace un movimiento -->
-      <button type="button" class="fervis-button no-print" id="fervis-button" title="Hablar con Fervis"
-              aria-label="Abrir el chat con Fervis"><span class="fervis-face"><svg viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-        focusable="false"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V5"/><circle cx="12" cy="3.6"
-        r="1.1"/><path d="M9 14h.01M15 14h.01"/><path d="M2 13v3M22 13v3"/></svg></span></button>
       <!-- «Gestión», como en gestion-hosteleria: todo lo que no es el cuadrante. Se cierra al tocar fuera o con Escape -->
       <details class="menu manage-menu no-print">
         <summary>Gestión</summary>
@@ -122,7 +123,6 @@
           </details>
         </div>
       </details>
-      </div>
     </div>
     <h1 class="print-only">Turnos · <span id="print-name"></span> · <span id="print-week"></span></h1>
     <!-- La semana entre dos flechas. El título es el botón que abre el calendario (el campo de fecha está, pero no se
