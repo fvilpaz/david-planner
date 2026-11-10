@@ -418,7 +418,7 @@ window.Fervis = (function () {
       response = await fetch(GROQ, { method: "POST", body: JSON.stringify(body), signal: AbortSignal.timeout(30000),
         headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" } });
     } catch (error) { throw failure("No he podido conectar con Groq (¿sin internet?).", false); }
-    if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en «🔑 Clave» que esté entera.", false); }
+    if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en Ajustes (el icono de las tres barras) que esté entera.", false); }
     if (!response.ok) {
       let detail = "";
       try { if (typeof response.text === "function") { detail = (await response.text()).slice(0, 300); } } catch (error) { /* sin detalle */ }
@@ -464,7 +464,7 @@ window.Fervis = (function () {
     let ids = [];
     try {
       const response = await fetch(GROQ_MODELS, { headers: { Authorization: "Bearer " + key }, signal: AbortSignal.timeout(15000) });
-      if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en «🔑 Clave» que esté entera.", false); }
+      if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en Ajustes (el icono de las tres barras) que esté entera.", false); }
       if (response.ok) { ids = ((await response.json()).data || []).map(function (m) { return m.id; }); }
     } catch (error) { if (error.tryNext === false) { throw error; } }  // sin red o sin lista: se prueban todos
     const mine = MODELS.filter(function (id) { return ids.includes(id); });

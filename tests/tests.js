@@ -834,7 +834,7 @@
     $("#fervis-question").value = "¿Y mañana?";
     $("#fervis-form").requestSubmit();
     await wait(300);
-    ok($$(".fervis-msg").pop().textContent.includes("no acepta tu clave"), "401: aviso de la clave");
+    ok($$(".fervis-msg").pop().textContent.includes("no acepta tu clave: mira en Ajustes (el icono de las tres barras)"), "401: aviso de la clave, que remite a Ajustes (el botón «🔑 Clave» ya no existe)");
     equal(asked, ["Bearer " + FAKE_KEY], "la lista de modelos se pide una sola vez");
   });
 
