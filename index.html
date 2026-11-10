@@ -59,6 +59,7 @@
         <div class="menu-list">
           <button type="button" class="secondary" id="print-button">🖨️ Imprimir / PDF</button>
           <button type="button" class="secondary" id="staff-button">👥 Personal</button>
+          <button type="button" class="secondary" id="status-button">🏷️ Estados</button>
           <!-- Plegado: con las fichas siempre a la vista, un toque que iba a otro sitio caía en un tema -->
           <details class="menu-group">
             <summary>🎨 Tema</summary>
@@ -164,6 +165,43 @@
     </div>
   </dialog>
 
+  <!-- Ventana «Estados» (states.js): la misma forma que Personal (lista ordenable de lists.js y ficha) -->
+  <dialog id="status-dialog" class="dialog" aria-labelledby="status-title">
+    <div class="dialog-form">
+      <div class="dialog-head">
+        <h2 id="status-title">Estados</h2>
+        <button type="button" class="secondary" data-close>Cerrar</button>
+      </div>
+      <div id="status-list-view" class="dialog-view">
+        <ul class="sort-list" id="status-list"></ul>
+        <small class="help">El primero es el que sale al abrir una casilla vacía (lo normal: Trabajo).</small>
+        <button type="button" id="status-add">+ Añadir estado</button>
+      </div>
+      <form id="status-form" class="dialog-view" hidden novalidate>
+        <label class="field">Nombre
+          <input id="status-name" maxlength="30" autocomplete="off" required>
+        </label>
+        <!-- Solo para los que no cuentan como trabajo: los que sí, llevan el color de cada persona -->
+        <fieldset class="slots" id="status-color">
+          <legend>Color en el cuadrante</legend>
+          <div class="palette" id="status-palette"></div>
+        </fieldset>
+        <label class="check">
+          <input type="checkbox" id="status-work">
+          <span>Cuenta como trabajo <small class="help">(lleva horario y horas extra)</small></span>
+        </label>
+        <p class="help" id="status-color-note">Con horario, cada casilla lleva el color de su persona.</p>
+        <p class="help" id="status-note" hidden></p>
+        <div class="form-actions">
+          <button type="submit">Guardar</button>
+          <button type="button" class="secondary" id="status-back">‹ Volver</button>
+          <button type="button" class="danger" id="status-remove">Quitar</button>
+        </div>
+      </form>
+      <p class="error" id="status-error" role="alert" hidden></p>
+    </div>
+  </dialog>
+
   <!-- Aviso de «Intercambiar con…» (swap.js): abajo, al alcance del pulgar en el móvil -->
   <div id="swap-bar" class="swap-bar no-print" role="status" hidden>
     <span id="swap-text"></span>
@@ -189,5 +227,6 @@
   <script src="js/swap.js"></script>
   <script src="js/lists.js"></script>
   <script src="js/staff.js"></script>
+  <script src="js/states.js"></script>
 </body>
 </html>

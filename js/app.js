@@ -162,14 +162,22 @@ window.Schedule = (function () {
     return saved;
   }
 
-  // Cambios en el personal (staff.js): `change` modifica la lista; si el navegador no deja guardar, se deshace.
-  function saveEmployees(change) {
-    const before = JSON.parse(JSON.stringify(data.employees));
-    change(data.employees);
+  // Cambios en una lista de los datos («employees» o «statuses»): `change` la modifica; si el navegador no deja
+  // guardar, se deshace. Lo usan staff.js (personal) y states.js (estados).
+  function saveList(name, change) {
+    const before = JSON.parse(JSON.stringify(data[name]));
+    change(data[name]);
     const saved = window.Store.save(data);
-    if (!saved) { data.employees = before; }
+    if (!saved) { data[name] = before; }
     render();
     return saved;
+  }
+  function saveEmployees(change) { return saveList("employees", change); }
+  function saveStatuses(change) { return saveList("statuses", change); }
+
+  // ¿En cuántas casillas se usa un estado? (en uso no se puede quitar ni cambiar si cuenta como trabajo)
+  function statusUses(statusId) {
+    return Object.keys(data.shifts).filter(function (key) { return data.shifts[key].statusId === statusId; }).length;
   }
 
   // ¿Tiene algún turno, en cualquier semana? (sin turnos se puede borrar del todo; con turnos, solo dar de baja)
@@ -220,6 +228,8 @@ window.Schedule = (function () {
     shiftKey: shiftKey,
     shownMonday: shownMonday,
     saveEmployees: saveEmployees,
+    saveStatuses: saveStatuses,
+    statusUses: statusUses,
     hasShifts: hasShifts,
     statusOf: statusOf,
     getData: function () { return data; },

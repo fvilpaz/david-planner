@@ -1,5 +1,31 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 7: Estados
+
+**Hecho**
+- Primero, en commit aparte y sin cambiar nada: la lista ordenable (⠿ + número) y la paleta, sacadas de `staff.js` a
+  `js/lists.js`; Personal probado otra vez con clics y teclas de verdad. Clases comunes `sort-list`, `sort-row`,
+  `dialog-view`.
+- `js/states.js` (ventana Estados con la misma forma), `saveList()` común en `app.js` (`saveEmployees` y
+  `saveStatuses`) y `statusUses()`.
+- Verificado: crear «Formación» con horario y usarla en una casilla; en uso → sin «Quitar», casilla de marcar
+  bloqueada y la explicación; renombrar y recolorear sin tocar «cuenta como trabajo»; quitar uno sin usar con doble
+  toque; nombre vacío; orden tecleando de verdad (Libre al 1) y el desplegable de la casilla lo sigue; sin espacio
+  → aviso y nada cambia; consola limpia.
+
+**Decidido**
+- En uso tampoco se cambia «cuenta como trabajo»: si Trabajo dejara de contar, sus horarios dejarían de verse.
+- Los estados con horario no enseñan paleta: su color no se ve (la casilla lleva el de la persona); antes la ficha
+  decía «Color en el cuadrante» y engañaba.
+- Ayuda en la lista: el primero es el de por defecto en una casilla vacía (lo vi al poner Libre la primera).
+
+**Aprendido**
+- **Mover antes de reutilizar, en un commit aparte:** sacar código común cambia archivos que ya funcionaban; se
+  prueba de nuevo lo de antes y se sube solo, para que si algo falla se sepa si fue el movimiento o lo nuevo.
+
+**Siguiente**
+- Paso 7b: puntos de venta (texto pequeño bajo la hora; «Dónde» por tramo).
+
 ## 10-nov-2026 — Paso 6b: orden del personal (y servidor sin caché)
 
 **Hecho**

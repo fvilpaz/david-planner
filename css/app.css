@@ -206,6 +206,10 @@ button.danger { background: var(--error); color: var(--on-error); }
                   border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--border); }
 .palette button[aria-pressed=true] { box-shadow: 0 0 0 3px var(--text); }  /* el elegido */
 .help[hidden] { display: none; }
+/* Casilla de marcar grande (Estados: «Cuenta como trabajo»), con toda la línea tocable */
+.check { display: flex; align-items: center; gap: .6rem; min-height: 48px; font-weight: 500; cursor: pointer; }
+.check input { width: 22px; height: 22px; min-height: 0; margin: 0; padding: 0; accent-color: var(--primary); }
+.check input:disabled + span { opacity: .6; }
 
 /* Footer de Nando, como el de health-tracker */
 .app-footer { text-align: center; padding: 16px 20px; font-size: .75rem; color: var(--muted);
