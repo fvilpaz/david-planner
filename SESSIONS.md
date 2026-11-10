@@ -22,7 +22,15 @@
   genera el PDF con las mismas reglas.
 
 **Siguiente**
-- Paso 2b: nombre de la barra editable con un lápiz (Nando). Después, paso 3: editar la casilla.
+- Paso 3: editar la casilla.
+
+### Paso 2b (mismo día): nombre editable y barra de la semana
+- Lápiz ✏️ en la barra (idea de Nando): el nombre se guarda en `dp_name`; iniciales automáticas («Beach Club
+  Marea» → BC), solo con letras y números (`\p{L}`, `\p{N}`); probado que `<b>…</b>` se ve como texto (no se cuela HTML).
+- Barra de la semana (a Nando no le gustaba el campo de fecha blanco y la fecha repetida): el título es el botón que
+  abre el calendario (`showPicker()`), «Hoy» solo fuera de esta semana, título con `Intl…formatRange`
+  («9–15 nov 2026», «28 dic 2026 – 3 ene 2027»).
+- **Aprendido:** `formatRange` del navegador junta solo lo que se repite (mes, año) en un rango de fechas.
 
 ## 10-nov-2026 — Paso 1: cuadrante de solo lectura
 

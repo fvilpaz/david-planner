@@ -9,7 +9,8 @@
   const title = document.getElementById("week-title");
   const picker = document.getElementById("week-picker");
   const dayName = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric" });
-  const shortDate = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" });
+  // formatRange junta lo que se repite: «9–15 nov 2026», «30 nov – 6 dic 2026», «29 dic 2026 – 4 ene 2027»
+  const weekRange = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" });
   const statusById = new Map(data.statuses.map(function (status) { return [status.id, status]; }));
 
   function el(tag, className, text) {
@@ -52,8 +53,9 @@
     const days = [0, 1, 2, 3, 4, 5, 6].map(function (n) { return Dates.addDays(monday, n); });
     const today = Dates.toIso(new Date());
 
-    title.textContent = shortDate.format(days[0]) + " — " + shortDate.format(days[6]) + " " + days[6].getFullYear();
-    document.getElementById("print-title").textContent = "Turnos · " + title.textContent;
+    title.textContent = weekRange.formatRange(days[0], days[6]);
+    document.getElementById("today-link").hidden = Dates.toIso(monday) === Dates.toIso(Dates.weekStart(new Date()));
+    document.getElementById("print-week").textContent = title.textContent;  // el nombre del local lo pone brand.js
     picker.value = Dates.toIso(monday);
     document.getElementById("prev-week").href = weekLink(Dates.addDays(monday, -7));
     document.getElementById("next-week").href = weekLink(Dates.addDays(monday, 7));
@@ -85,6 +87,12 @@
     }
     grid.replaceChildren(table);
   }
+
+  // Tocar el título abre el calendario del aparato. showPicker() es lo moderno; si el navegador no lo tiene, se
+  // le da el foco al campo (y el teclado o la rueda de fechas del móvil hacen el resto).
+  document.getElementById("week-title-button").addEventListener("click", function () {
+    try { picker.showPicker(); } catch (e) { picker.focus(); }
+  });
 
   // Elegir un día en el calendario lleva a su semana
   picker.addEventListener("change", function () {

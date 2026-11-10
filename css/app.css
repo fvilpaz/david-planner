@@ -32,6 +32,13 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .brand-text { display: grid; line-height: 1.2; min-width: 0; }
 .brand-text strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand-sub { opacity: .8; }
+/* Lápiz y campo para cambiar el nombre: sobre el color de la barra, sin fondo propio */
+.brand-edit { background: transparent; border: 0; min-width: 48px; padding: 0; font-size: 1.1rem; opacity: .85; }
+.brand-edit:hover { opacity: 1; }
+.brand-form { display: flex; gap: .35rem; }
+.brand-form[hidden], .brand-edit[hidden] { display: none; }  /* display:flex pesaría más que hidden */
+.brand-form input { min-height: 40px; width: min(60vw, 280px); padding: 0 .6rem; }
+.brand-form button { min-height: 40px; padding: 0 .8rem; background: var(--surface); color: var(--primary-text); }
 
 .page { padding: 1.5rem; }
 @media (max-width: 600px) { .page { padding: 1rem; } }
@@ -62,10 +69,16 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 
 .section-nav { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .75rem; }
 .section-nav > a.button { font-size: 1.6rem; line-height: 1; }  /* ‹ › se veían diminutas */
-.section-nav-center { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem; }
-.section-nav-title { font-weight: 500; text-align: center; }
-.section-nav-tools { display: inline-flex; gap: .5rem; }
-.week-picker { width: auto; padding: 0 .5rem; }
+.section-nav-center { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+                      gap: .5rem; }
+/* El título de la semana es un botón sin caja: al tocarlo se abre el calendario */
+.week-title { background: transparent; color: var(--text); font-weight: 600; font-size: 1.05rem; padding: 0 .75rem; }
+.week-title:hover { background: color-mix(in srgb, var(--primary) 10%, transparent); }
+/* El campo de fecha existe (el calendario se abre desde él) pero no se ve ni ocupa sitio */
+.week-picker { position: absolute; left: 50%; bottom: 0; width: 1px; height: 1px; min-height: 0; padding: 0;
+               border: 0; opacity: 0; pointer-events: none; }
+.today-link { min-height: 40px; }
+.today-link[hidden] { display: none; }  /* display:inline-flex pesaría más que hidden */
 
 /* Cuadrante. La caja tiene como mucho el alto de la pantalla menos la barra de arriba y se desliza por dentro:
    así la fila de los días (arriba) y la columna de nombres (izquierda) se quedan fijas en los dos sentidos. */
