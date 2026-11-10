@@ -458,6 +458,23 @@
   });
 
   // =================================================================================================================
+  // Sin conexión (sw.js): la lista ESSENTIAL se escribe a mano. Un archivo que la página pide y no está en ella hace
+  // que la app instalada se abra rota sin internet, sin ningún aviso (con internet todo va bien).
+  test("Todo lo que pide la página (y los iconos del manifiesto) está en la lista ESSENTIAL de sw.js", async function () {
+    await open(null);
+    const asked = $$("link[href], script[src]").map(function (el) { return el.getAttribute("href") || el.getAttribute("src"); })
+      .filter(function (url) { return !url.includes("://"); });
+    const manifest = await (await fetch("../manifest.webmanifest?t=" + Date.now())).json();
+    manifest.icons.forEach(function (icon) { asked.push(icon.src); });
+    const sw = await (await fetch("../sw.js?t=" + Date.now())).text();
+    const list = (sw.match(/const ESSENTIAL = \[([\s\S]*?)\];/) || ["", ""])[1].match(/"[^"]+"/g) || [];
+    const essential = list.map(function (quoted) { return quoted.slice(1, -1); });
+    ok(essential.length > 10, "no se pudo leer la lista ESSENTIAL de sw.js");
+    const missing = asked.filter(function (url) { return !essential.includes(url); });
+    equal(missing, [], "faltan en ESSENTIAL de sw.js");
+  });
+
+  // =================================================================================================================
   async function run() {
     if (!["localhost", "127.0.0.1"].includes(location.hostname)) {
       summary.textContent = "Las pruebas solo se lanzan en local (http://localhost:8731/tests/): aquí podrían tocar datos de verdad.";

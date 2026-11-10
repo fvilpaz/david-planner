@@ -43,7 +43,7 @@ un parpadeo del tema por defecto).
 2. **«Baja» significa dos cosas:** el estado «Baja» (baja médica, en una casilla) y «Dar de baja» en Personal (dejar
    de trabajar aquí). Propuesta: en Personal, «Ya no trabaja aquí desde el…» / «Vuelve a trabajar aquí». Decides tú.
 3. **Refactor de las tres ventanas** (Personal, Estados, Puntos de venta comparten esqueleto): ¿se junta ahora, con
-   las 26 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
+   las 27 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
 4. **¿Qué ve David la primera vez?** Hoy, Camarero 1–4 sin turnos. ¿Le preparas tú su personal y le pasas el
    archivo de copia para que lo cargue, o lo rellena él?
 5. **Saltos de línea (CRLF):** git avisa en cada commit («LF will be replaced by CRLF»). Un `.gitattributes` con

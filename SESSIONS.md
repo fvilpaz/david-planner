@@ -1,5 +1,27 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Prueba 27: la lista de `sw.js`
+
+**Hecho**
+- Nota lateral: la lista `ESSENTIAL` de `sw.js` se escribe a mano y el service worker solo atiende lo que hay en ella.
+  Un archivo nuevo sin apuntar → con internet todo va bien; sin internet, la app instalada se abre rota y nada avisa.
+  Hoy no faltaba ninguno.
+- Prueba 27 en `tests/tests.js`: los `link`/`script` de la página (sin los enlaces a otras webs) y los iconos del
+  manifiesto tienen que estar en `ESSENTIAL`. Regla en `CLAUDE.md` («Pruebas automáticas») y [P] en la especificación.
+- **Control**: quitado `js/pwa.js` de la lista → «faltan en ESSENTIAL de sw.js: … ["js/pwa.js"]», 1 de 27 en rojo;
+  devuelto `sw.js` (copia previa) → 27/27.
+
+**Decidido**
+- Vigilarlo con una prueba y no con memoria (Nando): se pasa antes de cada commit, así el olvido no llega a GitHub.
+  Lo que la página no carga no se mira: tampoco hace falta sin conexión.
+
+**Aprendido**
+- Una lista escrita a mano en dos sitios (la página y `sw.js`) se desincroniza sin ruido; una prueba que las compara
+  convierte el olvido en un aviso rojo.
+
+**Siguiente**
+- La lista «❓ Para decidir» de `PLAN.md`.
+
 ## 10-nov-2026 — Paso 11: publicado y auditado
 
 **Hecho**

@@ -59,6 +59,7 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 - [P] Descargar; cargar (no JSON, otra app, sin estados, trampas con `__proto__`); copias automáticas; franja.
 - [P] Iniciales y nombres como texto (no HTML).
 - [M] Nombres y días fijos al deslizar (390 px, 800×390, PC). [M] PDF en una hoja (Claro y Carbón en pantalla).
+- [P] Todo lo que pide la página y los iconos del manifiesto están en la lista `ESSENTIAL` de `sw.js`.
 - [M] Sin conexión con el servidor apagado; versión nueva borra solo cachés propias; lo ajeno no se guarda.
 - [M] Contraste de las horas extra ≥ 4,5 en los 4 temas.
 - **Sin comprobar:** arrastrar ⠿ con el dedo en un móvil real; el calendario del título (es del navegador);

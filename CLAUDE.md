@@ -62,6 +62,8 @@ pruebas (`tests/tests.js`, sacadas de las reglas de este archivo). Verde = todo 
 esperaba y qué salió. **Pasarlas antes de cada commit** y añadir la prueba de cada regla nueva. Guardan los datos
 `dp_*` del navegador y los devuelven al terminar; en la web publicada no se ejecutan (podrían tocar datos de David).
 Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
+**Archivo nuevo que carga la página → apuntarlo en `ESSENTIAL` de `sw.js`**: si no, con internet va bien y sin
+internet la app instalada se abre rota, sin avisar. Lo vigila la prueba «Todo lo que pide la página… está en ESSENTIAL».
 
 ## Estructura (prevista; se crea paso a paso)
 `index.html` · `css/` (estilos y temas) · `js/` (un archivo por pieza: `app.js` cuadrante, `cell.js` casilla,
