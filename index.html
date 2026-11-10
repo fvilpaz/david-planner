@@ -26,12 +26,17 @@
         </span>
         <button type="submit" aria-label="Guardar">✓</button>
       </form>
-      <button type="button" class="brand-edit" data-open aria-label="Cambiar el nombre del local y la ciudad">✏️</button>
+      <button type="button" class="brand-edit" data-open aria-label="Cambiar el nombre del local y la ciudad">
+        <svg class="pencil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg>
+      </button>
     </div>
     <div class="person editor">
       <button type="button" class="person-button" data-open data-view aria-label="Cambiar tu nombre">
         <span class="person-name" id="person-name"></span>
-        <span class="person-avatar" id="person-avatar" aria-hidden="true">👤</span>
+        <span class="person-avatar-wrap">
+          <span class="person-avatar" id="person-avatar" aria-hidden="true">👤</span>
+          <span class="pencil-badge" aria-hidden="true"><svg class="pencil" viewBox="0 0 24 24" focusable="false"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg></span>
+        </span>
       </button>
       <form class="edit-form" hidden>
         <span class="edit-fields">

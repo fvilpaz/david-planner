@@ -33,8 +33,18 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .brand-text strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand-sub { opacity: .8; }
 /* Lápiz (izquierda) y círculo de la persona (derecha): sobre el color de la barra, sin fondo propio */
-.brand-edit { background: transparent; border: 0; min-width: 48px; padding: 0; font-size: 1.1rem; opacity: .85; }
-.brand-edit:hover { opacity: 1; }
+/* Lápiz de línea en el color del texto de la barra: discreto, se ilumina al pasar por encima (zona táctil de 48 px) */
+.pencil { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round;
+          stroke-linejoin: round; }
+.brand-edit { display: inline-grid; place-items: center; background: transparent; color: inherit; border: 0;
+              min-width: 48px; padding: 0; opacity: .55; }
+.brand-edit:hover, .brand-edit:focus-visible { opacity: 1; }
+/* El de la persona: pequeñito en la esquina del círculo, como el de cambiar la foto de perfil */
+.person-avatar-wrap { position: relative; display: inline-grid; }
+.pencil-badge { position: absolute; right: -3px; bottom: -3px; display: grid; place-items: center; width: 20px;
+                height: 20px; border-radius: 50%; background: var(--primary); color: var(--on-primary);
+                border: 2px solid var(--surface); }
+.pencil-badge .pencil { width: 11px; height: 11px; }
 .person-button { display: inline-flex; align-items: center; gap: .6rem; background: transparent; color: inherit; padding: 0; }
 .person-name { font-weight: 600; white-space: nowrap; }
 .person-avatar { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; flex: none;
