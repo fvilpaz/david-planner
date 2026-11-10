@@ -57,6 +57,7 @@ window.Staff = (function () {
       const number = item.appendChild(document.createElement("input"));
       number.className = "order-number";
       number.inputMode = "numeric";
+      number.maxLength = 2;
       number.value = String(index + 1);
       number.setAttribute("aria-label", "Puesto de " + person.name);
       return item;
@@ -88,6 +89,11 @@ window.Staff = (function () {
   list.addEventListener("keydown", function (event) {
     if (event.key === "Enter" && event.target.closest(".order-number")) { event.preventDefault(); event.target.blur(); }
   });
+  // Al tocar la cajita, el número se selecciona entero: lo que se escriba lo sustituye. Sin esto, el cursor quedaba
+  // al principio y escribir «1» sobre un «3» daba «13» (= al final): parecía que no se movía (lo vio Nando).
+  // En el clic y no solo al recibir el foco: al soltar el ratón, el navegador quitaba la selección.
+  list.addEventListener("click", function (event) { if (event.target.closest(".order-number")) { event.target.select(); } });
+  list.addEventListener("focusin", function (event) { if (event.target.closest(".order-number")) { event.target.select(); } });
 
   // Arrastrar por el asa ⠿ (de gestion-hosteleria/schedule.js): el puntero sigue «agarrado» aunque salga del asa y, al
   // pasar por encima de otra persona, se cambian de sitio. Vale con el dedo y con el ratón. Se guarda al soltar.

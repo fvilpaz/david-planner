@@ -13,7 +13,14 @@
   orden sin cambiar; el cuadrante sale en el orden. Consola limpia. **Sin probar: arrastrar con el dedo en un móvil
   de verdad** (la herramienta solo simula ratón).
 
+- **Fallo que vio Nando:** al hacer clic en el número el cursor quedaba al principio; escribir «1» sobre «3» daba
+  «13» (= último puesto) y, si ya era el último, no se movía nada. Mi prueba lo tapó porque seleccioné con triple
+  clic. Arreglo: al tocar la cajita se selecciona el número entero (en `click`, no solo en `focus`: al soltar el
+  ratón el navegador quitaba la selección) y máximo 2 cifras. Repetido con un clic normal: Camarero 3 → 1.
+- Mecánica (pregunta de Nando): escribir un puesto **cuela** a la persona ahí y las demás bajan uno (no intercambia).
+
 **Aprendido**
+- **Probar como lo haría una persona, también el clic:** un triple clic en la prueba escondió un fallo real.
 - **Un valor puesto por código no dispara `change`:** la primera prueba de «escribir un número» no hizo nada y
   parecía un fallo; tecleando de verdad funciona. Otra herramienta que miente: probar como lo haría una persona.
 
