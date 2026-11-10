@@ -118,7 +118,7 @@ window.Fervis = (function () {
   function isOff(day) { return !day.works && !day.empty; }
   function summaryLines(data, from, days, name) {
     const rows = pick(inOrder(data.employees), name).map(function (e) {
-      const counts = {};
+      const counts = Object.create(null);  // sin prototipo: un estado llamado «constructor» o «__proto__» no choca (auditoría 10-nov)
       const order = [];
       const off = [];                 // sábados y domingos sin trabajar: { iso, saturday, text }
       const full = [];                // fines de semana completos (sábado y domingo) sin trabajar: { saturday, text }

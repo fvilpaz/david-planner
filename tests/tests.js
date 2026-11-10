@@ -759,6 +759,24 @@
     ok(!sent[1].messages[0].content.includes("GUÍA DE LA APP RELEVANTE"), "una pregunta de datos no la lleva");
   });
 
+  test("Fervis: un estado llamado «Constructor» o «__proto__» cuenta como cualquier otro en el resumen (antes se perdía)", async function () {
+    const data = fixture();
+    data.statuses.push({ id: "raro1", name: "Constructor", color: "#16a085", countsAsWork: false, position: 2 });
+    data.statuses.push({ id: "raro2", name: "__proto__", color: "#7f8c8d", countsAsWork: false, position: 3 });
+    data.shifts["e1|2026-11-09"] = { statusId: "raro1", slots: [], overtime: null };
+    data.shifts["e1|2026-11-10"] = { statusId: "raro1", slots: [], overtime: null };
+    data.shifts["e1|2026-11-11"] = { statusId: "raro2", slots: [], overtime: null };
+    const w = await open(data);
+    const ana = w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-11-11", persona: "Ana" });
+    ok(ana.includes("constructor 2 días") && ana.includes("__proto__ 1 día"), "los dos estados raros, contados: " + ana.split(" | ")[0]);
+  });
+
+  test("El aviso de Ajustes dice todo lo que se envía a Groq (también el nombre del local y el de quien usa la app)", async function () {
+    await open(fixture());
+    const help = $("#fervis-key-form .help").textContent;
+    ok(help.includes("el nombre del local y el tuyo") && help.includes("los turnos y el personal"), "aviso completo: " + help.slice(-120));
+  });
+
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
     const w = await open(fixture());
     const ctx = w.Fervis.context(new w.Date(2026, 10, 10, 12, 0));
