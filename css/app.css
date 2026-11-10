@@ -331,7 +331,12 @@ button.danger { background: var(--error); color: var(--on-error); }
 .fervis-msg { max-width: 85%; padding: .5rem .75rem; border-radius: var(--radius); white-space: pre-wrap;
               overflow-wrap: anywhere; }
 .fervis-chips { list-style: none; display: flex; flex-wrap: wrap; gap: .5rem; }
-.fervis-chip { min-height: 40px; padding: 0 1rem; border-radius: 999px; font-size: .95rem; text-align: left; }
+/* Los chips, con el tono del tema (suave, no un arcoíris) y su emoji delante, como los del menú «Gestión» */
+.fervis-chip { min-height: 40px; padding: 0 1rem; border-radius: 999px; font-size: .95rem; text-align: left;
+               color: color-mix(in srgb, var(--primary-text) 55%, var(--text)); background: color-mix(in srgb, var(--primary) 15%, var(--surface));
+               border: 1px solid color-mix(in srgb, var(--primary) 55%, var(--border)); }
+.fervis-chip::before { content: attr(data-icon) " "; }
+.fervis-chip:hover { background: color-mix(in srgb, var(--primary) 26%, var(--surface)); }
 .fervis-msg.fervis { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); }
 .fervis-msg.david { align-self: flex-end; background: var(--primary); color: var(--on-primary); }
 .fervis-model { display: block; margin-top: .35rem; font-size: .75rem; color: var(--muted); }  /* quién ha contestado */

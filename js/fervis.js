@@ -416,16 +416,20 @@ window.Fervis = (function () {
 
   // Las preguntas de ejemplo, como botones redondos (chips) debajo del saludo: se tocan y se mandan solas. Así quien abre un chat
   // vacío (David) ve qué puede preguntar sin escribir nada. Desaparecen al mandar la primera pregunta; la papelera las devuelve.
-  const CHIPS = ["¿Quién trabaja hoy?", "¿Quién libra este fin de semana?", "¿Quién tiene turno partido y quién seguido esta semana?", "¿Cómo copio un turno?"];
+  // El emoji va aparte (data-icon, se pinta con CSS): no forma parte del texto ni de la pregunta que se manda.
+  const CHIPS = [["🕒", "¿Quién trabaja hoy?"], ["🌴", "¿Quién libra este fin de semana?"],
+    ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"], ["📋", "¿Cómo copio un turno?"]];
 
   function greet() {
     say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?");
     const row = messages.appendChild(document.createElement("li"));
     row.className = "fervis-chips";
-    CHIPS.forEach(function (text) {
+    CHIPS.forEach(function (pair) {
+      const text = pair[1];
       const chip = row.appendChild(document.createElement("button"));
       chip.type = "button";
-      chip.className = "secondary fervis-chip";
+      chip.className = "fervis-chip";  // sin «secondary»: su estilo (fondo transparente) pisaría el del chip
+      chip.dataset.icon = pair[0];
       chip.textContent = text;
       chip.addEventListener("click", function () { question.value = text; chat.requestSubmit(); });  // sin clave, abre Ajustes y deja la pregunta escrita
     });

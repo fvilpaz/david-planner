@@ -17,6 +17,9 @@
   y dejan la pregunta escrita; desaparecen al mandar la primera; la papelera las devuelve. A 390 px, dentro de la ventana.
 - **Color por defecto de un estado nuevo** = el primero de la paleta que no lleve ninguna persona ni otro estado (así no se
   repite lo de «Asuntos propios», naranja como Ana).
+- Los chips, con el tono del tema (fondo 15 % y borde 55 % del color del tema) y un emoji delante (🕒 🌴 ✂️ 📋, por `data-icon`, así no
+  forma parte de la pregunta que se manda). Nando: «mola mucho». Probado en claro y oscuro. Ojo: a la primera no se veía el color
+  porque `button.secondary` pisaba el estilo; los chips ya no llevan esa clase.
 - Pruebas 42 y 43; **controles** (uno a uno): ranking de sueltos que repite los completos, el color «siguiente por orden» y
   los chips que no desaparecen → falla justo cada uno. 43/43.
 
