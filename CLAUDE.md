@@ -48,10 +48,12 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 
 ## Cómo verlo en local
 ```
-cd D:\Fernando\Coding\projects\david-planner
-python -m http.server 8000
+python D:\Fernando\Coding\projects\david-planner\servidor.py
 ```
-y abrir `http://localhost:8000`. (Con doble clic en `index.html` no funciona la parte instalable: necesita `localhost` o `https`.)
+y abrir `http://localhost:8000` (con `?demo` al final, los datos de ejemplo). `servidor.py` es como
+`python -m http.server 8000` pero le dice al navegador que **no guarde copias** (`Cache-Control: no-store`): con el
+otro, Chrome usaba CSS viejos y parecía que faltaban cosas. (Con doble clic en `index.html` no funciona la parte
+instalable: necesita `localhost` o `https`.)
 
 ## Estructura (prevista; se crea paso a paso)
 `index.html` · `css/` (estilos y temas) · `js/` (app, datos de ejemplo) · `manifest.webmanifest` y `sw.js` (PWA, paso 10) · `icons/`.
