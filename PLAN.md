@@ -6,7 +6,7 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | # | Paso | Se ve funcionando |
 |---|---|---|
 | 0 | ✅ Repositorio clonado, `CLAUDE.md`, `PLAN.md`, `SESSIONS.md` | Los tres archivos en el repo |
-| 1 | 🔲 Cuadrante de solo lectura con datos inventados: semana lunes–domingo, nombres y cabecera fijos, hoy marcado, ‹ Hoy ›, selector de fecha, footer | En localhost, en móvil (vertical y apaisado) y en PC |
+| 1 | ✅ Cuadrante de solo lectura con datos inventados: semana lunes–domingo, nombres y cabecera fijos, hoy marcado, ‹ Hoy ›, selector de fecha, footer | En localhost, en móvil (vertical y apaisado) y en PC |
 | 2 | 🔲 Menú «Gestión» con **Tema** (Claro, Lino, Oscuro, Carbón; se recuerda) e **Imprimir / PDF** (A4 apaisado, en claro) | Cambiar de tema; vista previa de impresión en una hoja |
 | 3 | 🔲 Guardar en el navegador y **editar la casilla** (ventana de gestion-hosteleria mejorada): estado, horario, segundo tramo, vaciar; **un solo Guardar**; si el estado no cuenta como trabajo, el horario **se oculta al momento**; sin «Dónde» | Cambiar un turno, recargar y que siga ahí |
 | 4 | 🔲 **Horas extra** en la casilla: borde de aviso + «+2 h extra», motivo opcional; también en el PDF | Marcar extras y verlas en pantalla y en la impresión |
@@ -15,7 +15,7 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 7 | 🔲 **Estados**: crear, nombre, color, si cuenta como trabajo, orden; uno en uso no se borra | Crear «Formación», usarlo y ver que no se deja borrar |
 | 8 | 🔲 **Copiar la semana anterior** en 1–8 semanas (solo vacías, sin extras, sin quien esté de baja) | Copiar a 4 semanas sin pisar lo puesto |
 | 9 | 🔲 **Copia de seguridad**: exportar e importar JSON (versión del formato, confirmación y copia previa) | Exportar, borrar, importar y que todo vuelva |
-| 10 | 🔲 **PWA**: manifiesto, iconos, service worker (funciona sin conexión) y aviso si hace días que no se exporta | Instalarla en el móvil y abrirla sin conexión |
+| 10 | 🔲 **PWA**: manifiesto, iconos, service worker (funciona sin conexión), aviso si hace días que no se exporta y `navigator.storage.persist()` (que el navegador no borre los datos por su cuenta) | Instalarla en el móvil y abrirla sin conexión |
 | 11 | 🔲 Publicar en **GitHub Pages** + `audit` (nando-toolkit) | Abrirla desde la dirección pública e instalarla |
 
 ## Propuesta de datos (a confirmar en el paso 3; código en inglés)

@@ -1,5 +1,31 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 1: cuadrante de solo lectura
+
+**Hecho**
+- `index.html`, `css/themes.css` (Claro, Lino, Oscuro, Carbón), `css/app.css`, `js/dates.js`, `js/demo-data.js`
+  (8 personas inventadas, esta semana y la anterior) y `js/app.js`. 375 líneas (previstas ~300: comentarios y
+  `dates.js`, que no estaba previsto).
+- Verificado en Chrome con `python -m http.server 8000`: PC, móvil vertical (390 px) y apaisado (800 × 390). Nombres
+  fijos a la izquierda y fila de días fija arriba al deslizar en los dos sentidos; la página no se sale de lado;
+  consola sin errores. Primer intento de prueba en móvil falló en silencio (la ventana no cambió de tamaño: seguía
+  en 1707 px); repetido con marcos del tamaño de un móvil.
+
+**Decidido**
+- La caja del cuadrante tiene como alto máximo la pantalla y se desliza por dentro: así la fila de días sigue fija
+  al bajar (en gestion-hosteleria la caja solo deslizaba de lado y eso no estaba asegurado).
+- Un tramo llena la casilla con flexbox, sin el truco de posición absoluta de gestion-hosteleria.
+- Prefijo `dp_` para todo lo guardado: `fvilpaz.github.io` lo comparten todas las apps de Pages (ver `CLAUDE.md`).
+
+**Aprendido**
+- **Las apps de un mismo dominio comparten el almacenamiento** (`localStorage` y cachés), aunque estén en carpetas
+  distintas: el navegador separa por dominio, no por ruta. De ahí los prefijos y no usar nunca `localStorage.clear()`.
+- **`append()` no devuelve nada; `appendChild()` devuelve el nodo añadido**: por eso solo el segundo se puede encadenar.
+- **Fechas en hora local**: `toISOString()` da la fecha en UTC y, de madrugada en España, sería el día anterior.
+
+**Siguiente**
+- Paso 2: menú «Gestión» con Tema (los 4, se recuerda) e Imprimir / PDF (A4 apaisado, siempre en claro).
+
 ## 10-nov-2026 — Arranque
 
 **Hecho**

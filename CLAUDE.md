@@ -18,6 +18,7 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | Tipo de app | Página estática (HTML + CSS + JS), **PWA instalable**. Sin TWA (solo haría falta para Google Play). |
 | Dónde vive | Primero en local (`python -m http.server 8000`); después **GitHub Pages** (repositorio público `fvilpaz/david-planner`). |
 | Datos | Solo en el aparato (`localStorage`). En el repositorio **nunca** hay datos reales: solo datos de ejemplo inventados. |
+| Almacenamiento compartido | `fvilpaz.github.io` es **un solo dominio** para todas las apps de Pages (health-tracker, nplayer, MasterMind…): comparten `localStorage` y cachés. Por eso: **todas las claves con el prefijo `dp_`** (como `ht_` y `np_`), **nunca `localStorage.clear()`**, cachés con el prefijo `david-planner-` y el service worker **solo borra sus propias cachés** (como `health-tracker/src/sw.js`). Lo mismo pasa en `localhost:8000` con otros proyectos. |
 | Copia | Exportar e importar **JSON** (con número de versión del formato). Importar = sustituir todo, con confirmación y copia previa automática. |
 | Sincronizar | **No.** El gist queda en «Aparcado» (token en el aparato, gist secreto ≠ privado, mezcla de cambios difícil). |
 | Pantalla | Abre directamente en el cuadrante. Una sola pantalla; lo demás en ventanas encima. Móvil, tablet y PC, vertical y apaisado. |

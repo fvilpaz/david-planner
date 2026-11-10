@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es" data-theme="claro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cuadrante de turnos semanal">
+  <title>David Planner</title>
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <!-- Barra de arriba, como la de gestion-hosteleria y auryapp: cuadrado con las iniciales y el nombre -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-avatar" aria-hidden="true">DP</span>
+      <span class="brand-text"><strong>David Planner</strong><span class="brand-sub">Cuadrante de turnos</span></span>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="section-header">
+      <span class="section-header-title">Cuadrante semanal</span>
+    </div>
+    <!-- La semana entre dos flechas; en medio, «Hoy» y el selector para ir a cualquier semana -->
+    <nav class="section-nav" aria-label="Semana">
+      <a class="button secondary" id="prev-week" aria-label="Semana anterior">‹</a>
+      <div class="section-nav-center">
+        <span class="section-nav-title" id="week-title"></span>
+        <span class="section-nav-tools">
+          <a class="button secondary" href="./">Hoy</a>
+          <input type="date" id="week-picker" class="week-picker" aria-label="Ir a la semana de este día">
+        </span>
+      </div>
+      <a class="button secondary" id="next-week" aria-label="Semana siguiente">›</a>
+    </nav>
+    <div id="schedule-grid" class="schedule-scroll"></div>
+  </main>
+
+  <footer class="app-footer">
+    <span>David Planner &copy; 2026 · <strong>Fernando Vilas Paz</strong></span>
+    <div class="footer-links">
+      <a href="https://github.com/fvilpaz" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/fernando-vilas-paz-1626901a9" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://fvilpaz.github.io/cv/" target="_blank" rel="noopener">CV</a>
+    </div>
+  </footer>
+
+  <script src="js/dates.js"></script>
+  <script src="js/demo-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
