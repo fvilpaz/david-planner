@@ -29,6 +29,10 @@
   turnos…») es **redundante con los chips**: vuelve al corto de antes («¿En qué te puedo ayudar?») y se queda solo la coletilla «Si tienes
   dudas, pulsa el botón «📖 Guía» de arriba». 46/46.
 
+- Nando enseña las filas de health-tracker («me mola más cómo has puesto los botones»): cada fila del glosario pasa a **tarjeta**: círculo
+  con el emoji a la izquierda, título con su subtítulo («5 temas», «6 pasos») y el triangulito ▼ azul a la derecha, que gira al abrir.
+  Probado en claro y oscuro y a 390 px (sin desbordes). 46/46.
+
 **Decidido (pendiente de Nando)**
 - Pega de negocio que apunta Nando: una guía que enseña sola puede cerrar la vía de ir él a dar formación a los locales. Sin decidir;
   la guía está en un solo sitio (`GUIDE`, `GUIDE_GROUPS`), fácil de recortar o quitar. Opinión mía: la guía quita lo aburrido (dónde

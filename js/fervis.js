@@ -553,17 +553,32 @@ window.Fervis = (function () {
   const guideView = document.getElementById("fervis-guide-view");
   const guideButton = document.getElementById("fervis-guide");
 
+  // Cada fila es una tarjeta como las de health-tracker (Nando: «me mola más cómo has puesto los botones»): círculo con el emoji a la izquierda,
+  // el título con su subtítulo («5 pasos», «3 temas») y el triangulito de desplegable a la derecha (lo pone el CSS).
+  function guideSummary(icon, title, subtitle) {
+    const summary = document.createElement("summary");
+    summary.appendChild(document.createElement("span")).className = "fervis-guide-badge";
+    summary.lastChild.textContent = icon;
+    const text = summary.appendChild(document.createElement("span"));
+    text.className = "fervis-guide-text";
+    text.appendChild(document.createElement("strong")).className = "fervis-guide-title";
+    text.lastChild.textContent = title;
+    text.appendChild(document.createElement("small")).className = "fervis-guide-sub";
+    text.lastChild.textContent = subtitle;
+    return summary;
+  }
+
   function buildGuide() {
     guideView.replaceChildren();
     GUIDE_GROUPS.forEach(function (group) {
       const groupBox = guideView.appendChild(document.createElement("details"));
       groupBox.className = "fervis-guide-group";
-      groupBox.appendChild(document.createElement("summary")).textContent = group[1] + " " + group[2];
+      groupBox.appendChild(guideSummary(group[1], group[2], group[3].length + (group[3].length === 1 ? " tema" : " temas")));
       group[3].forEach(function (topicId) {
         const item = GUIDE.find(function (it) { return it[0] === topicId; });
         const topic = groupBox.appendChild(document.createElement("details"));
         topic.className = "fervis-guide-topic";
-        topic.appendChild(document.createElement("summary")).textContent = item[1] + " " + item[2];
+        topic.appendChild(guideSummary(item[1], item[2], item[3].length + (item[3].length === 1 ? " paso" : " pasos")));
         const steps = topic.appendChild(document.createElement("ul"));
         item[3].forEach(function (step) { steps.appendChild(document.createElement("li")).textContent = step; });
       });

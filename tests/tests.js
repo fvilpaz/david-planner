@@ -659,16 +659,16 @@
     ok($(".fervis-msg").textContent.includes("pulsa el botón «📖 Guía» de arriba"), "el saludo remite a la guía");
     $("#fervis-guide").click();
     ok(!$("#fervis-guide-view").hidden && $("#fervis-messages").hidden && $("#fervis-form").hidden && $("#fervis-key-form").hidden, "se ve el glosario y se esconde el chat");
-    equal($$("#fervis-guide-view > details > summary").map(function (x) { return x.textContent; }),
-      ["📅 Turnos y casillas", "🛠️ Menú Gestión", "🏢 Mi local, la app y Fervis"], "primero, tres grupos");
+    equal($$("#fervis-guide-view > details > summary").map(function (x) { return [x.querySelector(".fervis-guide-badge").textContent, x.querySelector(".fervis-guide-title").textContent, x.querySelector(".fervis-guide-sub").textContent]; }),
+      [["📅", "Turnos y casillas", "5 temas"], ["🛠️", "Menú Gestión", "7 temas"], ["🏢", "Mi local, la app y Fervis", "3 temas"]], "primero, tres tarjetas: círculo con el emoji, título y subtítulo");
     const group = $("#fervis-guide-view > details");
     ok(!group.open, "cerrado al principio");
     group.querySelector("summary").click();
     await wait(50);  // «toggle» llega un instante después
     ok(group.open, "al tocar el grupo se despliega");
-    equal($$("#fervis-guide-view > details:first-child > details > summary").map(function (x) { return x.textContent; }),
-      ["🧭 Moverse por el cuadrante", "✏️ Poner o cambiar un turno", "⏱️ Horas extra", "⇄ Intercambiar dos turnos", "📋 Copiar un turno a otras casillas"], "y salen sus temas");
-    const topic = $$("#fervis-guide-view .fervis-guide-topic").find(function (d) { return d.querySelector("summary").textContent.includes("Copiar un turno"); });
+    equal($$("#fervis-guide-view > details:first-child > details > summary").map(function (x) { return x.querySelector(".fervis-guide-title").textContent + " (" + x.querySelector(".fervis-guide-sub").textContent + ")"; }),
+      ["Moverse por el cuadrante (6 pasos)", "Poner o cambiar un turno (6 pasos)", "Horas extra (4 pasos)", "Intercambiar dos turnos (4 pasos)", "Copiar un turno a otras casillas (5 pasos)"], "y salen sus temas, con cuántos pasos tiene cada uno");
+    const topic = $$("#fervis-guide-view .fervis-guide-topic").find(function (d) { return d.querySelector(".fervis-guide-title").textContent.includes("Copiar un turno"); });
     topic.querySelector("summary").click();
     await wait(50);
     ok(topic.open && topic.querySelectorAll("li").length === 5 && topic.querySelector("li").textContent.startsWith("Abre una casilla con turno"), "al tocar el tema, sus pasos");
