@@ -37,6 +37,10 @@
   rayas y el marco, pero **a poco zoom** (como un visor normal, 842 × 595 px) las rayas finas se ven flojas y pueden
   perderse otra vez. Engrosadas a 0,4 mm y más oscuras (#6f757c); vistos de nuevo el del ejemplo y el vacío a 1× y a 4×.
   Lo que parecía una raya «doble» en la ampliación era una sola línea sólida (medido píxel a píxel).
+- Nando, con otra captura: «en las celdas de lunes, martes, miércoles, jueves no tiene bordes» = las de la **cabecera
+  azul** (sus rayas eran azul sobre azul, y la de debajo también). Medida su captura: sus rayas eran ya las del último
+  arreglo (gris 111 = #6f757c). En impresión la cabecera lleva ahora las mismas rayas que el resto; vistos los PDF del
+  ejemplo y el vacío. 37/37. Pendiente de preguntarle: que el PDF salga siempre sin encabezado ni pie del navegador.
 
 **Decidido**
 - Rayas más oscuras en papel que en pantalla: en pantalla acompañan el diseño; en papel son lo que separa a las personas.
