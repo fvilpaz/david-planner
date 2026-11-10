@@ -50,23 +50,25 @@ window.Schedule = (function () {
     const shift = data.shifts[key];
     const status = shift && statusOf(shift.statusId);
     const texts = [];
+    const slotsBox = box.appendChild(el("span", "cell-slots"));  // los tramos, en columna; las extras, a su derecha
     if (status && status.countsAsWork) {
       shift.slots.forEach(function (slot) {
         const text = slot.start + "–" + slot.end;
         texts.push(text);
-        box.append(chip(text, employee.color));
+        slotsBox.append(chip(text, employee.color));
       });
     } else if (status) {
       texts.push(status.name);
-      box.append(chip(status.name, status.color));
+      slotsBox.append(chip(status.name, status.color));
     } else {
-      box.append(el("span", "cell-empty", "+"));
+      slotsBox.append(el("span", "cell-empty", "+"));
     }
     // Horas extra: borde de aviso y «+2 h extra» debajo; el motivo, al pasar el ratón y para el lector de pantalla
     if (status && status.countsAsWork && shift.overtime) {
-      const extra = "+" + hoursFormat.format(shift.overtime.hours) + " h extra";
+      const amount = "+" + hoursFormat.format(shift.overtime.hours) + " h";
+      const extra = amount + " extra";
       box.classList.add("has-overtime");
-      box.append(el("span", "overtime-tag", extra));
+      box.appendChild(el("span", "overtime-tag")).append(el("span", "", amount), el("span", "", "extra"));
       texts.push(extra + (shift.overtime.reason ? " (" + shift.overtime.reason + ")" : ""));
       if (shift.overtime.reason) { box.title = shift.overtime.reason; }
     }

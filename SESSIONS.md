@@ -17,6 +17,10 @@
 - **`type="number"` y la coma:** algunos navegadores no aceptan «1,5». Campo de texto con `inputmode="decimal"`
   (teclado numérico en el móvil) y se cambia la coma por punto al leerlo.
 
+**Retoque (Nando eligió entre tres):** debajo de la hora / en vertical con la letra girada / **franja a la derecha
+con la letra derecha («+2 h» / «extra») y su propio borde** ← la elegida. La fila no crece y en el móvil cabe; las
+horas ya no se parten en dos líneas (`white-space: nowrap`: si no cabe, la columna se ensancha).
+
 **Siguiente**
 - Paso 5: «Intercambiar con…» (dos toques).
 

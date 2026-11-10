@@ -120,17 +120,23 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .schedule-table .empty { color: var(--muted); padding: 2rem; }
 
 /* Casilla: un botón con uno o dos tramos, uno debajo de otro; si hay uno, ocupa toda la casilla. Vacía, un «+» */
-.cell { display: flex; flex-direction: column; gap: .25rem; width: 100%; min-height: 40px; padding: 0; border: 0;
+.cell { display: flex; gap: .25rem; width: 100%; min-height: 40px; padding: 0; border: 0;
         border-radius: 8px; background: transparent; color: inherit; font-size: inherit; }
+.cell-slots { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
 .cell:hover { outline: 2px solid var(--primary); }
 .cell-empty { margin: auto; color: var(--muted); font-size: 1.4rem; line-height: 1; }
 /* Horas extra: borde de aviso + «+2 h extra» (nunca solo el color: en blanco y negro el texto sigue ahí) */
-.cell.has-overtime { box-shadow: inset 0 0 0 2px var(--warning); padding: 2px; }
-.overtime-tag { color: var(--warning); font-size: .72rem; font-weight: 700; line-height: 1.2; }
+.cell.has-overtime { box-shadow: inset 0 0 0 2px var(--warning); padding: 3px; }
+/* Una franja a la derecha de la casilla, de arriba abajo, con la letra derecha en dos líneas: «+2 h» / «extra» */
+.overtime-tag { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 5px;
+                border-radius: 6px; background: color-mix(in srgb, var(--warning) 14%, var(--surface));
+                border: 1px solid color-mix(in srgb, var(--warning) 55%, var(--surface));  /* como el de los tramos */
+                color: var(--warning); font-size: .7rem; font-weight: 700; line-height: 1.15; white-space: nowrap; }
 .slot .overtime-hours { flex: 0 0 5rem; text-align: center; }  /* .slot input le daría todo el ancho */
 .chip { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;
         border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px;
-        font-size: .8rem; font-weight: 500; line-height: 1.35; }
+        font-size: .8rem; font-weight: 500; line-height: 1.35;
+        white-space: nowrap; }  /* «10:00–14:00» nunca partida en dos líneas: si no cabe, la columna se ensancha */
 /* Teñido con el color de la persona o del estado (--tint, lo pone app.js), mezclado con los colores del tema
    para que se lea igual en los claros y en los oscuros */
 .chip[data-tint] { background: color-mix(in srgb, var(--tint) var(--tint-mix), var(--surface));
