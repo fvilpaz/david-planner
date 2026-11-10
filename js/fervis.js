@@ -1,6 +1,6 @@
-// Fervis (paso 12, idea de Nando): el asistente de los turnos. 12a: la ventana y la clave de Groq de David. 12b: que
-// conteste. Habla de lo general y sabe de la app: un manual corto y los datos como texto (personal, estados, puntos de
-// venta, quién trabaja ahora, esta semana y la siguiente); otras fechas, con la consulta turnos_entre. Solo lee.
+// Fervis (paso 12, idea de Nando): el asistente de la app. Este archivo es el CHAT: la ventana, la clave de Groq de David, la
+// conversación con Groq (con cambio de modelo si uno falla), los chips, la papelera y el robot de la barra. Lo que calcula la app
+// para el modelo está en fervis-datos.js y la guía en fervis-guia.js (se cargan antes; partido en la auditoría del 10-nov). Solo lee.
 // La clave es de David (cuenta gratuita en console.groq.com) y vive SOLO en este navegador, en «dp_groq_key»: no está
 // en el código (el repositorio es público) ni en la copia de seguridad (backup.js copia una lista fija de claves,
 // SETTINGS, y esta no está). La limpieza al pegar es la de Crypto_Portafolio/js/fervis.js. Todo con textContent.
@@ -45,325 +45,8 @@ window.Fervis = (function () {
     return item;
   }
 
-  // ---------- Lo que sabe Fervis (paso 12b): los datos de la app como texto. Lo arma la app, no la IA ----------
-  const DAY = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
-  const MAX_DAYS = 31;  // la consulta de otras fechas: como mucho un mes de una vez
-
-  function minutes(time) { const parts = String(time).split(":"); return Number(parts[0]) * 60 + Number(parts[1]); }
-
-  function inOrder(list) { return list.slice().sort(function (a, b) { return a.position - b.position; }); }
-
-  function statusOf(data, shift) { return shift && data.statuses.find(function (s) { return s.id === shift.statusId; }); }
-
-  // Quien ya no trabaja aquí desde una fecha no sale ese día ni después (como en el cuadrante)
-  function staffOn(data, iso) {
-    return inOrder(data.employees).filter(function (e) { return !e.leftFrom || e.leftFrom > iso; });
-  }
-
-  function slotText(data, slot) {
-    const place = slot.placeId && data.places.find(function (p) { return p.id === slot.placeId; });
-    return slot.start + "–" + slot.end + (place ? " en " + place.name : "");
-  }
-
-  function shiftText(data, shift) {
-    const status = statusOf(data, shift);
-    if (!status) { return "sin nada puesto"; }
-    let text = status.name;
-    if (status.countsAsWork && shift.slots.length) {
-      text += " " + shift.slots.map(function (slot) { return slotText(data, slot); }).join(" y ");
-    }
-    if (shift.overtime) {
-      text += ", +" + String(shift.overtime.hours).replace(".", ",") + " h extra" +
-        (shift.overtime.reason ? " (" + shift.overtime.reason + ")" : "");
-    }
-    return text;
-  }
-
-  const norm = function (text) { return String(text || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); };
-
-  // El filtro opcional de las herramientas: una persona, por su nombre o parte (sin tildes ni mayúsculas)
-  function pick(people, name) {
-    if (!name) { return people; }
-    const wanted = norm(name);
-    return people.filter(function (e) { return norm(e.name).includes(wanted); });
-  }
-
-  function rangeLines(data, from, days, name) {
-    const lines = [];
-    for (let i = 0; i < days; i++) {
-      const date = Dates.addDays(from, i);
-      const iso = Dates.toIso(date);
-      const people = pick(staffOn(data, iso), name);
-      lines.push("- " + DAY.format(date) + " (" + iso + "): " + (people.length ? people.map(function (e) {
-        return e.name + ": " + shiftText(data, data.shifts[e.id + "|" + iso]);
-      }).join("; ") : "nadie en el personal"));
-    }
-    return lines.join("\n");
-  }
-
-  // Resumen por persona, CONTADO POR LA APP (el modelo, contando a ojo, se equivocaba: decía que alguien trabajaba de lunes
-  // a viernes cuando libraba jueves y viernes, y contestaba «2 días libres» sin decir si eran días sueltos o fines de
-  // semana enteros). Días de turno partido (dos tramos), de turno seguido (uno) y de cada estado sin horario; y de los
-  // fines de semana: los COMPLETOS sin trabajar (sábado y domingo) aparte de los sábados o domingos sueltos.
-  const SHORT_DATE = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" });
-  const DAY_NUMBER = new Intl.DateTimeFormat("es-ES", { day: "numeric" });
-  const MONTH_SHORT = new Intl.DateTimeFormat("es-ES", { month: "short" });
-  function dayLabel(data, e, date) {  // cómo cuenta ese día: trabaja (con qué turno) o su estado
-    const shift = data.shifts[e.id + "|" + Dates.toIso(date)];
-    const status = statusOf(data, shift);
-    const works = !!(status && status.countsAsWork && shift.slots.length);
-    return { works: works, empty: !status, label: !status ? "sin nada puesto" : works ? (shift.slots.length > 1 ? "turno partido" : "turno seguido") : status.name.toLowerCase() };
-  }
-  // «Libre» de verdad: un estado sin horario puesto a propósito. Un día SIN NADA PUESTO es un día sin planificar, no libre.
-  function isOff(day) { return !day.works && !day.empty; }
-  function summaryLines(data, from, days, name) {
-    const rows = pick(inOrder(data.employees), name).map(function (e) {
-      const counts = Object.create(null);  // sin prototipo: un estado llamado «constructor» o «__proto__» no choca (auditoría 10-nov)
-      const order = [];
-      const off = [];                 // sábados y domingos sin trabajar: { iso, saturday, text }
-      const full = [];                // fines de semana completos (sábado y domingo) sin trabajar: { saturday, text }
-      for (let i = 0; i < days; i++) {
-        const date = Dates.addDays(from, i);
-        const iso = Dates.toIso(date);
-        if (e.leftFrom && e.leftFrom <= iso) { continue; }
-        const day = dayLabel(data, e, date);
-        if (!counts[day.label]) { counts[day.label] = 0; order.push(day.label); }
-        counts[day.label]++;
-        const weekday = date.getDay();
-        if ((weekday === 6 || weekday === 0) && isOff(day)) {
-          off.push({ saturday: weekday === 6 ? iso : Dates.toIso(Dates.addDays(date, -1)), text: SHORT_DATE.format(date).replace(/\./g, "") + " (" + day.label + ")" });
-        }
-        if (weekday === 6 && i + 1 < days) {  // sábado con su domingo dentro del período
-          const sunday = Dates.addDays(date, 1);
-          const second = dayLabel(data, e, sunday);
-          if (isOff(day) && isOff(second) && !(e.leftFrom && e.leftFrom <= Dates.toIso(sunday))) {
-            // con el motivo (libre, vacaciones, baja…): no es lo mismo librar que estar de vacaciones
-            const why = day.label === second.label ? day.label : day.label + " y " + second.label;
-            full.push({ saturday: iso, text: DAY_NUMBER.format(date) + "–" + DAY_NUMBER.format(sunday) + " " + MONTH_SHORT.format(sunday).replace(".", "") + " (" + why + ")" });
-          }
-        }
-      }
-      order.sort(function (a, b) {  // primero los de trabajo
-        const rank = function (l) { return l === "turno partido" ? 0 : l === "turno seguido" ? 1 : 2; };
-        return rank(a) - rank(b);
-      });
-      const fullSaturdays = full.map(function (f) { return f.saturday; });
-      const loose = off.filter(function (d) { return !fullSaturdays.includes(d.saturday); });  // los que no forman un fin de semana completo
-      return { name: e.name, counts: counts, order: order, full: full, loose: loose };
-    });
-    const lines = rows.map(function (r) {
-      return "- " + r.name + ": " + (r.order.map(function (l) { return l + " " + r.counts[l] + (r.counts[l] === 1 ? " día" : " días"); }).join("; ") || "nada") +
-        " | fines de semana completos sin trabajar (sábado y domingo): " + r.full.length + (r.full.length ? " (" + r.full.map(function (f) { return f.text; }).join(", ") + ")" : "") +
-        " | sábados o domingos sueltos sin trabajar: " + r.loose.length + (r.loose.length ? " (" + r.loose.map(function (d) { return d.text; }).join(", ") + ")" : "");
-    });
-    if (rows.length > 1) {  // el ranking, ya hecho: el modelo lo repite, no ordena él
-      const rank = function (list, key, detail) {
-        const top = list.filter(function (r) { return r[key].length > 0; }).sort(function (a, b) { return b[key].length - a[key].length; });
-        return top.length ? top.map(function (r) { return r.name + " " + r[key].length + " (" + detail(r) + ")"; }).join(", ") : "nadie";
-      };
-      lines.push("RANKING de fines de semana completos sin trabajar (de más a menos; ojo al motivo: vacaciones o baja no es librar): " +
-        rank(rows, "full", function (r) { return r.full.map(function (f) { return f.text; }).join(", "); }));
-      lines.push("RANKING de sábados o domingos sueltos sin trabajar (de más a menos): " +
-        rank(rows, "loose", function (r) { return r.loose.map(function (d) { return d.text; }).join(", "); }));
-    }
-    return lines.join("\n");
-  }
-
-  // Quién está trabajando AHORA: los tramos de hoy y los de ayer que cruzan la medianoche (22:00–02:00 acaba hoy)
-  function onShiftNow(data, now) {
-    const time = now.getHours() * 60 + now.getMinutes();
-    const days = [[Dates.toIso(now), false], [Dates.toIso(Dates.addDays(now, -1)), true]];
-    const found = [];
-    inOrder(data.employees).forEach(function (e) {
-      days.forEach(function (day) {
-        const shift = data.shifts[e.id + "|" + day[0]];
-        const status = statusOf(data, shift);
-        if (!status || !status.countsAsWork || (e.leftFrom && e.leftFrom <= day[0])) { return; }
-        shift.slots.forEach(function (slot) {
-          if (!slot.start || !slot.end) { return; }
-          const start = minutes(slot.start);
-          const end = minutes(slot.end);
-          const crosses = end <= start;
-          const working = day[1] ? crosses && time < end : time >= start && (crosses || time < end);
-          if (working) { found.push(e.name + " (" + slotText(data, slot) + (day[1] ? ", empezó ayer" : "") + ")"); }
-        });
-      });
-    });
-    return found;
-  }
-
-  function context(now) {
-    const data = window.Schedule.getData();
-    const monday = Dates.weekStart(now);
-    const people = inOrder(data.employees);
-    const working = onShiftNow(data, now);
-    const setting = function (key) { try { return localStorage.getItem(key) || ""; } catch (error) { return ""; } };
-    const lines = [
-      "Ahora: " + DAY.format(now) + " de " + now.getFullYear() + ", " + String(now.getHours()).padStart(2, "0") + ":" +
-        String(now.getMinutes()).padStart(2, "0") + ".",
-      "Local: " + (setting("dp_name") || "sin nombre") + (setting("dp_city") ? ", " + setting("dp_city") : "") +
-        (setting("dp_person") ? ". Quien usa la app: " + setting("dp_person") : "") + ".",
-      "Personal (" + people.length + "): " + (people.map(function (e) {
-        return e.name + (e.leftFrom ? " (ya no trabaja aquí desde el " + e.leftFrom + ")" : "");
-      }).join(", ") || "nadie") + ".",
-    ];
-    if (!people.length) { lines.push("AVISO: no hay nadie en el personal."); }
-    else if (people.every(function (e) { return /^Camarero \d+$/.test(e.name); })) {
-      lines.push("AVISO: son los nombres que trae la app la primera vez (Camarero 1, 2…): aún no está el personal de verdad.");
-    }
-    if (!Object.keys(data.shifts).length) { lines.push("AVISO: todavía no hay ningún turno puesto en ninguna semana."); }
-    lines.push(
-      "Estados: " + inOrder(data.statuses).map(function (s) { return s.name + (s.countsAsWork ? " (con horario)" : ""); }).join(", ") + ".",
-      "Puntos de venta: " + (inOrder(data.places).map(function (p) { return p.name; }).join(", ") || "ninguno") + ".",
-      "Trabajando ahora mismo: " + (working.join("; ") || "nadie") + ".",
-      "Fechas: hoy " + Dates.toIso(now) + "; esta semana " + Dates.toIso(monday) + " a " + Dates.toIso(Dates.addDays(monday, 6)) +
-        "; la semana que viene " + Dates.toIso(Dates.addDays(monday, 7)) + " a " + Dates.toIso(Dates.addDays(monday, 13)) +
-        "; este mes " + Dates.toIso(new Date(now.getFullYear(), now.getMonth(), 1)) + " a " +
-        Dates.toIso(new Date(now.getFullYear(), now.getMonth() + 1, 0)) + ".");
-    return lines.join("\n");
-  }
-
-  // Las herramientas de Fervis: las funciones de la app calculan y le dan al modelo la respuesta ya hecha (así no recibe todos
-  // los turnos en cada pregunta —gasta muchos menos tokens— ni cuenta él a ojo). Las llama el modelo; también las pruebas.
-  const MAX_SUMMARY_DAYS = 93;
-  function range(args, max) {
-    const from = Dates.parseIso(args && args.desde);
-    const to = Dates.parseIso(args && args.hasta);
-    if (!from || !to || to < from) { return { error: "Fechas no válidas: AAAA-MM-DD, y «hasta» no puede ser antes que «desde»." }; }
-    const days = Math.round((to - from) / 86400000) + 1;  // redondeo: un día con cambio de hora no mide 24 h
-    if (days > max) { return { error: "Como mucho " + max + " días de una vez." }; }
-    return { from: from, days: days };
-  }
-
-  function runTool(name, args) {
-    const data = window.Schedule.getData();
-    if (name === "manual_app") { return manual(args && args.tema); }
-    if (name !== "turnos_entre" && name !== "resumen_entre") { return "No existe esa herramienta."; }
-    const asked = range(args, name === "resumen_entre" ? MAX_SUMMARY_DAYS : MAX_DAYS);
-    if (asked.error) { return asked.error; }
-    const who = args && args.persona ? String(args.persona) : "";
-    if (who && !pick(inOrder(data.employees), who).length) { return "No encuentro a nadie que se llame «" + who + "» en el personal."; }
-    return name === "turnos_entre" ? rangeLines(data, asked.from, asked.days, who) : summaryLines(data, asked.from, asked.days, who);
-  }
-
-  // La guía de la app, por temas y en pasos. Sale de dos formas: el botón 📖 y los chips la enseñan SIN el modelo (la responde la
-  // app: instantánea, gratis y sin clave de Groq), y el modelo la consulta con manual_app para los «cómo hago…». Si cambia algo de
-  // la app, se cambia aquí: una prueba comprueba que cada botón del menú y de la casilla sale en la guía. Cada tema: id, emoji,
-  // título y pasos.
-  const GUIDE = [
-    ["empezar", "🧭", "Moverse por el cuadrante", [
-      "El cuadrante muestra una semana, de lunes a domingo.",
-      "‹ y › cambian de semana.",
-      "Toca el título (con el 📅) para abrir un calendario y saltar a cualquier fecha.",
-      "«Hoy» vuelve a esta semana (solo sale si estás en otra).",
-      "Los nombres y los días se quedan fijos al deslizar.",
-      "Toca una casilla para editarla y un nombre para abrir la ficha de esa persona."]],
-    ["casilla", "✏️", "Poner o cambiar un turno", [
-      "Toca la casilla del día y la persona.",
-      "Elige el Estado (Trabajo, Libre, Vacaciones, Baja…).",
-      "Si es de trabajo: pon inicio y fin (si el fin es antes que el inicio, acaba al día siguiente: 22:00–02:00).",
-      "«+ Segundo tramo» para un turno partido.",
-      "«Dónde» elige el punto de venta (si los has creado).",
-      "Guardar. «Vaciar» deja la casilla en blanco."]],
-    ["horas_extra", "⏱️", "Horas extra", [
-      "En la ventana de la casilla, en «Horas extra», pon cuántas: de 0,5 a 16, con coma o punto, en medias horas.",
-      "Si quieres, escribe el motivo.",
-      "En el cuadrante, la casilla lleva una franja fucsia a la derecha con «+2 h extra»; también sale al imprimir.",
-      "Vacío = sin horas extra."]],
-    ["intercambiar", "⇄", "Intercambiar dos turnos", [
-      "Abre una casilla y pulsa «⇄ Intercambiar con…».",
-      "Toca la otra casilla: de otra persona, otro día o incluso otra semana.",
-      "Se cambian los dos turnos, con sus horas extra y su sitio. Si la otra está vacía, el turno se mueve.",
-      "«Deshacer» unos segundos; «Cancelar» o tocar la misma casilla lo anula."]],
-    ["copiar_turno", "📋", "Copiar un turno a otras casillas", [
-      "Abre una casilla con turno y pulsa «📋 Copiar a…».",
-      "Toca las casillas libres donde lo quieras (de cualquier persona, día o semana).",
-      "Cada una recibe el estado, el horario y el sitio, sin horas extra.",
-      "Lo que ya tiene algo no se pisa.",
-      "«Deshacer» quita la última copia; «Hecho» termina."]],
-    ["copiar_semanas", "🗓️", "Copiar semanas", [
-      "Gestión → «Copiar la semana anterior».",
-      "Elige en cuántas semanas (de 1 a 8) y pulsa Copiar.",
-      "La semana anterior a la que ves se repite en esta y en las siguientes.",
-      "Solo en casillas vacías, sin horas extra y sin quien ya no trabaje aquí; el sitio sí se copia."]],
-    ["personal", "👥", "Personal", [
-      "Gestión → «Personal»: la lista. «+ Añadir persona».",
-      "Toca a alguien para cambiar su nombre y su color (hay 20).",
-      "El orden: arrastra el ⠿ o escribe el número del puesto.",
-      "«Quitar»: sin turnos se borra; con turnos, «Dar de baja desde el…» (la semana que ves): deja de salir desde entonces y se conserva el histórico. «Volver a dar de alta» la recupera.",
-      "La primera vez salen «Camarero 1» a «Camarero 4»: renómbralos tocando el nombre."]],
-    ["estados", "🏷️", "Estados (Libre, Vacaciones, Baja…)", [
-      "Gestión → «Estados»: los tipos de casilla.",
-      "Vienen Trabajo, Libre, Vacaciones y Baja (baja médica). Puedes crear más, como «Asuntos propios».",
-      "Cada estado tiene nombre, color y si «Cuenta como trabajo» (lleva horario y horas extra y usa el color de la persona; los demás usan su propio color).",
-      "El primero es el que sale al abrir una casilla vacía.",
-      "Uno que ya se usa no se puede quitar ni cambiar si cuenta como trabajo."]],
-    ["puntos_de_venta", "📍", "Puntos de venta", [
-      "Gestión → «Puntos de venta»: crea los sitios (Chiringuito, Cafetería, Pub…).",
-      "Hasta que no haya uno, «Dónde» no sale en la casilla.",
-      "Con puntos creados, cada tramo tiene su «Dónde» y el nombre sale pequeño debajo de la hora.",
-      "Uno en uso no se puede quitar."]],
-    ["imprimir", "🖨️", "Imprimir o guardar en PDF", [
-      "Gestión → «Imprimir / PDF» abre la impresión del navegador con la semana que ves.",
-      "Sale en una hoja A4 apaisada y siempre en colores claros.",
-      "Para guardar un PDF, elige «Guardar como PDF» como destino.",
-      "También se lee bien en blanco y negro (se pierde el color por persona)."]],
-    ["copia_seguridad", "💾", "Copia de seguridad", [
-      "Gestión → «Copia de seguridad».",
-      "«Descargar copia» guarda un archivo con todo: guárdalo también fuera del móvil (Drive, correo, el PC).",
-      "«Cargar una copia…» lo recupera, pide confirmación y descarga antes lo que había.",
-      "Hay copias automáticas dentro del navegador: una por semana, las 5 últimas, con «Recuperar».",
-      "Si pasan 7 días sin descargar copia, sale un aviso arriba.",
-      "Los datos viven solo en el navegador de ese aparato: si se borran, se pierden."]],
-    ["temas", "🎨", "Temas de color", [
-      "Gestión → «Tema»: Claro, Lino, Oscuro y Carbón.",
-      "Se recuerda en cada aparato.",
-      "Al imprimir siempre sale en claro."]],
-    ["local_y_persona", "🏢", "Nombre del local y de la persona", [
-      "Arriba a la izquierda, el cuadrado con el lápiz cambia el nombre del local y la ciudad (las iniciales salen solas).",
-      "Arriba a la derecha, el círculo con el lápiz cambia el nombre de quien usa la app."]],
-    ["instalar", "📲", "Instalar la app y usarla sin conexión", [
-      "Se puede instalar como una aplicación: en el navegador, menú → «Instalar aplicación» o «Añadir a la pantalla de inicio» (depende del navegador).",
-      "Una vez instalada, abre sin conexión.",
-      "Fervis es lo único que necesita internet."]],
-    ["fervis", "🤖", "Qué puede hacer Fervis", [
-      "Se abre con el robot de arriba.",
-      "Dice quién trabaja ahora o cualquier día y qué turno tiene cada persona.",
-      "Cuenta: turnos partidos o seguidos, fines de semana libres, vacaciones, bajas.",
-      "Explica cómo se usa la app y charla de cosas generales (contratos, descansos…), siempre orientativo.",
-      "Solo lee los turnos: no cambia nada.",
-      "Necesita la clave gratuita de Groq: icono de tres barras → Ajustes (se crea en console.groq.com).",
-      "La papelera borra la conversación. Con muchas preguntas seguidas, el plan gratuito puede pedir esperar un minuto."]],
-  ];
-
-  // Para el modelo (manual_app): el tema como texto seguido, o el índice si no hay tema o no existe
-  function manual(topic) {
-    const wanted = norm(topic).replace(/[^a-z_]/g, "_");
-    const found = GUIDE.find(function (item) { return item[0] === wanted; });
-    if (found) { return found[2] + ": " + found[3].join(" "); }
-    return "Temas de la guía (pídelos uno a uno con manual_app y «tema»): " + GUIDE.map(function (item) { return item[0] + " (" + item[2] + ")"; }).join("; ") + ".";
-  }
-
-  // Cuando la pregunta es de «cómo se hace…», la APP busca en la guía los temas que tocan y se los pone delante al modelo (el modelo, solo,
-  // contestó de memoria que «no se puede cambiar el color de una persona», y sí se puede). Se comparan las palabras de la pregunta con las
-  // de cada tema (por sus 4 primeras letras: cambio/cambiar, copio/copiar, persona/personal) y salen los 2 que más coinciden.
-  const HOW_TO = /\b(como|donde|se puede|puedo|puede|manual|guia|ayuda|funcion|opcion|para que sirve|que hace|que puedes)\b/;
-  const STOP = ["para", "como", "donde", "puedo", "puede", "quiero", "tengo", "hacer", "esta", "este", "esto", "unas", "unos", "tiene", "tienen", "sobre", "desde", "hasta"];
-  const stems = function (text) {
-    return norm(text).split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 4 && !STOP.includes(w); }).map(function (w) { return w.slice(0, 4); });
-  };
-  function guideFor(asked) {
-    if (!HOW_TO.test(norm(asked))) { return ""; }
-    const words = stems(asked);
-    const scored = GUIDE.map(function (item) {
-      const own = stems(item[0].replace(/_/g, " ") + " " + item[2] + " " + item[3].join(" "));
-      return { item: item, score: words.filter(function (w) { return own.includes(w); }).length };
-    }).filter(function (x) { return x.score >= 2; }).sort(function (a, b) { return b.score - a.score; }).slice(0, 2);
-    return scored.map(function (x) { return x.item[2] + ": " + x.item[3].join(" "); }).join("\n");
-  }
-
   function system(model, asked) {
-    const found = guideFor(asked);
+    const found = window.FervisGuide.guideFor(asked);
     // Lo que va por delante: si la app ha encontrado en la guía lo que toca, el modelo explica SOLO con eso
     const help = found ? "\n\nGUÍA DE LA APP RELEVANTE PARA ESTA PREGUNTA (explica con esto; no digas que algo no se puede si no lo has visto aquí o en manual_app):\n" + found : "";
     return "Eres Fervis, el asistente personal de quien usa «David Planner», la app de turnos de este local de hostelería. " +
@@ -382,7 +65,7 @@ window.Fervis = (function () {
       "con el nombre; si hay dos posibles, pregunta. «Trabajando ahora mismo» ya está calculado: úsalo tal cual. Solo " +
       "lees: si piden cambiar un turno, explica cómo hacerlo en la app (manual_app). Si hay un AVISO de que falta personal " +
       "o turnos, dilo y ofrece explicar paso a paso cómo crearlos. Si preguntan qué IA eres: Fervis es tu nombre y te " +
-      "ejecuta el modelo " + model + " en Groq.\n\nDATOS DE LA APP:\n" + context(new Date()) + help;
+      "ejecuta el modelo " + model + " en Groq.\n\nDATOS DE LA APP:\n" + window.FervisData.context(new Date()) + help;
   }
 
   // ---------- Groq, con la clave de David. Si un modelo está saturado o falla, se prueba el siguiente ----------
@@ -400,7 +83,7 @@ window.Fervis = (function () {
       parameters: { type: "object", required: ["desde", "hasta"], properties: DATE_PARAMS } } },
     { type: "function", function: { name: "manual_app",
       description: "La guía de la app, por temas: cómo se hace cada cosa y qué puede hacer cada parte (casillas, intercambiar, copiar, personal, estados, puntos de venta, imprimir, copia de seguridad, temas, instalar, Fervis…). Para «cómo hago…» y «qué puede hacer…». Sin «tema» devuelve el índice.",
-      parameters: { type: "object", properties: { tema: { type: "string", enum: GUIDE.map(function (item) { return item[0]; }), description: "el tema de la guía; si no sabes cuál, no lo pongas y verás el índice" } } } } },
+      parameters: { type: "object", properties: { tema: { type: "string", enum: window.FervisGuide.GUIDE.map(function (item) { return item[0]; }), description: "el tema de la guía; si no sabes cuál, no lo pongas y verás el índice" } } } } },
   ];
   const history = [];  // la conversación, para entender «¿y mañana?» (hasta recargar la página)
   let busy = false;
@@ -450,7 +133,7 @@ window.Fervis = (function () {
         let args = null;
         try { args = JSON.parse(call.function.arguments || "{}"); } catch (error) { args = null; }
         turn.push({ role: "tool", tool_call_id: call.id,
-          content: runTool(call.function.name, args) });
+          content: window.FervisData.runTool(call.function.name, args) });
       });
     }
     throw failure("Demasiadas consultas para una sola pregunta.", true);
@@ -542,131 +225,6 @@ window.Fervis = (function () {
     messages.scrollTop = messages.scrollHeight;
   }
 
-  // La guía como GLOSARIO (Nando: «que el botón, en vez de modo bot, se convierta en glosario: vas pulsando y va desplegando»): una
-  // vista aparte dentro de la ventana, con grupos y temas que se despliegan. No es el chat: no añade burbujas, no llama a Groq y no
-  // necesita clave. El botón 📖 (y el chip «Guía de la app» del saludo) alterna entre el chat y el glosario.
-  const GUIDE_GROUPS = [
-    ["turnos", "📅", "Turnos y casillas", ["empezar", "casilla", "horas_extra", "intercambiar", "copiar_turno"]],
-    ["gestion", "🛠️", "Menú Gestión", ["copiar_semanas", "personal", "estados", "puntos_de_venta", "imprimir", "copia_seguridad", "temas"]],
-    ["app", "🏢", "Mi local, la app y Fervis", ["local_y_persona", "instalar", "fervis"]],
-  ];
-  const guideView = document.getElementById("fervis-guide-view");
-  const guideButton = document.getElementById("fervis-guide");
-
-  // Cada fila es una tarjeta como las de health-tracker (Nando: «me mola más cómo has puesto los botones»): círculo con el emoji a la izquierda,
-  // el título con su subtítulo («5 pasos», «3 temas») y el triangulito de desplegable a la derecha (lo pone el CSS).
-  function guideSummary(icon, title, subtitle) {
-    const summary = document.createElement("summary");
-    const card = summary.appendChild(document.createElement("span"));  // la tarjeta; el triangulito queda fuera, a su derecha (CSS)
-    card.className = "fervis-guide-card";
-    card.appendChild(document.createElement("span")).className = "fervis-guide-badge";
-    card.lastChild.textContent = icon;
-    const text = card.appendChild(document.createElement("span"));
-    text.className = "fervis-guide-text";
-    text.appendChild(document.createElement("strong")).className = "fervis-guide-title";
-    text.lastChild.textContent = title;
-    text.appendChild(document.createElement("small")).className = "fervis-guide-sub";
-    text.lastChild.textContent = subtitle;
-    return summary;
-  }
-
-  // «Descargar guía (PDF)» (idea de Nando, para entregarla tras la formación): una hoja de impresión con TODOS los temas abiertos y seguidos y el
-  // nombre del local arriba. Sale de los mismos textos (GUIDE), así que no se desfasa de la app. Abre la impresión del navegador («Guardar como PDF»).
-  // Con «#guia-imprimible» en la dirección, la hoja ya viene preparada (para ver el PDF sin pulsar nada, y para las pruebas).
-  function siteInfo() {
-    try { return { name: localStorage.getItem("dp_name") || "David Planner", city: localStorage.getItem("dp_city") || "" }; }
-    catch (error) { return { name: "David Planner", city: "" }; }
-  }
-
-  function prepareGuideSheet() {
-    const old = document.getElementById("guide-print");
-    if (old) { old.remove(); }
-    const info = siteInfo();
-    const sheet = document.body.appendChild(document.createElement("section"));
-    sheet.id = "guide-print";
-    sheet.className = "guide-print";
-    const add = function (parent, tag, text, className) {
-      const el = parent.appendChild(document.createElement(tag));
-      el.textContent = text;
-      if (className) { el.className = className; }
-      return el;
-    };
-    add(sheet, "h1", "Guía de uso");
-    add(sheet, "p", info.name + (info.city ? " · " + info.city : ""), "guide-print-site");
-    add(sheet, "p", "Cómo se usa la app, paso a paso. Si tienes dudas, pregunta a Fervis (el asistente de la app) o abre su botón «Guía».", "guide-print-intro");
-    GUIDE_GROUPS.forEach(function (group) {
-      add(sheet, "h2", group[1] + " " + group[2]);
-      group[3].forEach(function (topicId) {
-        const item = GUIDE.find(function (it) { return it[0] === topicId; });
-        const topic = sheet.appendChild(document.createElement("div"));
-        topic.className = "guide-print-topic";
-        add(topic, "h3", item[1] + " " + item[2]);
-        const steps = topic.appendChild(document.createElement("ul"));
-        item[3].forEach(function (step) { add(steps, "li", step); });
-      });
-    });
-    add(sheet, "p", "David Planner · fvilpaz.github.io/david-planner", "guide-print-foot");
-    document.body.classList.add("printing-guide");
-    return sheet;
-  }
-
-  function printGuide() {
-    const sheet = prepareGuideSheet();
-    const cleanup = function () {
-      document.body.classList.remove("printing-guide");
-      sheet.remove();
-      window.removeEventListener("afterprint", cleanup);
-    };
-    window.addEventListener("afterprint", cleanup);
-    window.print();
-  }
-
-  if (location.hash === "#guia-imprimible") { prepareGuideSheet(); }
-
-  function buildGuide() {
-    guideView.replaceChildren();
-    const printButton = guideView.appendChild(document.createElement("button"));  // arriba del todo, encima de las tarjetas
-    printButton.type = "button";
-    printButton.id = "fervis-guide-print";
-    printButton.className = "secondary fervis-guide-print";
-    printButton.textContent = "🖨️ Descargar guía (PDF)";
-    printButton.addEventListener("click", printGuide);
-    GUIDE_GROUPS.forEach(function (group) {
-      const groupBox = guideView.appendChild(document.createElement("details"));
-      groupBox.className = "fervis-guide-group";
-      groupBox.appendChild(guideSummary(group[1], group[2], group[3].length + (group[3].length === 1 ? " tema" : " temas")));
-      const children = groupBox.appendChild(document.createElement("div"));  // los temas cuelgan del grupo: sangría y línea guía (CSS)
-      children.className = "fervis-guide-children";
-      group[3].forEach(function (topicId) {
-        const item = GUIDE.find(function (it) { return it[0] === topicId; });
-        const topic = children.appendChild(document.createElement("details"));
-        topic.className = "fervis-guide-topic";
-        topic.appendChild(guideSummary(item[1], item[2], item[3].length + (item[3].length === 1 ? " paso" : " pasos")));
-        const steps = topic.appendChild(document.createElement("ul"));
-        item[3].forEach(function (step) { steps.appendChild(document.createElement("li")).textContent = step; });
-      });
-    });
-  }
-
-  // Acordeón (Nando: «si se despliega una que se pliegue otra, para que no ocupe toda la pantalla»): al abrir un grupo se cierran los
-  // otros grupos, y al abrir un tema se cierran los demás temas de ese grupo. «toggle» no sube por el árbol: se escucha en captura.
-  guideView.addEventListener("toggle", function (event) {
-    const opened = event.target;
-    if (!opened.open || opened.tagName !== "DETAILS") { return; }
-    Array.from(opened.parentElement.children).forEach(function (sibling) {
-      if (sibling !== opened && sibling.tagName === "DETAILS" && sibling.open) { sibling.open = false; }
-    });
-  }, true);
-
-  function showGuide(show) {  // el glosario o el chat: uno u otro
-    if (show && !guideView.children.length) { buildGuide(); }
-    guideView.hidden = !show;
-    messages.hidden = show;
-    chat.hidden = show;
-    if (show) { keyForm.hidden = true; guideView.scrollTop = 0; }
-    guideButton.setAttribute("aria-expanded", String(show));
-  }
-
   const QUESTIONS = [["🕒", "¿Quién trabaja hoy?"], ["🌴", "¿Quién libra este fin de semana?"],
     ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"], ["📋", "¿Cómo copio un turno?"]];
 
@@ -674,18 +232,16 @@ window.Fervis = (function () {
     say("fervis", "¡Hola! Soy Fervis, tu asistente personal. Estoy aquí para ayudarte. Puedes escribirme tu consulta directamente aquí abajo o, si no sabes por dónde empezar, pulsar el botón «📖 Guía» de arriba.");
     chipRow(QUESTIONS.map(function (pair) {
       return [pair[0], pair[1], function () { question.value = pair[1]; chat.requestSubmit(); }];  // sin clave, abre Ajustes y deja la pregunta escrita
-    }).concat([["📖", "Guía de la app", function () { showGuide(true); }]]));
+    }).concat([["📖", "Guía de la app", function () { window.FervisGuide.showGuide(true); }]]));
     messages.scrollTop = 0;  // el saludo se lee desde su primera línea (los chips lo bajarían al final)
   }
 
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
   // la respuesta llegaría a una conversación que ya no existe
-  guideButton.addEventListener("click", function () { showGuide(guideView.hidden); });
-
   document.getElementById("fervis-clear").addEventListener("click", function () {
     if (busy) { return; }
     history.length = 0;
-    showGuide(false);
+    window.FervisGuide.showGuide(false);
     messages.replaceChildren();
     greet();
     if (readKey()) { question.focus(); }
@@ -744,7 +300,7 @@ window.Fervis = (function () {
   // La conversación se queda al cerrar y volver a abrir (hasta recargar la página)
   function open() {
     dialog.showModal();
-    showGuide(false);  // siempre se abre en el chat
+    window.FervisGuide.showGuide(false);  // siempre se abre en el chat
     const key = readKey();
     if (!messages.children.length) { greet(); }
     showKeyForm(!key);
@@ -752,5 +308,6 @@ window.Fervis = (function () {
     if (key && window.matchMedia("(pointer: fine)").matches) { question.focus(); }
   }
 
-  return { open: open, context: context, tool: runTool, guideFor: guideFor };  // context: para las pruebas (con una hora fija)
+  // Lo que usan las pruebas (context con una hora fija, las herramientas y la guía relevante)
+  return { open: open, context: window.FervisData.context, tool: window.FervisData.runTool, guideFor: window.FervisGuide.guideFor };
 })();

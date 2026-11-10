@@ -1,5 +1,31 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Auditoría: fases 3 y 4 (arreglos y Fervis partido en tres)
+
+**Hecho**
+- Arreglos aprobados por Nando, cada uno con su prueba y su control (la prueba falla con el código de antes): el recuento por
+  estado sin prototipo (la «llave zombie»: un estado llamado «constructor» o «__proto__» ya cuenta), el aviso de Ajustes dice
+  también que van el nombre del local y el tuyo, `.gitattributes` (todo LF, sin avisos en cada commit) y el aviso de clave
+  mala remite a Ajustes (el botón «🔑 Clave» ya no existe). 49 pruebas.
+- **Refactor 4: `fervis.js` (757 líneas) partido en tres, sin cambiar nada de lo que se ve**: `fervis-datos.js` (lo que calcula
+  la app: `context`, `runTool`), `fervis-guia.js` (`GUIDE`, `manual`, `guideFor`, el glosario y el PDF) y `fervis.js` (el chat:
+  clave, Groq, chips, papelera, robot). Hecho con un script que corta por números de línea comprobados y cuenta que ninguna
+  línea se queda fuera ni se repite. Los dos nuevos, en `index.html` y en `ESSENTIAL` de `sw.js`.
+  Comprobado: 49/49; en la app carga los tres, glosario abre y vuelve al chat, 5 chips, sin errores en la consola; el PDF de
+  la guía sale igual (2 hojas A4, dos columnas); `audit` igual que antes (0 errores, 40 avisos).
+
+**Decidido**
+- Partir por **responsabilidad**, no por tamaño: datos (qué sabe), guía (qué enseña) y chat (cómo habla). Se cargan en ese
+  orden porque cada uno usa al anterior; la guía pide a los datos `norm` y los datos llaman a la guía solo al contestar.
+- Las pruebas siguen usando `window.Fervis` (open, context, tool, guideFor): el chat los reexporta, así no cambia ninguna.
+
+**Aprendido**
+- Responsabilidad única (la S de SOLID): cada archivo tiene una sola razón para cambiar. Cambiar un texto de la guía ya no
+  obliga a abrir el archivo que habla con Groq.
+
+**Siguiente**
+- Punto 5 (juntar el esqueleto de Personal, Estados y Puntos de venta): explicado a Nando, sin tocar hasta que decida.
+
 ## 10-nov-2026 — Auditoría entera (Opus): fases 1 y 2
 
 **Hecho**
