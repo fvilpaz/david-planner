@@ -340,9 +340,9 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-scroll { overflow: visible; max-height: none; border: 0; border-radius: 0; margin: 0; }
   /* Rejilla propia para el papel: bordes separados (con los unidos, el PDF perdía rayas sueltas) — el marco (arriba e
      izquierda) en la tabla y derecha y abajo en cada celda, así ninguna raya se dobla — y más oscura que en pantalla */
-  .schedule-table { font-size: 8pt; border-collapse: separate; border-spacing: 0; border-top: 1px solid #8f959c;
-                    border-left: 1px solid #8f959c; }
-  .schedule-table th, .schedule-table td { border: 0; border-right: 1px solid #8f959c; border-bottom: 1px solid #8f959c; }
+  .schedule-table { font-size: 8pt; border-collapse: separate; border-spacing: 0; border-top: .4mm solid #6f757c;
+                    border-left: .4mm solid #6f757c; }
+  .schedule-table th, .schedule-table td { border: 0; border-right: .4mm solid #6f757c; border-bottom: .4mm solid #6f757c; }
   /* En papel nada se desliza: sin «sticky». Con él, Chrome pierde las rayas de las celdas fijas (el nombre de cada persona
      salía sin líneas entre filas) */
   .schedule-table th, .schedule-table thead th, .schedule-table th[scope=row], .schedule-table thead th:first-child {

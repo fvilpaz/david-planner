@@ -10,6 +10,10 @@
 - Arreglo solo en `@media print` (`css/app.css`): rejilla propia con bordes separados (marco arriba/izquierda en la
   tabla y derecha/abajo en cada celda, #8f959c), sin «sticky» ni sombra en la columna de nombres (que dibujaba una raya
   doble). Verificado con los dos PDF: todas las rayas, marco por los cuatro lados, una hoja. 35/35.
+- Nando: «¿estás seguro que se ha arreglado?» (PDF `David Planner.pdf` del escritorio, 15:38). Lo abrí: tenía todas las
+  rayas y el marco, pero **a poco zoom** (como un visor normal, 842 × 595 px) las rayas finas se ven flojas y pueden
+  perderse otra vez. Engrosadas a 0,4 mm y más oscuras (#6f757c); vistos de nuevo el del ejemplo y el vacío a 1× y a 4×.
+  Lo que parecía una raya «doble» en la ampliación era una sola línea sólida (medido píxel a píxel).
 
 **Decidido**
 - Rayas más oscuras en papel que en pantalla: en pantalla acompañan el diseño; en papel son lo que separa a las personas.
