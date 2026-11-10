@@ -2,6 +2,11 @@
 
 ## 10-nov-2026 — Cierre del día y relevo para la auditoría completa
 
+**Decidido por Nando (modelo de negocio):** el glosario y la formación **van de la mano**: él da la formación en persona a los locales y les deja
+el glosario de apoyo «por si no queda claro». El glosario se queda (no «cierra la vía» de la formación: la complementa). Y **todos los locales que
+cojan la app tendrán su clave de Groq** (Nando), así que la guía puede seguir viviendo dentro del chat de Fervis, sin entrada aparte en Gestión.
+Ideas anotadas en «💡 Aparcado»: versión imprimible de una hoja y repaso de los textos con ojos de quien no sabe de apps.
+
 **Hecho**
 - Todo lo de hoy, subido a GitHub de una vez (era «no subas todavía; cuando esté todo hecho, commit y push»). 46 pruebas en verde.
 - Nando pasa a **Opus** para una **auditoría entera**: revisar los `.md` (`CLAUDE.md`, `PLAN.md`, `SESSIONS.md`, `docs/especificacion.md`), la
