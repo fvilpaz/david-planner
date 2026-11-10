@@ -9,6 +9,7 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 1 | ✅ Cuadrante de solo lectura con datos inventados: semana lunes–domingo, nombres y cabecera fijos, hoy marcado, ‹ Hoy ›, selector de fecha, footer | En localhost, en móvil (vertical y apaisado) y en PC |
 | 2 | ✅ Menú «Gestión» con **Tema** (Claro, Lino, Oscuro, Carbón; se recuerda) e **Imprimir / PDF** (A4 apaisado, en claro) | Cambiar de tema; vista previa de impresión en una hoja |
 | 2b | ✅ Nombre de la barra editable con un lápiz (`dp_name`; iniciales automáticas; sale en la pestaña y en el PDF) y barra de la semana limpia (el título abre el calendario; «Hoy» solo fuera de esta semana) | Cambiar el nombre, recargar y verlo; tocar el título y elegir otra semana |
+| 2c | ✅ Barra como la de gestion-hosteleria: local + **ciudad** (un solo lápiz para los dos; `dp_city`) y **persona** a la derecha en un círculo (`dp_person`; en el móvil solo el círculo) | Poner local, ciudad y persona, recargar y verlos |
 | 3 | 🔲 Guardar en el navegador y **editar la casilla** (ventana de gestion-hosteleria mejorada): estado, horario, segundo tramo, vaciar; **un solo Guardar**; si el estado no cuenta como trabajo, el horario **se oculta al momento**; sin «Dónde» | Cambiar un turno, recargar y que siga ahí |
 | 4 | 🔲 **Horas extra** en la casilla: borde de aviso + «+2 h extra», motivo opcional; también en el PDF | Marcar extras y verlas en pantalla y en la impresión |
 | 5 | 🔲 **Intercambiar con…** (dos toques) | Cambiar dos días de una persona y dos personas el mismo día |

@@ -10,20 +10,35 @@
   <script src="js/theme.js"></script>
 </head>
 <body>
-  <!-- Barra de arriba, como la de gestion-hosteleria y auryapp: cuadrado con las iniciales y el nombre.
-       El nombre se cambia con el lápiz (el del local o el que quiera David); las iniciales salen solas de él -->
+  <!-- Barra de arriba, como la de gestion-hosteleria: a la izquierda el local y su ciudad (se cambian con el lápiz;
+       las iniciales del cuadrado salen solas del nombre); a la derecha, la persona en un círculo (se cambia al tocarlo) -->
   <header class="topbar">
-    <div class="brand">
+    <div class="brand editor">
       <span class="brand-avatar" id="brand-avatar" aria-hidden="true">DP</span>
-      <div class="brand-text">
+      <div class="brand-text" data-view>
         <strong id="brand-name">David Planner</strong>
-        <form id="brand-form" class="brand-form" hidden>
-          <input id="brand-input" maxlength="40" autocomplete="off" aria-label="Nombre que sale arriba">
-          <button type="submit" aria-label="Guardar el nombre">✓</button>
-        </form>
-        <span class="brand-sub">Cuadrante de turnos</span>
+        <span class="brand-sub" id="brand-city"></span>
       </div>
-      <button type="button" class="brand-edit" id="brand-edit" aria-label="Cambiar el nombre">✏️</button>
+      <form class="edit-form" hidden>
+        <span class="edit-fields">
+          <input data-key="dp_name" maxlength="40" placeholder="David Planner" autocomplete="off" aria-label="Nombre del local">
+          <input data-key="dp_city" maxlength="40" placeholder="Ciudad" autocomplete="off" aria-label="Ciudad">
+        </span>
+        <button type="submit" aria-label="Guardar">✓</button>
+      </form>
+      <button type="button" class="brand-edit" data-open aria-label="Cambiar el nombre del local y la ciudad">✏️</button>
+    </div>
+    <div class="person editor">
+      <button type="button" class="person-button" data-open data-view aria-label="Cambiar tu nombre">
+        <span class="person-name" id="person-name"></span>
+        <span class="person-avatar" id="person-avatar" aria-hidden="true">👤</span>
+      </button>
+      <form class="edit-form" hidden>
+        <span class="edit-fields">
+          <input data-key="dp_person" maxlength="30" placeholder="Tu nombre" autocomplete="off" aria-label="Tu nombre">
+        </span>
+        <button type="submit" aria-label="Guardar">✓</button>
+      </form>
     </div>
   </header>
 

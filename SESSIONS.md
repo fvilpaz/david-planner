@@ -32,6 +32,12 @@
   («9–15 nov 2026», «28 dic 2026 – 3 ene 2027»).
 - **Aprendido:** `formatRange` del navegador junta solo lo que se repite (mes, año) en un rango de fechas.
 
+### Paso 2c (mismo día): local, ciudad y persona en la barra
+- Idea de Nando, como la barra de gestion-hosteleria: a la izquierda el local y debajo la **ciudad** («Cuadrante de
+  turnos» sobraba con «Cuadrante semanal» debajo), con **un solo lápiz** para los dos; a la derecha la persona en un
+  círculo con sus iniciales (👤 si no hay nombre). La lógica del lápiz es una pieza común (`editor()` en `brand.js`).
+- Verificado: guardar, Escape, recargar, iniciales, móvil (solo el círculo, la barra no se sale), consola limpia.
+
 ## 10-nov-2026 — Paso 1: cuadrante de solo lectura
 
 **Hecho**
