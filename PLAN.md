@@ -1,0 +1,39 @@
+# PLAN — david-planner
+
+Cada paso termina con algo que se ve en `http://localhost:8000` y un commit. Los pasos grandes se parten (1a, 1b…)
+cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
+
+| # | Paso | Se ve funcionando |
+|---|---|---|
+| 0 | ✅ Repositorio clonado, `CLAUDE.md`, `PLAN.md`, `SESSIONS.md` | Los tres archivos en el repo |
+| 1 | 🔲 Cuadrante de solo lectura con datos inventados: semana lunes–domingo, nombres y cabecera fijos, hoy marcado, ‹ Hoy ›, selector de fecha, footer | En localhost, en móvil (vertical y apaisado) y en PC |
+| 2 | 🔲 Menú «Gestión» con **Tema** (Claro, Lino, Oscuro, Carbón; se recuerda) e **Imprimir / PDF** (A4 apaisado, en claro) | Cambiar de tema; vista previa de impresión en una hoja |
+| 3 | 🔲 Guardar en el navegador y **editar la casilla** (ventana de gestion-hosteleria mejorada): estado, horario, segundo tramo, vaciar; **un solo Guardar**; si el estado no cuenta como trabajo, el horario **se oculta al momento**; sin «Dónde» | Cambiar un turno, recargar y que siga ahí |
+| 4 | 🔲 **Horas extra** en la casilla: borde de aviso + «+2 h extra», motivo opcional; también en el PDF | Marcar extras y verlas en pantalla y en la impresión |
+| 5 | 🔲 **Intercambiar con…** (dos toques) | Cambiar dos días de una persona y dos personas el mismo día |
+| 6 | 🔲 **Personal**: añadir, nombre, color, orden (número y ⠿), baja desde una semana y volver a dar de alta | Dar de baja y ver que sigue en semanas anteriores |
+| 7 | 🔲 **Estados**: crear, nombre, color, si cuenta como trabajo, orden; uno en uso no se borra | Crear «Formación», usarlo y ver que no se deja borrar |
+| 8 | 🔲 **Copiar la semana anterior** en 1–8 semanas (solo vacías, sin extras, sin quien esté de baja) | Copiar a 4 semanas sin pisar lo puesto |
+| 9 | 🔲 **Copia de seguridad**: exportar e importar JSON (versión del formato, confirmación y copia previa) | Exportar, borrar, importar y que todo vuelva |
+| 10 | 🔲 **PWA**: manifiesto, iconos, service worker (funciona sin conexión) y aviso si hace días que no se exporta | Instalarla en el móvil y abrirla sin conexión |
+| 11 | 🔲 Publicar en **GitHub Pages** + `audit` (nando-toolkit) | Abrirla desde la dirección pública e instalarla |
+
+## Propuesta de datos (a confirmar en el paso 3; código en inglés)
+```
+{ version: 1,
+  employees: [{ id, name, color, position, leftFrom: null | "AAAA-MM-DD" }],
+  statuses:  [{ id, name, color, countsAsWork, position }],
+  shifts:    { "<employeeId>|AAAA-MM-DD": { statusId,
+                                            slots: [{ start: "10:00", end: "18:00" }],
+                                            overtime: { hours: 2, reason: "" } | null } },
+  settings:  { theme: "claro" } }
+```
+
+## 💡 Aparcado
+- Sincronizar entre aparatos con un gist de GitHub (ver «Decisiones» en `CLAUDE.md` por qué no ahora).
+- Total de horas extra del mes por persona (sumar las marcas de las casillas).
+- Botones con los horarios más usados (p. ej. 10–18, 18–02) para poner un turno de un toque.
+- Arrastrar para intercambiar en PC (en móvil se confunde con desplazar).
+- Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
+- Color propio por turno (en gestion-hosteleria existe; aquí la casilla toma el color de la persona o del estado).
+- Para gestion-hosteleria (no es de este repo): en la ventana de la casilla, la casilla de marcar «color propio» parece un segundo selector de color roto.
