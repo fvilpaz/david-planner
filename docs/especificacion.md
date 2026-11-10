@@ -49,35 +49,41 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 
 **Barra**: local y ciudad (un lápiz) y persona (círculo); iniciales automáticas solo con letras y números.
 
-**Fervis** (paso 12): el robot, en la barra de arriba (blanco; centrado desde 900 px de ancho, y junto al círculo de la
-persona en pantallas menores; el nombre del local se abrevia con «…» antes de llegar a él), hace un movimiento al azar, nunca el mismo dos veces seguidas (quieto
-con «reducir movimiento») y abre el chat. Sin clave, lo dice y abre el campo; la clave pegada de un `.env` se limpia;
-lo que no parece una clave no se guarda; «Quitar la clave» la borra. Lo de la clave vive en Ajustes (icono de tres
-barras): el chat solo saluda, y preguntar sin clave abre Ajustes y deja la pregunta escrita. Contesta de lo general y
-de la app. Recibe un mensaje pequeño (personal, estados, puntos de venta, quién trabaja ahora, las fechas de hoy, de
-esta semana, la siguiente y el mes) y **pide lo demás a funciones de la app**, que le dan la respuesta ya calculada:
-`turnos_entre` (turnos día a día, hasta 31 días, de todos o de una persona), `resumen_entre` (por persona y hasta 93
-días: días de turno partido, seguido y de cada estado; **fines de semana completos** sin trabajar, con su motivo, aparte
-de los sábados o domingos sueltos; un día sin nada puesto no cuenta como libre) y `manual_app` (cómo se usa la app).
-Así gasta ~65 % menos de entrada y no cuenta a ojo; reconoce a las personas sin tildes ni mayúsculas; sin personal o sin
-turnos, lo dice. Usa solo los modelos que tiene la cuenta; debajo de cada respuesta, `groq · modelo` (y «(respaldo)»
-si el primero falló). Lo laboral es orientativo (nota en el pie). La papelera borra la conversación (y lo que Fervis recuerda de ella;
-la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?» (no «de los turnos»: suena a que
-no sirve para nada más) y debajo cuatro **chips** con preguntas de ejemplo que se tocan y se mandan solas (sin clave,
-abren Ajustes y dejan la pregunta escrita); desaparecen al mandar la primera y la papelera las devuelve. Para «quién
-tiene más…», `resumen_entre` trae un RANKING ya hecho por la app con el motivo (vacaciones o baja no es librar). La ventana es grande (hasta 860 px de ancho y el 92 % del alto), con los
-mensajes ocupando lo que sobra. **Guía de la app como glosario** (botón «📖 Guía», con su nombre escrito, en la cabecera —en el móvil la cabecera pasa a dos filas— y chip «Guía de
-la app» del saludo, cuyo saludo es «¡Hola! Soy Fervis, tu asistente personal. Estoy aquí para ayudarte. Puedes escribirme tu consulta directamente aquí abajo o,
-si no sabes por dónde empezar, pulsar el botón «📖 Guía» de arriba.» (lo que hace Fervis ya lo dicen los chips de debajo); acordeón: al abrir un grupo o un tema se
-plieguan los demás; flechita ▸ que gira): una vista aparte, no el chat, con 3 grupos
-(Turnos y casillas, Menú Gestión, Mi local la app y Fervis) que se despliegan en sus temas y estos en sus pasos. No añade
-burbujas, no llama a Groq y **no necesita clave**; el 📖 alterna con el chat. El modelo la consulta por temas con `manual_app`
-para los «cómo hago…» (la app le pone delante los 2 temas de la guía que más coinciden con la pregunta y le prohíbe decir que algo "no se puede" sin comprobarlo)
-y, si piden «la guía» en general, remite al 📖. Una prueba exige que cada botón del menú Gestión y de la
-ventana de la casilla salga en la guía. **«🖨️ Descargar guía (PDF)»**, arriba del glosario: abre la impresión del navegador con una hoja
-con todos los temas abiertos y seguidos, el nombre del local arriba y la dirección de la app abajo; A4 vertical, a dos columnas, en unas 2 hojas,
-sin encabezado ni pie del navegador; sale de los mismos textos (`GUIDE`), así que no se desfasa. Los temas cuelgan de su grupo con sangría y línea
-guía, con hueco entre filas. Solo lee los turnos.
+**Fervis** (pasos 12a–12c). Solo lee los turnos: no cambia nada.
+- *Robot y ventana:* el robot va en la barra de arriba (blanco; centrado desde 900 px de ancho y junto al círculo de la
+  persona en pantallas menores; el nombre del local se abrevia con «…» antes de llegar a él). Al tocarlo hace un
+  movimiento al azar (nunca el mismo dos veces seguidas; quieto con «reducir movimiento») y abre el chat. Ventana grande
+  (hasta 860 px de ancho y el 92 % del alto). En la cabecera: «📖 Guía» (con su nombre escrito), Ajustes (tres barras),
+  papelera y Cerrar; en el móvil la cabecera pasa a dos filas.
+- *Saludo y chips:* «¡Hola! Soy Fervis, tu asistente personal. Estoy aquí para ayudarte. Puedes escribirme tu consulta
+  directamente aquí abajo o, si no sabes por dónde empezar, pulsar el botón «📖 Guía» de arriba.» Debajo, chips con el
+  tono del tema y su emoji: 🕒 «¿Quién trabaja hoy?», 🌴 «¿Quién libra este fin de semana?», ✂️ «¿Quién tiene turno
+  partido y quién seguido esta semana?», 📋 «¿Cómo copio un turno?» y 📖 «Guía de la app». Se tocan y se mandan solos;
+  desaparecen al mandar la primera pregunta y la papelera los devuelve.
+- *Clave de Groq:* vive en Ajustes, nunca en la conversación. Sin clave, el chat solo saluda y preguntar abre Ajustes
+  dejando la pregunta escrita. La clave pegada de un `.env` se limpia; lo que no parece una clave no se guarda;
+  «Quitar la clave» la borra; nunca va en la copia de seguridad.
+- *Qué contesta:* de lo general (lo laboral, orientativo: nota en el pie) y de la app. Recibe un mensaje pequeño
+  (personal, estados, puntos de venta, quién trabaja ahora y las fechas de hoy, esta semana, la siguiente y el mes) y
+  **pide lo demás a funciones de la app**, que le dan la respuesta ya calculada: `turnos_entre` (día a día, hasta 31
+  días, de todos o de una persona), `resumen_entre` (por persona, hasta 93 días: días de turno partido, seguido y de
+  cada estado; **fines de semana completos** sin trabajar, con su motivo, aparte de los sábados o domingos sueltos; un
+  RANKING ya hecho para «quién tiene más…»; un día sin nada puesto no cuenta como libre) y `manual_app` (la guía, por
+  temas). Así gasta ~65 % menos de entrada y no cuenta a ojo. Para «cómo se hace…», la app le pone delante los 2 temas
+  de la guía que más coinciden con la pregunta y le prohíbe decir que algo «no se puede» sin comprobarlo; al explicar
+  cómo se hace algo, termina remitiendo al glosario, y si piden «la guía» en general, remite al 📖. Reconoce a las
+  personas sin tildes ni mayúsculas; sin personal o sin turnos, lo dice.
+- *Modelos:* solo los que tiene la cuenta (`/models`); debajo de cada respuesta, `groq · modelo` (y «(respaldo)» si el
+  primero falló); una respuesta vacía o un error pasan al siguiente modelo, nunca sale «(sin respuesta)». La papelera
+  borra la conversación (y lo que Fervis recuerda de ella; la clave no se toca) y no hace nada con una respuesta en marcha.
+- *Guía de la app (glosario):* con el botón «📖 Guía» o el chip, una vista aparte (no el chat): no añade burbujas, no
+  llama a Groq y **no necesita clave**; el 📖 alterna con el chat. Tres grupos (Turnos y casillas, Menú Gestión, Mi
+  local la app y Fervis) que se despliegan en sus temas, y estos en sus pasos. Cada fila es una tarjeta (círculo con el
+  emoji, título y subtítulo: «5 temas», «6 pasos») con el triangulito ▼ suelto a su derecha; acordeón (al abrir uno se
+  pliegan los demás); los temas cuelgan de su grupo con sangría y línea guía, con hueco entre filas. Arriba,
+  **«🖨️ Descargar guía (PDF)»**: una hoja con todos los temas abiertos, el nombre del local arriba y la dirección de la
+  app abajo; A4 vertical, a dos columnas, unas 2 hojas, sin encabezado ni pie del navegador. Todo sale de los mismos
+  textos (`GUIDE`); una prueba exige que cada botón del menú Gestión y de la ventana de la casilla salga en la guía.
 
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.
 
@@ -123,8 +129,11 @@ En `localStorage` con prefijo `dp_` (el dominio `fvilpaz.github.io` lo comparten
   Groq para contestar (paso 12b; la ventana lo avisa). Repositorio público: solo código y datos inventados.
 - Todo se pinta con `textContent` (nunca `innerHTML`): un nombre con HTML se ve como texto.
 - Un archivo cargado se revisa campo a campo y solo se copian los campos conocidos.
-- Sin librerías de fuera. `audit` (nando-toolkit): git, python y semgrep limpios; 25 avisos de ESLint revisados,
-  falsos positivos (referencia: 25).
+- Sin librerías de fuera. `audit` (nando-toolkit), 10-nov tras Fervis, con control antes (un `innerHTML` metido a
+  propósito → error): git (sin secretos, tampoco en el historial), python y semgrep limpios; ESLint 0 errores y 40
+  avisos, revisados uno a uno: 39 falsos positivos (claves `persona|fecha` hechas por la app, constantes fijas, claves
+  `dp_` en las pruebas) y 1 fallo pequeño de verdad (el recuento por estado de Fervis usaba un objeto normal: un estado
+  llamado «constructor» o «__proto__» se perdería del recuento). **Referencia: 40.** Solo se conecta a `api.groq.com`.
 
 ## Qué queda fuera
 Ver «💡 Aparcado» en `PLAN.md`: sincronizar entre aparatos, total de extras del mes, horarios rápidos, arrastrar para

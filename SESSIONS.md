@@ -1,5 +1,27 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Auditoría entera (Opus): fases 1 y 2
+
+**Hecho**
+- **Fase 1, sin tocar código.** `audit` (nando-toolkit) con **control** antes (copia con `innerHTML = location.hash` → ESLint
+  lo da como error en `fervis.js`): git sin secretos (tampoco en el historial: la clave de Groq nunca se subió), python y
+  semgrep limpios; **ESLint 0 errores y 40 avisos** (la referencia era 25). Los 15 nuevos, uno a uno: 14 falsos positivos
+  (claves `persona|fecha` en `copyShift`, constantes `"full"`/`"loose"`, `PASTE_MESSAGES[result]`, claves `dp_` en las
+  pruebas) y **1 fallo pequeño de verdad**: `fervis.js` cuenta los días por estado en un objeto normal (`{}`) con el nombre
+  del estado como clave → un estado llamado «constructor» o «__proto__» desaparecería del recuento. **Referencia nueva: 40.**
+- Sin restos de código viejo (guía en chat, manual de siete líneas…); nada de `innerHTML`/`eval`; la app solo se conecta a
+  `api.groq.com` (`/chat/completions` y `/models`) y a sus propios archivos; llaves de los CSS cuadradas (302/302 y 4/4); los
+  únicos estilos «sin usar» son los `move-*` del robot, que se forman al vuelo.
+- Privacidad: a Groq van también el nombre del local y el de quien usa la app (`dp_name`, `dp_person`), y el aviso de Ajustes
+  no lo dice. Los nombres del personal van dentro de las instrucciones al modelo (riesgo bajo: Fervis solo lee).
+- **Fase 2, documentos frente al código.** Especificación: el apartado de Fervis era un párrafo que se contradecía (dos saludos,
+  la flechita ▸ que ya no existe, frases cortadas) → reescrito por bloques sin perder datos. `PLAN.md`: el esquema de los datos
+  estaba mal anidado (`places` dentro de los turnos) → corregido según el código; «35 pruebas» → 47. `CLAUDE.md`: «Estructura
+  (prevista…)» → «Estructura», la guía descargable en la fila de Fervis, la paleta de 20. 47/47.
+
+**Siguiente**
+- Fase 3 (lo que decide Nando) y fase 4 (arreglos y refactor, solo lo que apruebe).
+
 ## 10-nov-2026 — Cierre del día y relevo para la auditoría completa
 **Después del cierre (misma tarde):** Nando: «dale» a la guía descargable.
 - **«🖨️ Descargar guía (PDF)»** arriba del glosario: monta una hoja (`#guide-print`) con todos los temas, el nombre del local y la dirección, y abre la

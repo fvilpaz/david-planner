@@ -27,14 +27,14 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 12c | ✅ **Fervis, la segunda vuelta** (Nando, 10-nov, tras probarlo con clave real): las **funciones de la app calculan y el modelo solo las llama** (`turnos_entre`, `resumen_entre` con fines de semana completos y ranking, `manual_app`; −65 % de tokens), chips de preguntas de ejemplo con el tono del tema, **guía de la app como glosario** (botón «📖 Guía»: tarjetas que se despliegan, sin chat, sin Groq y sin clave), guía relevante puesta por la app en las preguntas de «cómo se hace» (el modelo había contestado de memoria que algo «no se podía»), robot en la barra, papelera, saludo propio | Preguntar «quién libra los fines de semana», «cómo cambio el color de una persona» y abrir el 📖 Guía |
 | 13 | ✅ **Copiar a…** (idea de David, vía Nando, 10-nov): en la ventana de una casilla con turno, «📋 Copiar a…» y se tocan las casillas LIBRES que se quieran (otras personas, otros días, otras semanas); copia estado, los dos tramos y el sitio, sin horas extra; no pisa lo ocupado; «Deshacer» la última y «Hecho» para terminar | Copiar un turno partido a tres días, ver que no pisa uno ocupado y deshacer |
 
-## Propuesta de datos (a confirmar en el paso 3; código en inglés)
+## Forma de los datos (la del código; `js/storage.js` completa `places` en los datos de antes del paso 7b)
 ```
 { version: 1,
   employees: [{ id, name, color, position, leftFrom: null | "AAAA-MM-DD" }],
   statuses:  [{ id, name, color, countsAsWork, position }],
+  places:    [{ id, name, position }],
   shifts:    { "<employeeId>|AAAA-MM-DD": { statusId,
-                                            slots: [{ start: "10:00", end: "18:00", placeId? }],  // placeId: paso 7b
-  places:    [{ id, name, position }],  // paso 7b; los datos de antes sin «places» se completan al cargar
+                                            slots: [{ start: "10:00", end: "18:00", placeId? }],
                                             overtime: { hours: 2, reason: "" } | null } } }
 ```
 El tema va aparte, en `dp_theme`: es de cada aparato y se tiene que leer antes de pintar la página (si no, se ve
@@ -49,7 +49,7 @@ un parpadeo del tema por defecto).
    semana que se ve (se la **da** de baja; vuelve con «Volver a dar de alta»). Son dos cosas distintas y los verbos lo
    dicen. No cambiar los textos.
 3. **Refactor de las tres ventanas** (Personal, Estados, Puntos de venta comparten esqueleto): ¿se junta ahora, con
-   las 35 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
+   las 47 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
 4. **¿Qué ve David la primera vez?** Hoy, Camarero 1–4 sin turnos. ¿Le preparas tú su personal y le pasas el
    archivo de copia para que lo cargue, o lo rellena él?
 5. **Saltos de línea (CRLF):** git avisa en cada commit («LF will be replaced by CRLF»). Un `.gitattributes` con
