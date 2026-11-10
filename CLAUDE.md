@@ -31,7 +31,8 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | Puntos de venta | Lista editable (Chiringuito, Cafetería, Pub…). Un «Dónde» por tramo. Se ve como **texto pequeño debajo de la hora**, no con colores y leyenda (el color ya es la persona o el estado; en blanco y negro el texto sigue ahí). Con la lista vacía no aparece nada. |
 | Menú «Gestión» | Imprimir / PDF · Copiar la semana anterior (en 1–8 semanas) · Personal · Estados · Puntos de venta · Tema · Copia de seguridad. |
 | Copiar semanas | Como `gestion-hosteleria`: la semana anterior a la que se ve se repite en esta y en las siguientes (1–8), **solo en casillas vacías** y sin quien esté de baja en la semana de destino. |
-| Personal | Añadir, nombre, color, orden (número o arrastrar por ⠿), **dar de baja desde una semana** (sigue en las anteriores) y volver a dar de alta. |
+| Personal | La primera vez: **Camarero 1–4** sin turnos (se renombran tocando el nombre). Añadir, nombre, color (paleta sin fucsia), orden (número o arrastrar por ⠿). **Quitar**: sin ningún turno se borra del todo; con turnos, **se da de baja desde la semana que se ve** (sigue en las anteriores) y se puede volver a dar de alta. |
+| Ejemplo | Los 8 inventados solo con **`?demo`** en la dirección, guardados aparte (`dp_demo_data`): nunca tocan los datos de verdad. El título dice «· ejemplo». |
 | Temas | **Claro, Lino, Oscuro y Carbón** (colores de `gestion-hosteleria/app/core/static/core/themes.css`). |
 | PDF | Imprimir del navegador («Guardar como PDF»), **A4 apaisado**, siempre en colores claros. Sin PNG ni jsPDF. |
 | Footer | El de Nando, como en health-tracker: «David Planner © 2026 · Fernando Vilas Paz» + GitHub, LinkedIn y CV. |

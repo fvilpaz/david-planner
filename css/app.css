@@ -174,6 +174,26 @@ button.danger { background: var(--error); color: var(--on-error); }
 .swap-bar[hidden], .swap-bar button[hidden] { display: none; }
 .swap-bar span { flex: 1; min-width: 12rem; }
 
+/* Nombre en el cuadrante: se toca para editar a la persona (sin aspecto de botón, pero con zona táctil y foco) */
+.name-button { width: 100%; min-height: 40px; padding: 0 .25rem; background: transparent; color: inherit;
+               font: inherit; font-weight: 600; border-radius: 8px; }
+.name-button:hover { outline: 2px solid var(--primary); }
+
+/* Ventana «Personal»: lista de personas y ficha con su paleta de colores */
+.staff-view { display: grid; gap: 1rem; }
+.staff-view[hidden] { display: none; }
+.staff-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.staff-row { width: 100%; display: flex; align-items: center; gap: .75rem; text-align: left; padding: 0 1rem;
+             background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.staff-row small { margin-left: auto; color: var(--muted); }
+.staff-row.left { opacity: .65; }  /* de baja */
+.swatch { display: inline-block; width: 16px; height: 16px; border-radius: 50%; flex: none; background: var(--swatch); }
+.palette { display: flex; flex-wrap: wrap; gap: .5rem; }
+.palette button { width: 44px; min-height: 44px; padding: 0; border-radius: 50%; background: var(--swatch);
+                  border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--border); }
+.palette button[aria-pressed=true] { box-shadow: 0 0 0 3px var(--text); }  /* el elegido */
+.help[hidden] { display: none; }
+
 /* Footer de Nando, como el de health-tracker */
 .app-footer { text-align: center; padding: 16px 20px; font-size: .75rem; color: var(--muted);
               border-top: 1px solid var(--border); }

@@ -58,6 +58,7 @@
         <summary>Gestión</summary>
         <div class="menu-list">
           <button type="button" class="secondary" id="print-button">🖨️ Imprimir / PDF</button>
+          <button type="button" class="secondary" id="staff-button">👥 Personal</button>
           <!-- Plegado: con las fichas siempre a la vista, un toque que iba a otro sitio caía en un tema -->
           <details class="menu-group">
             <summary>🎨 Tema</summary>
@@ -132,6 +133,36 @@
     </form>
   </dialog>
 
+  <!-- Ventana «Personal» (staff.js): la lista y, al tocar a alguien o «Añadir», su ficha -->
+  <dialog id="staff-dialog" class="dialog" aria-labelledby="staff-title">
+    <div class="dialog-form">
+      <div class="dialog-head">
+        <h2 id="staff-title">Personal</h2>
+        <button type="button" class="secondary" data-close>Cerrar</button>
+      </div>
+      <div id="staff-list-view" class="staff-view">
+        <ul class="staff-list" id="staff-list"></ul>
+        <button type="button" id="staff-add">+ Añadir persona</button>
+      </div>
+      <form id="staff-form" class="staff-view" hidden novalidate>
+        <label class="field">Nombre
+          <input id="staff-name" maxlength="40" autocomplete="off" required>
+        </label>
+        <fieldset class="slots">
+          <legend>Color en el cuadrante</legend>
+          <div class="palette" id="staff-palette"></div>
+        </fieldset>
+        <p class="help" id="staff-note" hidden></p>
+        <p class="error" id="staff-error" role="alert" hidden></p>
+        <div class="form-actions">
+          <button type="submit">Guardar</button>
+          <button type="button" class="secondary" id="staff-back">‹ Volver</button>
+          <button type="button" class="danger" id="staff-remove">Quitar</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
   <!-- Aviso de «Intercambiar con…» (swap.js): abajo, al alcance del pulgar en el móvil -->
   <div id="swap-bar" class="swap-bar no-print" role="status" hidden>
     <span id="swap-text"></span>
@@ -155,5 +186,6 @@
   <script src="js/app.js"></script>
   <script src="js/cell.js"></script>
   <script src="js/swap.js"></script>
+  <script src="js/staff.js"></script>
 </body>
 </html>

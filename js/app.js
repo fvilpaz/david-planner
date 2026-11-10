@@ -30,7 +30,12 @@ window.Schedule = (function () {
     return Dates.weekStart(asked || new Date());
   }
 
-  function weekLink(monday) { return "?week=" + Dates.toIso(monday); }
+  // Enlace a una semana conservando lo demás de la dirección (así «?demo» no se pierde al pasar de semana)
+  function weekLink(monday) {
+    const params = new URLSearchParams(window.location.search);
+    params.set("week", Dates.toIso(monday));
+    return "?" + params.toString();
+  }
 
   // Un tramo pintado en su color: trabajando, el de la persona; libre, vacaciones…, el del estado (como gestion-hosteleria)
   function chip(text, color) {
@@ -84,7 +89,9 @@ window.Schedule = (function () {
     const today = Dates.toIso(new Date());
 
     title.textContent = weekRange.formatRange(days[0], days[6]);
-    document.getElementById("today-link").hidden = Dates.toIso(monday) === Dates.toIso(Dates.weekStart(new Date()));
+    const todayLink = document.getElementById("today-link");
+    todayLink.hidden = Dates.toIso(monday) === Dates.toIso(Dates.weekStart(new Date()));
+    todayLink.href = weekLink(Dates.weekStart(new Date()));
     document.getElementById("print-week").textContent = title.textContent;  // el nombre del local lo pone brand.js
     picker.value = Dates.toIso(monday);
     document.getElementById("prev-week").href = weekLink(Dates.addDays(monday, -7));
@@ -101,11 +108,20 @@ window.Schedule = (function () {
     table.appendChild(el("thead")).append(headRow);  // appendChild devuelve el nodo añadido; append no devuelve nada
 
     const body = table.appendChild(el("tbody"));
-    const employees = data.employees.slice().sort(function (a, b) { return a.position - b.position; });
+    // Quien está de baja desde una semana no sale de esa semana en adelante, pero sí en las anteriores (histórico)
+    const isoMonday = Dates.toIso(monday);
+    const employees = data.employees
+      .filter(function (e) { return !e.leftFrom || e.leftFrom > isoMonday; })
+      .sort(function (a, b) { return a.position - b.position; });
     employees.forEach(function (employee) {
       const row = body.appendChild(el("tr"));
-      const name = row.appendChild(el("th", "", employee.name));
+      const name = row.appendChild(el("th"));
       name.scope = "row";
+      // El nombre se toca para editar a la persona (staff.js)
+      const nameButton = name.appendChild(el("button", "name-button", employee.name));
+      nameButton.type = "button";
+      nameButton.dataset.employee = employee.id;
+      nameButton.setAttribute("aria-label", "Editar a " + employee.name);
       days.forEach(function (day) {
         row.appendChild(el("td", Dates.toIso(day) === today ? "today" : "")).append(cell(employee, day));
       });
@@ -146,6 +162,21 @@ window.Schedule = (function () {
     return saved;
   }
 
+  // Cambios en el personal (staff.js): `change` modifica la lista; si el navegador no deja guardar, se deshace.
+  function saveEmployees(change) {
+    const before = JSON.parse(JSON.stringify(data.employees));
+    change(data.employees);
+    const saved = window.Store.save(data);
+    if (!saved) { data.employees = before; }
+    render();
+    return saved;
+  }
+
+  // ¿Tiene algún turno, en cualquier semana? (sin turnos se puede borrar del todo; con turnos, solo dar de baja)
+  function hasShifts(employeeId) {
+    return Object.keys(data.shifts).some(function (key) { return key.split("|")[0] === employeeId; });
+  }
+
   // Tras cerrar la ventana, el foco vuelve a la casilla (la de antes se sustituyó al repintar)
   function focusCell(key) {
     const button = grid.querySelector('[data-key="' + CSS.escape(key) + '"]');
@@ -153,6 +184,8 @@ window.Schedule = (function () {
   }
 
   grid.addEventListener("click", function (event) {
+    const nameButton = event.target.closest("button.name-button");
+    if (nameButton) { window.Staff.edit(nameButton.dataset.employee); return; }
     const button = event.target.closest("button.cell");
     if (!button) { return; }
     if (window.Swap && window.Swap.pick(button.dataset.key)) { return; }  // en modo «Intercambiar con…», no se abre la ventana
@@ -179,9 +212,15 @@ window.Schedule = (function () {
     if (day) { window.location.search = weekLink(Dates.weekStart(day)); }
   });
 
+  // En modo ejemplo («?demo») el título lo dice, para no confundirlo con los datos de verdad
+  if (window.Store.DEMO) { document.querySelector(".section-header-title").textContent += " · ejemplo"; }
+
   render();
   return {
     shiftKey: shiftKey,
+    shownMonday: shownMonday,
+    saveEmployees: saveEmployees,
+    hasShifts: hasShifts,
     statusOf: statusOf,
     getData: function () { return data; },
     update: update,

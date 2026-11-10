@@ -1,4 +1,5 @@
-// Datos de ejemplo INVENTADOS (ninguna persona real). En el paso 3 se sustituyen por lo guardado en el navegador.
+// Datos de ejemplo INVENTADOS (ninguna persona real): solo se ven abriendo la app con «?demo» (storage.js los guarda
+// aparte, en «dp_demo_data»). Abajo, PALETTE y STARTER_DATA: lo que ve David la primera vez.
 // Forma de los datos: la propuesta de PLAN.md. Los turnos se generan para esta semana y la anterior a partir de un
 // patrón semanal por persona (de lunes a domingo): «10-18» = un tramo, «10-14,18-22» = turno partido,
 // «18-02» = acaba al día siguiente, y si no es un horario, el id de un estado (off, vacation, sick).
@@ -54,3 +55,17 @@ window.DEMO_DATA = (function () {
 
   return { version: 1, employees: employees, statuses: statuses, shifts: shifts };
 })();
+
+// Los colores que se ofrecen para el personal: bien distintos entre sí y sin fucsia ni rosas (son el aviso de horas extra)
+window.PALETTE = ["#2c7be5", "#e67e22", "#27ae60", "#8e44ad", "#16a085", "#d35400", "#c0392b", "#7f8c8d", "#2c3e50", "#b7950b"];
+
+// Lo que ve David la primera vez: los estados y cuatro camareros genéricos sin turnos, para que vea la forma del
+// cuadrante y solo tenga que cambiar los nombres (tocando el nombre). Idea de Nando, 10-nov-2026.
+window.STARTER_DATA = {
+  version: 1,
+  statuses: window.DEMO_DATA.statuses,
+  employees: [1, 2, 3, 4].map(function (n) {
+    return { id: "e" + n, name: "Camarero " + n, color: window.PALETTE[n - 1], position: n - 1, leftFrom: null };
+  }),
+  shifts: {},
+};

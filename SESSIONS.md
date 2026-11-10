@@ -1,5 +1,30 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 6a: Personal
+
+**Hecho**
+- `js/staff.js` (ventana Personal: lista y ficha con nombre y paleta), `PALETTE` y `STARTER_DATA` en `demo-data.js`,
+  `storage.js` con modo ejemplo (`?demo` → `dp_demo_data`), en `app.js` nombres que se tocan, filtro de bajas,
+  `saveEmployees()` (deshace si no se puede guardar), `hasShifts()` y enlaces de semana que conservan `?demo`.
+- Verificado: arranque con Camarero 1–4 y casillas vacías; renombrar tocando el nombre (espacios de sobra limpios,
+  color cambiado, guardado); nombre vacío → aviso; añadir desde Gestión; `<b>Pedro</b>` se ve como texto; quitar sin
+  turnos pide segundo toque y borra; con turnos → «Dar de baja desde el 9 nov 2026», desaparece esta semana y sigue
+  en la anterior con su turno; en la lista, atenuado «de baja desde…»; volver a dar de alta; sin espacio → nada
+  cambia; `?demo`: 8 personas, «· ejemplo», datos reales intactos, sigue en ejemplo al pasar de semana. Móvil: lista
+  y ficha bien. Consola limpia.
+
+**Decidido**
+- La primera vez, Camarero 1–4 (Nando): David ve la forma del cuadrante y solo cambia nombres.
+- Quitar sin turnos = borrar del todo (no hay histórico); con turnos = baja desde la semana que se ve.
+- El ejemplo, solo con `?demo` y en su propia clave: enseñar la app nunca toca los datos de verdad.
+- Paso 6 partido en 6a (esto) y 6b (orden).
+
+**Aprendido**
+- **El foco solo se puede dar a algo visible:** `input.focus()` antes de `dialog.showModal()` no hace nada.
+
+**Siguiente**
+- Paso 6b: orden del personal (número y ⠿).
+
 ## 10-nov-2026 — Paso 5: «Intercambiar con…»
 
 **Hecho**
