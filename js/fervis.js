@@ -237,7 +237,7 @@ window.Fervis = (function () {
 
   function runTool(name, args) {
     const data = window.Schedule.getData();
-    if (name === "manual_app") { return MANUAL; }
+    if (name === "manual_app") { return manual(args && args.tema); }
     if (name !== "turnos_entre" && name !== "resumen_entre") { return "No existe esa herramienta."; }
     const asked = range(args, name === "resumen_entre" ? MAX_SUMMARY_DAYS : MAX_DAYS);
     if (asked.error) { return asked.error; }
@@ -246,16 +246,103 @@ window.Fervis = (function () {
     return name === "turnos_entre" ? rangeLines(data, asked.from, asked.days, who) : summaryLines(data, asked.from, asked.days, who);
   }
 
-  const MANUAL = [
-    "Cómo se usa la app (para explicarlo si preguntan):",
-    "- Cuadrante semanal, de lunes a domingo: ‹ y › cambian de semana, tocar el título abre el calendario, «Hoy» vuelve a esta semana.",
-    "- Tocar una casilla abre su ventana: estado (Trabajo, Libre, Vacaciones…), horario (si el fin es antes que el inicio, acaba al día siguiente), «+ Segundo tramo» para el turno partido, «Dónde» (punto de venta) y horas extra con su motivo. «Guardar»; «Vaciar» la deja vacía.",
-    "- «⇄ Intercambiar con…» (en la ventana de una casilla) y tocar otra casilla: se cambian, también entre personas o semanas; «Deshacer» unos segundos.",
-    "- Tocar el nombre de una persona en el cuadrante abre su ficha.",
-    "- Menú «Gestión»: Imprimir / PDF; Copiar la semana anterior (en 1 a 8 semanas, solo en casillas vacías); Personal (añadir, nombre, color y orden arrastrando ⠿ o con el número; «Quitar»: sin turnos se borra, con turnos deja de salir desde la semana que se ve); Estados; Puntos de venta; Copia de seguridad (descargar y cargar el archivo; copias automáticas semanales); Tema.",
-    "- El lápiz de arriba a la izquierda cambia el nombre del local y la ciudad; el círculo de la derecha, el nombre de quien la usa.",
-    "- Los datos viven solo en este navegador: conviene descargar la copia de seguridad a menudo y guardarla fuera del móvil.",
-  ].join("\n");
+  // La guía de la app, por temas y en pasos. Sale de dos formas: el botón 📖 y los chips la enseñan SIN el modelo (la responde la
+  // app: instantánea, gratis y sin clave de Groq), y el modelo la consulta con manual_app para los «cómo hago…». Si cambia algo de
+  // la app, se cambia aquí: una prueba comprueba que cada botón del menú y de la casilla sale en la guía. Cada tema: id, emoji,
+  // título y pasos.
+  const GUIDE = [
+    ["empezar", "🧭", "Moverse por el cuadrante", [
+      "El cuadrante muestra una semana, de lunes a domingo.",
+      "‹ y › cambian de semana.",
+      "Toca el título (con el 📅) para abrir un calendario y saltar a cualquier fecha.",
+      "«Hoy» vuelve a esta semana (solo sale si estás en otra).",
+      "Los nombres y los días se quedan fijos al deslizar.",
+      "Toca una casilla para editarla y un nombre para abrir la ficha de esa persona."]],
+    ["casilla", "✏️", "Poner o cambiar un turno", [
+      "Toca la casilla del día y la persona.",
+      "Elige el Estado (Trabajo, Libre, Vacaciones, Baja…).",
+      "Si es de trabajo: pon inicio y fin (si el fin es antes que el inicio, acaba al día siguiente: 22:00–02:00).",
+      "«+ Segundo tramo» para un turno partido.",
+      "«Dónde» elige el punto de venta (si los has creado).",
+      "Guardar. «Vaciar» deja la casilla en blanco."]],
+    ["horas_extra", "⏱️", "Horas extra", [
+      "En la ventana de la casilla, en «Horas extra», pon cuántas: de 0,5 a 16, con coma o punto, en medias horas.",
+      "Si quieres, escribe el motivo.",
+      "En el cuadrante, la casilla lleva una franja fucsia a la derecha con «+2 h extra»; también sale al imprimir.",
+      "Vacío = sin horas extra."]],
+    ["intercambiar", "⇄", "Intercambiar dos turnos", [
+      "Abre una casilla y pulsa «⇄ Intercambiar con…».",
+      "Toca la otra casilla: de otra persona, otro día o incluso otra semana.",
+      "Se cambian los dos turnos, con sus horas extra y su sitio. Si la otra está vacía, el turno se mueve.",
+      "«Deshacer» unos segundos; «Cancelar» o tocar la misma casilla lo anula."]],
+    ["copiar_turno", "📋", "Copiar un turno a otras casillas", [
+      "Abre una casilla con turno y pulsa «📋 Copiar a…».",
+      "Toca las casillas libres donde lo quieras (de cualquier persona, día o semana).",
+      "Cada una recibe el estado, el horario y el sitio, sin horas extra.",
+      "Lo que ya tiene algo no se pisa.",
+      "«Deshacer» quita la última copia; «Hecho» termina."]],
+    ["copiar_semanas", "🗓️", "Copiar semanas", [
+      "Gestión → «Copiar la semana anterior».",
+      "Elige en cuántas semanas (de 1 a 8) y pulsa Copiar.",
+      "La semana anterior a la que ves se repite en esta y en las siguientes.",
+      "Solo en casillas vacías, sin horas extra y sin quien ya no trabaje aquí; el sitio sí se copia."]],
+    ["personal", "👥", "Personal", [
+      "Gestión → «Personal»: la lista. «+ Añadir persona».",
+      "Toca a alguien para cambiar su nombre y su color (hay 20).",
+      "El orden: arrastra el ⠿ o escribe el número del puesto.",
+      "«Quitar»: sin turnos se borra; con turnos, «Dar de baja desde el…» (la semana que ves): deja de salir desde entonces y se conserva el histórico. «Volver a dar de alta» la recupera.",
+      "La primera vez salen «Camarero 1» a «Camarero 4»: renómbralos tocando el nombre."]],
+    ["estados", "🏷️", "Estados (Libre, Vacaciones, Baja…)", [
+      "Gestión → «Estados»: los tipos de casilla.",
+      "Vienen Trabajo, Libre, Vacaciones y Baja (baja médica). Puedes crear más, como «Asuntos propios».",
+      "Cada estado tiene nombre, color y si «Cuenta como trabajo» (lleva horario y horas extra y usa el color de la persona; los demás usan su propio color).",
+      "El primero es el que sale al abrir una casilla vacía.",
+      "Uno que ya se usa no se puede quitar ni cambiar si cuenta como trabajo."]],
+    ["puntos_de_venta", "📍", "Puntos de venta", [
+      "Gestión → «Puntos de venta»: crea los sitios (Chiringuito, Cafetería, Pub…).",
+      "Hasta que no haya uno, «Dónde» no sale en la casilla.",
+      "Con puntos creados, cada tramo tiene su «Dónde» y el nombre sale pequeño debajo de la hora.",
+      "Uno en uso no se puede quitar."]],
+    ["imprimir", "🖨️", "Imprimir o guardar en PDF", [
+      "Gestión → «Imprimir / PDF» abre la impresión del navegador con la semana que ves.",
+      "Sale en una hoja A4 apaisada y siempre en colores claros.",
+      "Para guardar un PDF, elige «Guardar como PDF» como destino.",
+      "También se lee bien en blanco y negro (se pierde el color por persona)."]],
+    ["copia_seguridad", "💾", "Copia de seguridad", [
+      "Gestión → «Copia de seguridad».",
+      "«Descargar copia» guarda un archivo con todo: guárdalo también fuera del móvil (Drive, correo, el PC).",
+      "«Cargar una copia…» lo recupera, pide confirmación y descarga antes lo que había.",
+      "Hay copias automáticas dentro del navegador: una por semana, las 5 últimas, con «Recuperar».",
+      "Si pasan 7 días sin descargar copia, sale un aviso arriba.",
+      "Los datos viven solo en el navegador de ese aparato: si se borran, se pierden."]],
+    ["temas", "🎨", "Temas de color", [
+      "Gestión → «Tema»: Claro, Lino, Oscuro y Carbón.",
+      "Se recuerda en cada aparato.",
+      "Al imprimir siempre sale en claro."]],
+    ["local_y_persona", "🏢", "Nombre del local y de la persona", [
+      "Arriba a la izquierda, el cuadrado con el lápiz cambia el nombre del local y la ciudad (las iniciales salen solas).",
+      "Arriba a la derecha, el círculo con el lápiz cambia el nombre de quien usa la app."]],
+    ["instalar", "📲", "Instalar la app y usarla sin conexión", [
+      "Se puede instalar como una aplicación: en el navegador, menú → «Instalar aplicación» o «Añadir a la pantalla de inicio» (depende del navegador).",
+      "Una vez instalada, abre sin conexión.",
+      "Fervis es lo único que necesita internet."]],
+    ["fervis", "🤖", "Qué puede hacer Fervis", [
+      "Se abre con el robot de arriba.",
+      "Dice quién trabaja ahora o cualquier día y qué turno tiene cada persona.",
+      "Cuenta: turnos partidos o seguidos, fines de semana libres, vacaciones, bajas.",
+      "Explica cómo se usa la app y charla de cosas generales (contratos, descansos…), siempre orientativo.",
+      "Solo lee los turnos: no cambia nada.",
+      "Necesita la clave gratuita de Groq: icono de tres barras → Ajustes (se crea en console.groq.com).",
+      "La papelera borra la conversación. Con muchas preguntas seguidas, el plan gratuito puede pedir esperar un minuto."]],
+  ];
+
+  // Para el modelo (manual_app): el tema como texto seguido, o el índice si no hay tema o no existe
+  function manual(topic) {
+    const wanted = norm(topic).replace(/[^a-z_]/g, "_");
+    const found = GUIDE.find(function (item) { return item[0] === wanted; });
+    if (found) { return found[2] + ": " + found[3].join(" "); }
+    return "Temas de la guía (pídelos uno a uno con manual_app y «tema»): " + GUIDE.map(function (item) { return item[0] + " (" + item[2] + ")"; }).join("; ") + ".";
+  }
 
   function system(model) {
     return "Eres Fervis, el asistente personal de quien usa «David Planner», la app de turnos de este local de hostelería. " +
@@ -266,7 +353,7 @@ window.Fervis = (function () {
       "inventes ni lo cuentes tú a ojo: turnos_entre da los turnos concretos (qué turno tiene alguien, quién trabaja un " +
       "día; con «persona» solo los de esa persona), resumen_entre da lo ya contado por persona (días de turno partido o " +
       "seguido, libres, vacaciones, bajas, fines de semana completos sin trabajar y sábados o domingos sueltos) y " +
-      "manual_app explica cómo se usa la app. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
+      "manual_app(tema) es la guía de la app: cómo se hace cada cosa y qué puede hacer cada parte (úsala para todo «cómo hago…» y «qué puedes hacer»; si dudas del tema, sin tema da el índice). Si piden la guía o el manual en general, no la recites: di en una línea que pulsen el botón 📖 de arriba (guía por temas) y, si preguntan algo concreto, explícalo con manual_app. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
       "completos (sábado y domingo) y los días sueltos por separado, sin mezclarlos en «días libres». Para «quién tiene " +
       "más…» usa las líneas RANKING ya calculadas y di siempre el motivo: vacaciones o baja NO es librar. «Sin nada puesto» " +
       "es un día sin planificar: no es libre, dilo aparte. «Esta semana», " +
@@ -291,8 +378,8 @@ window.Fervis = (function () {
       description: "Resumen YA CONTADO por persona entre dos fechas (hasta 93 días): cuántos días de turno partido, de turno seguido y de cada estado (libre, vacaciones, baja…), cuántos fines de semana completos (sábado y domingo) no trabaja y qué sábados o domingos sueltos. Para CONTAR o comparar: «quién ha librado los fines de semana», «cuántos días libra cada uno», «quién tiene turno partido».",
       parameters: { type: "object", required: ["desde", "hasta"], properties: DATE_PARAMS } } },
     { type: "function", function: { name: "manual_app",
-      description: "Cómo se usa la app (casillas, intercambiar, copiar, personal, estados, copias de seguridad…). Para preguntas de «cómo hago…».",
-      parameters: { type: "object", properties: {} } } },
+      description: "La guía de la app, por temas: cómo se hace cada cosa y qué puede hacer cada parte (casillas, intercambiar, copiar, personal, estados, puntos de venta, imprimir, copia de seguridad, temas, instalar, Fervis…). Para «cómo hago…» y «qué puede hacer…». Sin «tema» devuelve el índice.",
+      parameters: { type: "object", properties: { tema: { type: "string", enum: GUIDE.map(function (item) { return item[0]; }), description: "el tema de la guía; si no sabes cuál, no lo pongas y verás el índice" } } } } },
   ];
   const history = [];  // la conversación, para entender «¿y mañana?» (hasta recargar la página)
   let busy = false;
@@ -414,30 +501,54 @@ window.Fervis = (function () {
 
   keyToggle.addEventListener("click", function () { showKeyForm(keyForm.hidden); });
 
-  // Las preguntas de ejemplo, como botones redondos (chips) debajo del saludo: se tocan y se mandan solas. Así quien abre un chat
-  // vacío (David) ve qué puede preguntar sin escribir nada. Desaparecen al mandar la primera pregunta; la papelera las devuelve.
-  // El emoji va aparte (data-icon, se pinta con CSS): no forma parte del texto ni de la pregunta que se manda.
-  const CHIPS = [["🕒", "¿Quién trabaja hoy?"], ["🌴", "¿Quién libra este fin de semana?"],
-    ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"], ["📋", "¿Cómo copio un turno?"]];
+  // Las filas de chips (botones redondos con emoji) que salen en la conversación: preguntas de ejemplo y temas de la guía. Solo hay una
+  // fila a la vez: al mandar una pregunta o elegir algo, la anterior se quita.
+  function clearChips() { messages.querySelectorAll(".fervis-chips").forEach(function (row) { row.remove(); }); }
 
-  function greet() {
-    say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?");
+  function chipRow(items) {  // items: [emoji, texto, qué hacer al tocarlo]
+    clearChips();
     const row = messages.appendChild(document.createElement("li"));
     row.className = "fervis-chips";
-    CHIPS.forEach(function (pair) {
-      const text = pair[1];
+    items.forEach(function (item) {
       const chip = row.appendChild(document.createElement("button"));
       chip.type = "button";
       chip.className = "fervis-chip";  // sin «secondary»: su estilo (fondo transparente) pisaría el del chip
-      chip.dataset.icon = pair[0];
-      chip.textContent = text;
-      chip.addEventListener("click", function () { question.value = text; chat.requestSubmit(); });  // sin clave, abre Ajustes y deja la pregunta escrita
+      chip.dataset.icon = item[0];     // el emoji va aparte, con CSS: no forma parte del texto ni de lo que se manda
+      chip.textContent = item[1];
+      chip.addEventListener("click", item[2]);
     });
     messages.scrollTop = messages.scrollHeight;
   }
 
+  // La guía interactiva: el índice son chips; al tocar un tema, sale solo ese, en pasos. La responde la app (no el modelo): al
+  // instante, sin gastar Groq y sin necesitar clave.
+  function guideIndex() {
+    say("fervis", "📖 Guía de la app. ¿Sobre qué quieres que te explique?");
+    chipRow(GUIDE.map(function (item) { return [item[1], item[2], function () { guideTopic(item[0]); }]; }));
+  }
+
+  function guideTopic(id) {
+    const item = GUIDE.find(function (it) { return it[0] === id; });
+    clearChips();
+    say("david", item[1] + " " + item[2]);
+    say("fervis", item[1] + " " + item[2] + "\n" + item[3].map(function (step) { return "• " + step; }).join("\n"));
+    chipRow([["📖", "Otros temas", guideIndex]]);
+  }
+
+  const QUESTIONS = [["🕒", "¿Quién trabaja hoy?"], ["🌴", "¿Quién libra este fin de semana?"],
+    ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"], ["📋", "¿Cómo copio un turno?"]];
+
+  function greet() {
+    say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar?");
+    chipRow(QUESTIONS.map(function (pair) {
+      return [pair[0], pair[1], function () { question.value = pair[1]; chat.requestSubmit(); }];  // sin clave, abre Ajustes y deja la pregunta escrita
+    }).concat([["📖", "Guía de la app", guideIndex]]));
+  }
+
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
   // la respuesta llegaría a una conversación que ya no existe
+  document.getElementById("fervis-guide").addEventListener("click", guideIndex);
+
   document.getElementById("fervis-clear").addEventListener("click", function () {
     if (busy) { return; }
     history.length = 0;
@@ -456,8 +567,7 @@ window.Fervis = (function () {
       return;
     }
     question.value = "";
-    const chips = messages.querySelector(".fervis-chips");
-    if (chips) { chips.remove(); }
+    clearChips();
     say("david", text);
     busy = true;
     const reply = say("fervis", "Pensando…");

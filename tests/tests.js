@@ -634,7 +634,7 @@
     const only = w.Fervis.tool("turnos_entre", { desde: "2026-11-09", hasta: "2026-11-09", persona: "ANA" });
     ok(only.includes("Ana:") && !only.includes("Luis:"), "solo una persona");
     ok(w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-11-10", persona: "zzz" }).includes("No encuentro a nadie que se llame «zzz»"), "persona que no existe");
-    ok(w.Fervis.tool("manual_app").includes("Gestión"), "el manual es una herramienta");
+    ok(w.Fervis.tool("manual_app", { tema: "estados" }).includes("Asuntos propios"), "la guía por temas es una herramienta");
     ok(w.Fervis.tool("turnos_entre", { desde: "2026-11-09", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "turnos: como mucho 31 días");
     ok(!w.Fervis.tool("resumen_entre", { desde: "2026-11-09", hasta: "2026-12-31" }).includes("Como mucho"), "el resumen admite 93");
   });
@@ -645,6 +645,43 @@
     $("#status-add").click();
     const pressed = $("#status-palette button[aria-pressed=true]");
     equal(pressed.style.getPropertyValue("--swatch"), "#16a085", "el primero de la paleta que no usa nadie (no el siguiente por orden)");
+  });
+
+  test("La guía interactiva: el botón 📖 y el chip enseñan el índice, un tema sale en pasos con «Otros temas», sin clave y sin llamar a Groq", async function () {
+    const w = await open(fixture());  // sin clave
+    let calls = 0;
+    w.fetch = function () { calls++; return Promise.reject(new Error("la guía no debe llamar a Groq")); };
+    w.Fervis.open();
+    $$(".fervis-chip").pop().click();  // el chip «Guía de la app» del saludo
+    const topics = $$(".fervis-chip").map(function (c) { return c.textContent; });
+    ok(topics.length >= 14 && topics[0] === "Moverse por el cuadrante" && topics.includes("Copiar un turno a otras casillas"), "el índice: " + topics.length + " temas");
+    $$(".fervis-chip").find(function (c) { return c.textContent === "Copiar un turno a otras casillas"; }).click();
+    const msgs = $$(".fervis-msg").map(function (m) { return m.textContent; });
+    ok(msgs[msgs.length - 2] === "📋 Copiar un turno a otras casillas" && msgs[msgs.length - 1].startsWith("📋 Copiar un turno a otras casillas\n• Abre una casilla con turno"), "lo tocado y la respuesta en pasos");
+    equal($$(".fervis-chip").map(function (c) { return c.textContent; }), ["Otros temas"], "debajo, solo «Otros temas»");
+    $$(".fervis-chip")[0].click();
+    ok($$(".fervis-chip").length >= 14, "«Otros temas» vuelve al índice");
+    $("#fervis-clear").click();
+    $("#fervis-guide").click();  // el botón de la cabecera
+    ok($$(".fervis-chip").length >= 14 && $$(".fervis-msg").pop().textContent.startsWith("📖 Guía de la app"), "el botón 📖 también");
+    equal(calls, 0, "la guía no llama a Groq (y funciona sin clave)");
+  });
+
+  test("La guía de Fervis: cada tema responde, el índice los lista todos y cada botón del menú Gestión y de la casilla sale en ella", async function () {
+    const w = await open(fixture());
+    const index = w.Fervis.tool("manual_app");
+    const topics = index.split("»): ")[1].split("; ").map(function (item) { return item.split(" (")[0]; });
+    ok(topics.length >= 14, "el índice lista los temas: " + topics.length);
+    const all = topics.map(function (id) { return w.Fervis.tool("manual_app", { tema: id }); });
+    ok(all.every(function (text) { return text.length > 80 && !text.startsWith("Temas de la guía"); }), "cada tema contesta con su texto");
+    equal(w.Fervis.tool("manual_app", { tema: "no_existe" }).startsWith("Temas de la guía"), true, "un tema desconocido da el índice");
+    const guide = all.join(" ");
+    // cada botón del menú Gestión y de la ventana de la casilla tiene que estar explicado (si se añade uno y se olvida la guía, falla)
+    const label = function (el) { return el.textContent.replace(/^[^\p{L}]+/u, "").replace(/[^\p{L}\p{N}…+ ⇄]+$/u, "").trim(); };
+    const buttons = $$(".manage-menu .menu-list > button, .manage-menu .menu-list > details > summary, #cell-swap, #cell-copy, #cell-clear, #add-slot").map(label);
+    ok(buttons.length >= 11, "se leyeron los botones: " + buttons.join(" | "));
+    const missing = buttons.filter(function (b) { return !guide.includes(b.replace(/^\+ /, "").replace(/^⇄ /, "").replace(/ \(turno partido\)?$/, "")); });
+    equal(missing, [], "botones que la guía no nombra");
   });
 
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
@@ -711,9 +748,9 @@
     let w = await open(fixture());  // sin clave
     w.Fervis.open();
     equal($$(".fervis-chip").map(function (c) { return c.textContent; }),
-      ["¿Quién trabaja hoy?", "¿Quién libra este fin de semana?", "¿Quién tiene turno partido y quién seguido esta semana?", "¿Cómo copio un turno?"], "los cuatro chips");
+      ["¿Quién trabaja hoy?", "¿Quién libra este fin de semana?", "¿Quién tiene turno partido y quién seguido esta semana?", "¿Cómo copio un turno?", "Guía de la app"], "los chips: cuatro preguntas y la guía");
     $$(".fervis-chip")[0].click();
-    ok(!$("#fervis-key-form").hidden && $("#fervis-question").value === "¿Quién trabaja hoy?" && $$(".fervis-chip").length === 4 && $$(".fervis-msg").length === 1,
+    ok(!$("#fervis-key-form").hidden && $("#fervis-question").value === "¿Quién trabaja hoy?" && $$(".fervis-chip").length === 5 && $$(".fervis-msg").length === 1,
       "sin clave: abre Ajustes, deja la pregunta escrita y los chips siguen");
     w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
     const bodies = [];
@@ -729,7 +766,7 @@
     equal([$$(".fervis-msg").map(function (m) { return m.firstChild.textContent; }).slice(1, 3), bodies[0].messages[bodies[0].messages.length - 1].content],
       [["¿Cómo copio un turno?", "Nadie."], "¿Cómo copio un turno?"], "la pregunta del chip se manda tal cual");
     $("#fervis-clear").click();
-    equal($$(".fervis-chip").length, 4, "la papelera devuelve los chips");
+    equal($$(".fervis-chip").length, 5, "la papelera devuelve los chips");
   });
 
   test("Fervis: la papelera borra la conversación (también lo que recuerda) y deja la clave; con una respuesta en marcha no hace nada", async function () {
