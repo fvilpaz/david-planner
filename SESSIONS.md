@@ -1,5 +1,26 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Cierre del día y relevo para la auditoría completa
+
+**Hecho**
+- Todo lo de hoy, subido a GitHub de una vez (era «no subas todavía; cuando esté todo hecho, commit y push»). 46 pruebas en verde.
+- Nando pasa a **Opus** para una **auditoría entera**: revisar los `.md` (`CLAUDE.md`, `PLAN.md`, `SESSIONS.md`, `docs/especificacion.md`), la
+  **especificación**, la **clarificación** y la **refactorización**, y pasar `audit` (nando-toolkit).
+
+**Para quien audite (lo que yo sé que conviene mirar)**
+- `js/fervis.js` ha crecido mucho hoy (~700 líneas: datos, herramientas, guía, glosario, chips, Groq, claves, robot). Candidato claro a
+  partirse; no se ha hecho por la regla de Nando (refactor solo si lo pide).
+- `js/app.js` mezcla finales de línea CRLF y LF (hay que tenerlo en cuenta al editarlo con scripts).
+- Las tres ventanas Personal, Estados y Puntos de venta siguen repitiendo esqueleto (pendiente «Para decidir» nº 3 de `PLAN.md`).
+- Falta `.gitattributes` (`* text=auto eol=lf`): git avisa de LF/CRLF en cada commit (pendiente «Para decidir» nº 5).
+- `audit`: la última pasada fue antes de Fervis; no se ha vuelto a pasar con la clave de Groq, las llamadas a `api.groq.com` y el glosario.
+- Sin comprobar en un móvil real: `persist()`, instalar y abrir sin conexión, Fervis con teclado del móvil. Sin cuenta de Groq de David aún.
+- Las pruebas (46) viven en `tests/tests.js`; cada regla nueva se dio por buena tras verla fallar con el código roto (controles).
+
+**Siguiente**
+- La auditoría con Opus. Luego, la cuenta de Groq de David en su móvil y las decisiones que quedan en «❓ Para decidir» de `PLAN.md`.
+
+
 ## 10-nov-2026 — Fervis: la guía, como glosario desplegable
 
 **Hecho (en local; sin subir a GitHub: Nando pidió «no subas todavía, que GitHub vaya lanzándose solo; nosotros currando en local»)**
