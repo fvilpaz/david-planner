@@ -544,7 +544,7 @@
     await wait(1100);  // el movimiento más largo dura 1 s
     ok($("#fervis-dialog").open && !$("#fervis-key-form").hidden, "se abre el chat y, sin clave, el panel de Ajustes");
     equal($$(".fervis-msg").map(function (m) { return m.textContent; }),
-      ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar? Si tienes dudas, pulsa el botón «📖 Guía» de arriba."], "el chat solo saluda");
+      ["¡Hola! Soy Fervis, tu asistente personal. Estoy aquí para ayudarte. Puedes escribirme tu consulta directamente aquí abajo o, si no sabes por dónde empezar, pulsar el botón «📖 Guía» de arriba."], "el chat solo saluda");
     ok($("#fervis-key-state").textContent.includes("Fervis la necesita para contestarte"), "el aviso está en el panel");
     $("#fervis-key-toggle").click();
     ok($("#fervis-key-form").hidden, "el botón de Ajustes cierra el panel");
@@ -656,7 +656,7 @@
     ok($("#fervis-guide-view").hidden && !$("#fervis-messages").hidden, "al abrir, el chat");
     equal($("#fervis-guide").textContent.trim(), "Guía", "el botón de la guía lleva su nombre escrito");
     equal($("#fervis-messages").scrollTop, 0, "el saludo se ve desde su primera línea");
-    ok($(".fervis-msg").textContent.includes("pulsa el botón «📖 Guía» de arriba"), "el saludo remite a la guía");
+    ok($(".fervis-msg").textContent.includes("pulsar el botón «📖 Guía» de arriba"), "el saludo remite a la guía");
     $("#fervis-guide").click();
     ok(!$("#fervis-guide-view").hidden && $("#fervis-messages").hidden && $("#fervis-form").hidden && $("#fervis-key-form").hidden, "se ve el glosario y se esconde el chat");
     equal($$("#fervis-guide-view > details > summary").map(function (x) { return [x.querySelector(".fervis-guide-badge").textContent, x.querySelector(".fervis-guide-title").textContent, x.querySelector(".fervis-guide-sub").textContent]; }),
@@ -839,7 +839,7 @@
     release();
     await wait(100);
     $("#fervis-clear").click();
-    equal($$(".fervis-msg").map(function (m) { return m.textContent; }), ["Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar? Si tienes dudas, pulsa el botón «📖 Guía» de arriba."], "solo el saludo");
+    equal($$(".fervis-msg").map(function (m) { return m.textContent; }), ["¡Hola! Soy Fervis, tu asistente personal. Estoy aquí para ayudarte. Puedes escribirme tu consulta directamente aquí abajo o, si no sabes por dónde empezar, pulsar el botón «📖 Guía» de arriba."], "solo el saludo");
     equal(localStorage.getItem("dp_groq_key"), FAKE_KEY, "la clave sigue");
     await ask("Segunda");
     release();

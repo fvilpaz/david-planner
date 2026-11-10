@@ -608,7 +608,7 @@ window.Fervis = (function () {
     ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"], ["📋", "¿Cómo copio un turno?"]];
 
   function greet() {
-    say("fervis", "Hola, soy Fervis, tu asistente personal. ¿En qué te puedo ayudar? Si tienes dudas, pulsa el botón «📖 Guía» de arriba.");
+    say("fervis", "¡Hola! Soy Fervis, tu asistente personal. Estoy aquí para ayudarte. Puedes escribirme tu consulta directamente aquí abajo o, si no sabes por dónde empezar, pulsar el botón «📖 Guía» de arriba.");
     chipRow(QUESTIONS.map(function (pair) {
       return [pair[0], pair[1], function () { question.value = pair[1]; chat.requestSubmit(); }];  // sin clave, abre Ajustes y deja la pregunta escrita
     }).concat([["📖", "Guía de la app", function () { showGuide(true); }]]));
