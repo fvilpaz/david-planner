@@ -59,7 +59,7 @@ un parpadeo del tema por defecto).
 - Arrastrar para intercambiar en PC (en móvil se confunde con desplazar).
 - Avisar si los dos tramos de un turno partido se pisan (10–14 y 12–16); ahora no se comprueba.
 - En el móvil, abrir la semana actual desplazada hasta hoy (ahora empieza siempre en el lunes).
-- Fervis: botón de «borrar la conversación» (la papelera de la cartera) y otras preguntas rápidas sugeridas.
+- Fervis: preguntas rápidas sugeridas (botones con «¿Quién trabaja ahora?», «¿Quién libra mañana?»…).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
 - Refactor (solo si Nando lo pide): las ventanas Personal, Estados y Puntos de venta repiten el esqueleto de abrir,
   cerrar, volver y guardar (la lista ordenable y la paleta ya son comunes en `lists.js`). Regla de tres: a la tercera

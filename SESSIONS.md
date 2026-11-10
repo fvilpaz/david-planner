@@ -11,7 +11,9 @@
 - «Ahora» lo calcula la app (también el turno de ayer que cruza la medianoche). Historia de la conversación en memoria.
 - Ajustes como en la cartera (idea de Nando): icono de tres barras que abre el panel de la clave; el chat no habla de la
   clave (sin ella, preguntar abre Ajustes y deja la pregunta escrita). Nota laboral orientativa en el pie.
-- Pruebas 30–33 (quién trabaja ahora, avisos, Groq de mentira con 429/401, solo modelos de la cuenta). **Controles:** turno
+- Papelera para empezar una conversación nueva (Nando, como la cartera; prueba 33, control: sin el olvido, la prueba
+  falla). Saludo: «¿En qué te puedo ayudar?».
+- Pruebas 30–34 (quién trabaja ahora, avisos, Groq de mentira con 429/401, solo modelos de la cuenta). **Controles:** turno
   de la medianoche, «ya no trabaja aquí» y salto de modelo (fallan justo esos); luego chat con aviso de clave y lista de
   modelos ignorada (fallan justo esos). Un primer control rompió el archivo (sed mal): no valía, rehecho. 33/33.
 - **Con una clave real** (la de Nando, en el ejemplo con nombres inventados): quién trabaja ahora (Diego, 14:07 ✔),

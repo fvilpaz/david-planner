@@ -295,6 +295,18 @@ window.Fervis = (function () {
 
   keyToggle.addEventListener("click", function () { showKeyForm(keyForm.hidden); });
 
+  function greet() { say("fervis", "Hola, soy Fervis, el asistente de los turnos. ¿En qué te puedo ayudar?"); }
+
+  // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
+  // la respuesta llegaría a una conversación que ya no existe
+  document.getElementById("fervis-clear").addEventListener("click", function () {
+    if (busy) { return; }
+    history.length = 0;
+    messages.replaceChildren();
+    greet();
+    if (readKey()) { question.focus(); }
+  });
+
   chat.addEventListener("submit", async function (event) {
     event.preventDefault();
     const text = question.value.trim();
@@ -348,9 +360,7 @@ window.Fervis = (function () {
   function open() {
     dialog.showModal();
     const key = readKey();
-    if (!messages.children.length) {
-      say("fervis", "Hola, soy Fervis, el asistente de los turnos. ¿Qué quieres saber?");
-    }
+    if (!messages.children.length) { greet(); }
     showKeyForm(!key);
     // En el móvil, el cursor en la casilla saca el teclado y tapa el saludo: ahí se escribe al tocarla (como en la cartera)
     if (key && window.matchMedia("(pointer: fine)").matches) { question.focus(); }

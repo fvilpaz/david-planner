@@ -49,7 +49,8 @@ barras): el chat solo saluda, y preguntar sin clave abre Ajustes y deja la pregu
 de la app (manual, personal, estados, puntos de venta, quién trabaja ahora, esta semana y la siguiente; otras fechas,
 con la consulta `turnos_entre`, hasta 31 días); reconoce a las personas sin tildes ni mayúsculas; sin personal o sin
 turnos, lo dice. Usa solo los modelos que tiene la cuenta; debajo de cada respuesta, `groq · modelo` (y «(respaldo)»
-si el primero falló). Lo laboral es orientativo (nota en el pie). Solo lee los turnos.
+si el primero falló). Lo laboral es orientativo (nota en el pie). La papelera borra la conversación (y lo que Fervis recuerda de ella;
+la clave no se toca) y no hace nada con una respuesta en marcha. Saluda con «¿En qué te puedo ayudar?». Solo lee los turnos.
 
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.
 

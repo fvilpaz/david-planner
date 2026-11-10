@@ -469,7 +469,7 @@
     await wait(1100);  // el movimiento más largo dura 1 s
     ok($("#fervis-dialog").open && !$("#fervis-key-form").hidden, "se abre el chat y, sin clave, el panel de Ajustes");
     equal($$(".fervis-msg").map(function (m) { return m.textContent; }),
-      ["Hola, soy Fervis, el asistente de los turnos. ¿Qué quieres saber?"], "el chat solo saluda");
+      ["Hola, soy Fervis, el asistente de los turnos. ¿En qué te puedo ayudar?"], "el chat solo saluda");
     ok($("#fervis-key-state").textContent.includes("Fervis la necesita para contestarte"), "el aviso está en el panel");
     $("#fervis-key-toggle").click();
     ok($("#fervis-key-form").hidden, "el botón de Ajustes cierra el panel");
@@ -568,6 +568,34 @@
     await wait(300);
     ok($$(".fervis-msg").pop().textContent.includes("no acepta tu clave"), "401: aviso de la clave");
     equal(asked, ["Bearer " + FAKE_KEY], "la lista de modelos se pide una sola vez");
+  });
+
+  test("Fervis: la papelera borra la conversación (también lo que recuerda) y deja la clave; con una respuesta en marcha no hace nada", async function () {
+    const w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
+    const bodies = [];
+    let release = null;
+    w.fetch = function (url, options) {
+      if (url.endsWith("/models")) { return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ data: MODEL_IDS.map(function (id) { return { id: id }; }) }); } }); }
+      bodies.push(JSON.parse(options.body));
+      return new Promise(function (resolve) {
+        release = function () { resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ choices: [{ message: { content: "Respuesta " + bodies.length } }] }); } }); };
+      });
+    };
+    w.Fervis.open();
+    const ask = function (text) { $("#fervis-question").value = text; $("#fervis-form").requestSubmit(); return wait(100); };
+    await ask("Primera");
+    $("#fervis-clear").click();
+    equal($$(".fervis-msg").length, 3, "con una respuesta en marcha, la papelera no hace nada (saludo, pregunta y «Pensando…»)");
+    release();
+    await wait(100);
+    $("#fervis-clear").click();
+    equal($$(".fervis-msg").map(function (m) { return m.textContent; }), ["Hola, soy Fervis, el asistente de los turnos. ¿En qué te puedo ayudar?"], "solo el saludo");
+    equal(localStorage.getItem("dp_groq_key"), FAKE_KEY, "la clave sigue");
+    await ask("Segunda");
+    release();
+    await wait(100);
+    equal(bodies[1].messages.filter(function (m) { return m.role !== "system"; }).map(function (m) { return m.content; }), ["Segunda"],
+      "Fervis ya no recuerda lo anterior");
   });
 
   test("Fervis usa solo los modelos que tiene la cuenta: si falta el primero, no lo prueba ni pone «respaldo»", async function () {
