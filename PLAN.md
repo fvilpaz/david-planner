@@ -36,6 +36,20 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 El tema va aparte, en `dp_theme`: es de cada aparato y se tiene que leer antes de pintar la página (si no, se ve
 un parpadeo del tema por defecto).
 
+## ❓ Para decidir (Nando) — clarificación del 10-nov, al cerrar
+1. **Probar en tu móvil** (yo solo puedo simular ratón): arrastrar ⠿ con el dedo, el calendario al tocar el título,
+   instalarla y ver que abre sin conexión. Con la app instalada, mirar si el navegador acepta proteger los datos
+   (`persist()`); en una pestaña de prueba lo rechaza.
+2. **«Baja» significa dos cosas:** el estado «Baja» (baja médica, en una casilla) y «Dar de baja» en Personal (dejar
+   de trabajar aquí). Propuesta: en Personal, «Ya no trabaja aquí desde el…» / «Vuelve a trabajar aquí». Decides tú.
+3. **Refactor de las tres ventanas** (Personal, Estados, Puntos de venta comparten esqueleto): ¿se junta ahora, con
+   las 26 pruebas de red, o se deja? Funciona igual; solo quitaría repetición.
+4. **¿Qué ve David la primera vez?** Hoy, Camarero 1–4 sin turnos. ¿Le preparas tú su personal y le pasas el
+   archivo de copia para que lo cargue, o lo rellena él?
+5. **Saltos de línea (CRLF):** git avisa en cada commit («LF will be replaced by CRLF»). Un `.gitattributes` con
+   `* text=auto eol=lf` lo dejaría fijo para Windows y WSL. No lo he añadido: es configuración del repo.
+6. **Cierra cualquier pestaña en `localhost:8000`** para que termine de irse el service worker de las pruebas.
+
 ## 💡 Aparcado
 - Sincronizar entre aparatos con un gist de GitHub (ver «Decisiones» en `CLAUDE.md` por qué no ahora).
 - Total de horas extra del mes por persona (sumar las marcas de las casillas).
