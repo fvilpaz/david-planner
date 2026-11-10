@@ -1,5 +1,28 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 13: «Copiar a…»
+
+**Hecho**
+- Idea de David (vía Nando): copiar un turno y pegarlo en casillas libres. Opción A elegida por Nando: botón
+  «📋 Copiar a…» en la ventana de la casilla (solo con turno) y se tocan las casillas libres; **mismo aviso y mismo modo
+  de elegir casilla que Intercambiar** (`swap.js`, modo `copy`), sin archivos nuevos. `Schedule.copyShift` copia estado,
+  los dos tramos y el sitio, sin horas extra; nunca pisa lo ocupado; «Deshacer» quita la última; «Hecho» o Escape
+  termina. El modo sobrevive al cambiar de semana (la casilla de origen está en `sessionStorage`).
+- Pruebas 36 y 37. **Controles** (uno a uno, porque una prueba se para en el primer fallo): copiar las horas extra, pisar
+  una ocupada y «Deshacer» que no quita → falla justo cada una. 37/37.
+- A mano en Chrome (ejemplo): copiar el turno partido de Ana a dos casillas de una semana vacía (marzo de 2027) → 2 y 2
+  tramos con su Pub; en la semana siguiente (ya llena) avisa «ya tiene algo»; deshecho y estado como antes.
+
+**Decidido**
+- La B (fila de días dentro de la ventana) se queda sin hacer: la A cubre más casos con un gesto que David ya conoce.
+
+**Aprendido**
+- `app.js` mezcla finales de línea CRLF y LF: para editarlo con scripts hay que tener cuidado con `
+`.
+
+**Siguiente**
+- Cuenta de Groq de David y probar en su móvil (lista «Para decidir»).
+
 ## 10-nov-2026 — Arreglo: bordes del PDF
 
 **Hecho**

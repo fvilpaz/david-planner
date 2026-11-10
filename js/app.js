@@ -167,6 +167,19 @@ window.Schedule = (function () {
     return saved;
   }
 
+  // «Copiar a…» (paso 13, idea de David): copia el estado, el horario (los dos tramos) y el sitio de una casilla a otra
+  // que esté LIBRE; sin horas extra (son de un día concreto, como al copiar semanas). Devuelve "ok", "empty" (no hay
+  // nada que copiar), "occupied" (la de destino ya tiene algo: nunca se pisa) o "error" (no se pudo guardar: no cambia).
+  function copyShift(fromKey, toKey) {
+    const from = data.shifts[fromKey];
+    if (!from) { return "empty"; }
+    if (data.shifts[toKey]) { return "occupied"; }
+    data.shifts[toKey] = { statusId: from.statusId, slots: from.slots.map(function (slot) { return Object.assign({}, slot); }), overtime: null };
+    if (!window.Store.save(data)) { delete data.shifts[toKey]; render(); return "error"; }
+    render();
+    return "ok";
+  }
+
   // «Copiar la semana anterior» (paso 8, como gestion-hosteleria/scheduling/week.py): la semana anterior a la que se
   // ve se repite en esta y en las siguientes (`weeks`, de 1 a 8), SOLO en casillas vacías, SIN horas extra (son de un
   // día concreto) y SIN quien esté de baja en la semana de destino. Los puntos de venta sí se copian. Todo o nada: si
@@ -289,6 +302,7 @@ window.Schedule = (function () {
     getData: function () { return data; },
     update: update,
     swap: swap,
+    copyShift: copyShift,
     render: render,
     focusCell: focusCell,
   };

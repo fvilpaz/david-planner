@@ -26,6 +26,10 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 - «Intercambiar con…»: se toca otra casilla (cualquier persona y día, también en otra semana); se cambian las dos con
   sus extras y su sitio; con una vacía, el turno se mueve; «Deshacer» 8 s; se cancela con el botón, Escape o la misma
   casilla.
+- «Copiar a…» (solo en una casilla con turno): se tocan las casillas **libres** (cualquier persona, día o semana) y cada
+  una recibe el estado, los dos tramos y el sitio, **sin horas extra**; una casilla con algo no se pisa y lo dice; el
+  aviso sigue hasta «Hecho» o Escape; «Deshacer» quita la última copia (no tras cambiar de semana). Sin espacio en el
+  navegador, no copia y lo dice.
 
 **Gestión**
 - Imprimir / PDF: A4 apaisado, una hoja, siempre en colores claros, con «Turnos · local · semana».
@@ -63,6 +67,8 @@ mensajes ocupando lo que sobra. Solo lee los turnos.
   puntos de venta se abren. [P] `?demo` no toca los datos de verdad.
 - [P] Guardar y recargar. [P] 22:00–02:00 vale; inicio = fin y sin horas, no. [P] Horas extra válidas e inválidas.
   [P] Libre limpia. [P] Sin espacio en el navegador no cambia nada. [P] Bajas por semana.
+- [P] Copiar a…: tramos y sitio sin extras, no pisa, Deshacer, Hecho, sin espacio. [M] Entre semanas (turno partido a
+  una semana vacía).
 - [P] Intercambiar mueve extras y sitio; todo o nada. [M] Entre semanas, Deshacer, cancelar, aviso en el móvil.
 - [P] Copiar semanas (vacías, sin extras, con sitio, varias, bajas, semana vacía). [M] Tecleando el número.
 - [P] Personal: borrar sin turnos / baja con turnos; ordenar por número. [M] Arrastrar ⠿ con ratón.

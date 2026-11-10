@@ -13,6 +13,7 @@ window.CellDialog = (function () {
   const second = document.getElementById("slot-2");
   const addSlot = document.getElementById("add-slot");
   const clear = document.getElementById("cell-clear");
+  const copy = document.getElementById("cell-copy");
   const errorEl = document.getElementById("cell-error");
   const longDay = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
   const shortDay = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" });
@@ -89,6 +90,7 @@ window.CellDialog = (function () {
     overtimeHours.value = extra ? String(extra.hours).replace(".", ",") : "";
     overtimeReason.value = extra ? extra.reason : "";
     clear.hidden = !shift;  // Vaciar solo si hay algo que vaciar
+    copy.hidden = !shift;   // y Copiar a…, solo si hay algo que copiar
     showError(statuses.length ? "" : "No hay estados: créalos antes en «Gestión».");
     syncHours();
     dialog.showModal();
@@ -144,6 +146,11 @@ window.CellDialog = (function () {
   document.getElementById("cell-swap").addEventListener("click", function () {
     dialog.close();
     window.Swap.start(current.key, current.label);
+  });
+  // «Copiar a…» (paso 13): igual, pero la casilla de origen se copia a todas las libres que se vayan tocando (swap.js)
+  copy.addEventListener("click", function () {
+    dialog.close();
+    window.Swap.start(current.key, current.label, "copy");
   });
   form.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
   // Tocar el fondo oscuro cierra (el formulario ocupa toda la ventana: solo el fondo es el propio <dialog>)

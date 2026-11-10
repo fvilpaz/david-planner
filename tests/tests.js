@@ -274,6 +274,50 @@
     equal(w.Schedule.getData().shifts["e2|2026-11-10"].slots[0].start, "20:00", "e2 igual");
   });
 
+  test("Copiar a…: copia estado, los dos tramos y el sitio a las casillas libres que se toquen, sin horas extra; no pisa; Deshacer; Hecho", async function () {
+    const data = fixture();
+    data.shifts["e1|2026-11-09"] = { statusId: "work", slots: [{ start: "10:00", end: "14:00", placeId: "p1" }, { start: "18:00", end: "22:00" }],
+      overtime: { hours: 2, reason: "Cierre" } };
+    data.shifts["e2|2026-11-10"] = work("08:00", "16:00");  // ya ocupada
+    await open(data);
+    const cell = function (key) { return $('[data-key="' + key + '"]'); };
+    cell("e3|2026-11-09").click();
+    ok($("#cell-copy").hidden, "en una casilla vacía no hay nada que copiar");
+    $("#cell-dialog").close();
+    cell("e1|2026-11-09").click();
+    ok(!$("#cell-copy").hidden, "con turno, sí");
+    $("#cell-copy").click();
+    ok(!$("#swap-bar").hidden && $("#swap-text").textContent.includes("Toca las casillas libres donde copiar") &&
+      cell("e1|2026-11-09").classList.contains("swap-source"), "aviso y casilla de origen marcada");
+    cell("e1|2026-11-10").click();
+    cell("e3|2026-11-11").click();
+    const original = saved().shifts["e1|2026-11-09"];
+    equal(saved().shifts["e1|2026-11-10"], { statusId: "work", slots: original.slots, overtime: null }, "copia con los dos tramos y el sitio, sin extras");
+    equal(saved().shifts["e1|2026-11-09"].overtime.hours, 2, "el origen conserva sus extras");
+    ok(!$("#swap-bar").hidden && $("#swap-text").textContent.includes("Copiado ✓ (2)") && !$("#cell-dialog").open, "sigue en modo copiar, sin abrir ventanas");
+    cell("e2|2026-11-10").click();
+    equal(saved().shifts["e2|2026-11-10"].slots[0].start, "08:00", "una ocupada no se pisa");
+    ok($("#swap-text").textContent.includes("ya tiene algo"), "y lo dice");
+    $("#swap-undo").click();
+    equal([saved().shifts["e3|2026-11-11"], saved().shifts["e1|2026-11-10"] !== undefined], [undefined, true], "Deshacer quita solo la última");
+    $("#swap-cancel").click();
+    ok($("#swap-bar").hidden, "Hecho cierra el aviso");
+    cell("e3|2026-11-12").click();
+    ok($("#cell-dialog").open, "tras Hecho, tocar una casilla abre su ventana otra vez");
+  });
+
+  test("Copiar a… con el navegador sin espacio: no copia nada y lo dice", async function () {
+    const data = fixture();
+    data.shifts["e1|2026-11-09"] = work("10:00", "18:00");
+    const w = await open(data);
+    $('[data-key="e1|2026-11-09"]').click();
+    $("#cell-copy").click();
+    const restoreStorage = breakStorage(w, "dp_data");
+    $('[data-key="e1|2026-11-10"]').click();
+    restoreStorage();
+    equal([saved().shifts["e1|2026-11-10"], $("#swap-text").textContent.includes("No se ha podido guardar")], [undefined, true], "no cambia y avisa");
+  });
+
   test("Copiar la semana anterior: solo en vacías, sin horas extra, con su sitio, en varias semanas", async function () {
     const data = fixture();
     data.shifts["e1|2026-11-09"] = work("10:00", "18:00", { hours: 2, reason: "Cierre" }, "p1");

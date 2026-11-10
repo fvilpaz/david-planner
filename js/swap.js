@@ -1,3 +1,5 @@
+// «Copiar a…» (paso 13) usa el mismo aviso y la misma elección de casilla, pero no termina al primer toque: cada casilla
+// LIBRE que se toca recibe una copia, hasta pulsar «Hecho» (o Escape). «Deshacer» quita la última copia hecha.
 // «Intercambiar con…» en dos toques: desde la ventana de una casilla se pulsa el botón, sale un aviso abajo y se toca
 // la otra casilla (la misma persona otro día, otra persona el mismo día o cualquier combinación). Si una está vacía,
 // el turno se mueve. Se cancela con el botón, con Escape o tocando otra vez la misma casilla.
@@ -12,6 +14,7 @@ window.Swap = (function () {
   const cancel = document.getElementById("swap-cancel");
   let source = read();  // { key, label } de la casilla de origen, o null
   let last = null;      // el último intercambio, para «Deshacer»
+  let pasted = [];      // las casillas rellenadas en este «Copiar a…», para «Deshacer» (solo mientras no se cambie de semana)
   let hideTimer = 0;
 
   function read() {
@@ -24,14 +27,28 @@ window.Swap = (function () {
     } catch (e) { /* sin almacenamiento: funciona igual mientras no se cambie de semana */ }
   }
 
-  function show(message, canUndo) {
+  function show(message, canUndo, cancelLabel, sticky) {
     clearTimeout(hideTimer);
     text.textContent = message;
     undo.hidden = !canUndo;
-    cancel.textContent = canUndo ? "Cerrar" : "Cancelar";
+    cancel.textContent = cancelLabel || (canUndo ? "Cerrar" : "Cancelar");
     bar.hidden = false;
-    if (canUndo) { hideTimer = setTimeout(function () { bar.hidden = true; }, 8000); }
+    if (canUndo && !sticky) { hideTimer = setTimeout(function () { bar.hidden = true; }, 8000); }
   }
+
+  // El aviso de «estás eligiendo casilla»; en «Copiar a…» no se oculta (hasta «Hecho») y puede deshacer lo copiado
+  function showSource(note) {
+    const copying = source.mode === "copy";
+    const ask = copying ? "Toca las casillas libres donde copiar «" + source.label + "»"
+      : "Toca la casilla con la que cambiar «" + source.label + "»";
+    show((note ? note + " · " : "") + ask, copying && pasted.length > 0, copying ? "Hecho" : null, true);
+  }
+
+  const PASTE_MESSAGES = {
+    occupied: "Esa casilla ya tiene algo: solo se copia a casillas libres",
+    empty: "Ya no hay nada que copiar",
+    error: "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha copiado",
+  };
 
   function stop() {
     source = null;
@@ -40,10 +57,11 @@ window.Swap = (function () {
     window.Schedule.render();  // quita el borde discontinuo de la casilla de origen
   }
 
-  function start(key, label) {
-    source = { key: key, label: label };
+  function start(key, label, mode) {
+    source = { key: key, label: label, mode: mode === "copy" ? "copy" : "swap" };
+    pasted = [];
     remember(source);
-    show("Toca la casilla con la que cambiar «" + label + "»", false);
+    showSource();
     window.Schedule.render();
   }
 
@@ -51,6 +69,11 @@ window.Swap = (function () {
   function pick(key) {
     if (!source) { return false; }
     if (key === source.key) { stop(); return true; }  // la misma casilla: cancelar
+    if (source.mode === "copy") {
+      const result = window.Schedule.copyShift(source.key, key);
+      if (result === "ok") { pasted.push(key); showSource("Copiado ✓ (" + pasted.length + ")"); } else { showSource(PASTE_MESSAGES[result]); }
+      return true;
+    }
     const from = source.key;
     source = null;
     remember(null);
@@ -64,6 +87,11 @@ window.Swap = (function () {
   }
 
   undo.addEventListener("click", function () {
+    if (source && source.mode === "copy") {  // quita la última copia
+      const key = pasted[pasted.length - 1];
+      if (key && window.Schedule.update(key, null)) { pasted.pop(); showSource("Quitado ✓"); } else { showSource(PASTE_MESSAGES.error); }
+      return;
+    }
     if (!last) { return; }
     if (window.Schedule.swap(last[0], last[1])) {
       last = null;
@@ -79,7 +107,7 @@ window.Swap = (function () {
   });
 
   // Venimos de otra semana con un intercambio a medias: el aviso sigue y la casilla de origen se marca si está a la vista
-  if (source) { show("Toca la casilla con la que cambiar «" + source.label + "»", false); window.Schedule.render(); }
+  if (source) { showSource(); window.Schedule.render(); }
 
   return { start: start, pick: pick, sourceKey: function () { return source ? source.key : null; } };
 })();
