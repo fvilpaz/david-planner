@@ -1,17 +1,17 @@
-// Cuadrante semanal (paso 1: solo lectura). Pinta de lunes a domingo la semana de «?week=AAAA-MM-DD» (o la de hoy).
+// Cuadrante semanal. Pinta de lunes a domingo la semana de «?week=AAAA-MM-DD» (o la de hoy); cada casilla es un
+// botón que abre su ventana (cell.js). Los datos salen de storage.js.
 // Todo se construye con textContent, nunca con innerHTML: los nombres los escribirá David y así no se puede colar
 // ningún trozo de HTML o de código en la página.
-(function () {
+window.Schedule = (function () {
   "use strict";
-  const data = window.DEMO_DATA;
   const Dates = window.Dates;
+  let data = window.Store.load();
   const grid = document.getElementById("schedule-grid");
   const title = document.getElementById("week-title");
   const picker = document.getElementById("week-picker");
   const dayName = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric" });
   // formatRange junta lo que se repite: «9–15 nov 2026», «30 nov – 6 dic 2026», «29 dic 2026 – 4 ene 2027»
   const weekRange = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" });
-  const statusById = new Map(data.statuses.map(function (status) { return [status.id, status]; }));
 
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -19,6 +19,10 @@
     if (text !== undefined) { node.textContent = text; }
     return node;
   }
+
+  function shiftKey(employeeId, isoDay) { return employeeId + "|" + isoDay; }
+
+  function statusOf(id) { return data.statuses.find(function (status) { return status.id === id; }); }
 
   function shownMonday() {
     const asked = Dates.parseIso(new URLSearchParams(window.location.search).get("week"));
@@ -35,20 +39,34 @@
     return node;
   }
 
-  function cell(employee, isoDay) {
-    const box = el("div", "cell");
-    const shift = data.shifts[employee.id + "|" + isoDay];
-    const status = shift && statusById.get(shift.statusId);
-    if (!status) { return box; }
-    if (status.countsAsWork) {
-      shift.slots.forEach(function (slot) { box.append(chip(slot.start + "–" + slot.end, employee.color)); });
-    } else {
+  // La casilla es un botón (se toca con el dedo o con el teclado); vacía enseña un «+»
+  function cell(employee, day) {
+    const isoDay = Dates.toIso(day);
+    const key = shiftKey(employee.id, isoDay);
+    const box = el("button", "cell");
+    box.type = "button";
+    box.dataset.key = key;
+    const shift = data.shifts[key];
+    const status = shift && statusOf(shift.statusId);
+    const texts = [];
+    if (status && status.countsAsWork) {
+      shift.slots.forEach(function (slot) {
+        const text = slot.start + "–" + slot.end;
+        texts.push(text);
+        box.append(chip(text, employee.color));
+      });
+    } else if (status) {
+      texts.push(status.name);
       box.append(chip(status.name, status.color));
+    } else {
+      box.append(el("span", "cell-empty", "+"));
     }
+    box.setAttribute("aria-label", employee.name + ", " + dayName.format(day) + ": " + (texts.join(" y ") || "vacía"));
     return box;
   }
 
   function render() {
+    const scroll = { left: grid.scrollLeft, top: grid.scrollTop };  // al repintar, no saltar al lunes
     const monday = shownMonday();
     const days = [0, 1, 2, 3, 4, 5, 6].map(function (n) { return Dates.addDays(monday, n); });
     const today = Dates.toIso(new Date());
@@ -77,8 +95,7 @@
       const name = row.appendChild(el("th", "", employee.name));
       name.scope = "row";
       days.forEach(function (day) {
-        const isoDay = Dates.toIso(day);
-        row.appendChild(el("td", isoDay === today ? "today" : "")).append(cell(employee, isoDay));
+        row.appendChild(el("td", Dates.toIso(day) === today ? "today" : "")).append(cell(employee, day));
       });
     });
     if (!employees.length) {
@@ -86,7 +103,42 @@
       empty.colSpan = 8;
     }
     grid.replaceChildren(table);
+    grid.scrollLeft = scroll.left;
+    grid.scrollTop = scroll.top;
   }
+
+  // Guarda (o vacía, con null) una casilla. Si el navegador no deja guardar, se deshace el cambio: así nunca se ve
+  // algo que desaparecería al recargar. Devuelve si se ha guardado.
+  function update(key, shift) {
+    const before = data.shifts[key];
+    if (shift) { data.shifts[key] = shift; } else { delete data.shifts[key]; }
+    const saved = window.Store.save(data);
+    if (!saved) {
+      if (before) { data.shifts[key] = before; } else { delete data.shifts[key]; }
+    }
+    render();
+    return saved;
+  }
+
+  // Tras cerrar la ventana, el foco vuelve a la casilla (la de antes se sustituyó al repintar)
+  function focusCell(key) {
+    const button = grid.querySelector('[data-key="' + CSS.escape(key) + '"]');
+    if (button) { button.focus({ preventScroll: true }); }
+  }
+
+  grid.addEventListener("click", function (event) {
+    const button = event.target.closest("button.cell");
+    if (!button) { return; }
+    const parts = button.dataset.key.split("|");
+    const employee = data.employees.find(function (e) { return e.id === parts[0]; });
+    if (employee) { window.CellDialog.open(employee, parts[1]); }
+  });
+
+  // La app abierta en dos sitios (dos pestañas, o la instalada y el navegador): si la otra guarda, esta se pone al
+  // día. Sin esto, al guardar aquí se pisaría lo de la otra con datos viejos.
+  window.addEventListener("storage", function (event) {
+    if (event.key === window.Store.KEY) { data = window.Store.load(); render(); }
+  });
 
   // Tocar el título abre el calendario del aparato. showPicker() es lo moderno; si el navegador no lo tiene, se
   // le da el foco al campo (y el teclado o la rueda de fechas del móvil hacen el resto).
@@ -101,6 +153,13 @@
   });
 
   render();
+  return {
+    shiftKey: shiftKey,
+    statusOf: statusOf,
+    getData: function () { return data; },
+    update: update,
+    focusCell: focusCell,
+  };
 })();
 
 // Menú «Gestión»: Imprimir / PDF y Tema. Se cierra al tocar fuera o con Escape (como en gestion-hosteleria).

@@ -10,10 +10,10 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 2 | ✅ Menú «Gestión» con **Tema** (Claro, Lino, Oscuro, Carbón; se recuerda) e **Imprimir / PDF** (A4 apaisado, en claro) | Cambiar de tema; vista previa de impresión en una hoja |
 | 2b | ✅ Nombre de la barra editable con un lápiz (`dp_name`; iniciales automáticas; sale en la pestaña y en el PDF) y barra de la semana limpia (el título abre el calendario; «Hoy» solo fuera de esta semana) | Cambiar el nombre, recargar y verlo; tocar el título y elegir otra semana |
 | 2c | ✅ Barra como la de gestion-hosteleria: local + **ciudad** (un solo lápiz para los dos; `dp_city`) y **persona** a la derecha en un círculo (`dp_person`; en el móvil solo el círculo) | Poner local, ciudad y persona, recargar y verlos |
-| 3 | 🔲 Guardar en el navegador y **editar la casilla** (ventana de gestion-hosteleria mejorada): estado, horario, segundo tramo, vaciar; **un solo Guardar**; si el estado no cuenta como trabajo, el horario **se oculta al momento**; sin «Dónde» | Cambiar un turno, recargar y que siga ahí |
+| 3 | ✅ Guardar en el navegador y **editar la casilla** (ventana de gestion-hosteleria mejorada): estado, horario, segundo tramo, vaciar; **un solo Guardar**; si el estado no cuenta como trabajo, el horario **se oculta al momento**; sin «Dónde» | Cambiar un turno, recargar y que siga ahí |
 | 4 | 🔲 **Horas extra** en la casilla: borde de aviso + «+2 h extra», motivo opcional; también en el PDF | Marcar extras y verlas en pantalla y en la impresión |
 | 5 | 🔲 **Intercambiar con…** (dos toques) | Cambiar dos días de una persona y dos personas el mismo día |
-| 6 | 🔲 **Personal**: añadir, nombre, color, orden (número y ⠿), baja desde una semana y volver a dar de alta | Dar de baja y ver que sigue en semanas anteriores |
+| 6 | 🔲 **Personal**: añadir, nombre, color, orden (número y ⠿), baja desde una semana y volver a dar de alta. **Decidir aquí: ¿la primera vez se abre vacía o con el ejemplo?** (David no debería encontrarse 8 personas inventadas) | Dar de baja y ver que sigue en semanas anteriores |
 | 7 | 🔲 **Estados**: crear, nombre, color, si cuenta como trabajo, orden; uno en uso no se borra | Crear «Formación», usarlo y ver que no se deja borrar |
 | 8 | 🔲 **Copiar la semana anterior** en 1–8 semanas (solo vacías, sin extras, sin quien esté de baja) | Copiar a 4 semanas sin pisar lo puesto |
 | 9 | 🔲 **Copia de seguridad** (como health-tracker, `src/js/copia.js`): exportar e importar JSON con todas las claves `dp_` (datos, `dp_name`…; no las copias automáticas) (`app`, `version`, `exportedAt`, `data`; confirmación y copia previa); **copias automáticas** dentro del navegador (una por semana al abrir, las 5 últimas en `dp_copias`, con «Recuperar»); **franja de aviso que no bloquea** si hace 7 días o más de la última descarga | Exportar, borrar, importar y que todo vuelva; ver la franja y que desaparezca al descargar |
@@ -37,6 +37,8 @@ un parpadeo del tema por defecto).
 - Total de horas extra del mes por persona (sumar las marcas de las casillas).
 - Botones con los horarios más usados (p. ej. 10–18, 18–02) para poner un turno de un toque.
 - Arrastrar para intercambiar en PC (en móvil se confunde con desplazar).
+- Avisar si los dos tramos de un turno partido se pisan (10–14 y 12–16); ahora no se comprueba.
+- En el móvil, abrir la semana actual desplazada hasta hoy (ahora empieza siempre en el lunes).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
 - Color propio por turno (en gestion-hosteleria existe; aquí la casilla toma el color de la persona o del estado).
 - Para gestion-hosteleria (no es de este repo): en la ventana de la casilla, la casilla de marcar «color propio» parece un segundo selector de color roto.

@@ -88,6 +88,38 @@
     <div id="schedule-grid" class="schedule-scroll"></div>
   </main>
 
+  <!-- Ventana de la casilla (cell.js): se abre al tocar una casilla del cuadrante -->
+  <dialog id="cell-dialog" class="dialog" aria-labelledby="cell-title">
+    <form id="cell-form" class="dialog-form" novalidate>
+      <div class="dialog-head">
+        <h2 id="cell-title"></h2>
+        <button type="button" class="secondary" data-close>Cerrar</button>
+      </div>
+      <label class="field">Estado
+        <select id="cell-status" autofocus></select>
+      </label>
+      <!-- Solo si el estado cuenta como trabajo: se oculta al momento al elegir Libre, Vacaciones… -->
+      <fieldset class="slots" id="cell-hours">
+        <legend>Horario</legend>
+        <div class="slot" data-slot="1">
+          <input type="time" aria-label="Inicio"> <span aria-hidden="true">–</span> <input type="time" aria-label="Fin">
+        </div>
+        <div class="slot" data-slot="2" id="slot-2" hidden>
+          <input type="time" aria-label="Inicio del segundo tramo"> <span aria-hidden="true">–</span>
+          <input type="time" aria-label="Fin del segundo tramo">
+          <button type="button" class="secondary" id="remove-slot" aria-label="Quitar el segundo tramo">✕</button>
+        </div>
+        <button type="button" class="secondary" id="add-slot">+ Segundo tramo (turno partido)</button>
+        <small class="help">Si el fin es anterior al inicio, termina al día siguiente (22:00–02:00).</small>
+      </fieldset>
+      <p class="error" id="cell-error" role="alert" hidden></p>
+      <div class="form-actions">
+        <button type="submit">Guardar</button>
+        <button type="button" class="danger" id="cell-clear">Vaciar</button>
+      </div>
+    </form>
+  </dialog>
+
   <footer class="app-footer no-print">
     <span>David Planner &copy; 2026 · <strong>Fernando Vilas Paz</strong></span>
     <div class="footer-links">
@@ -99,7 +131,9 @@
 
   <script src="js/dates.js"></script>
   <script src="js/demo-data.js"></script>
+  <script src="js/storage.js"></script>
   <script src="js/brand.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/cell.js"></script>
 </body>
 </html>

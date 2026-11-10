@@ -1,5 +1,33 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 3: editar la casilla
+
+**Hecho**
+- `js/storage.js` (`dp_data`; la primera vez, los de ejemplo; si lo guardado no se puede leer, se aparta a
+  `dp_data_broken` y no se pisa), `js/cell.js` (ventana: estado, uno o dos tramos, Guardar, Vaciar), casillas como
+  botones en `app.js`, colores de error en los 4 temas (exactos de gestion-hosteleria).
+- Verificado en Chrome: abrir; estado a Trabajo y el horario aparece, a Libre y se oculta al momento; sin horas,
+  inicio = fin y segundo tramo a medias → error en castellano; 22:00–02:00 guardado y sigue al recargar; turno partido
+  leído y quitado; Vaciar deja «+» y borra la casilla de los datos; casilla vacía abre con «Trabajo» y sin Vaciar;
+  foco vuelve a la casilla al cerrar; móvil: editar el viernes no te devuelve al lunes (520 px antes y después);
+  navegador sin espacio (simulado) → aviso y nada cambia; otra pestaña guarda → esta se pone al día; datos
+  estropeados → apartados, cuadrante pintado, consola limpia.
+
+**Decidido**
+- Si el navegador no deja guardar, se deshace el cambio en pantalla: nunca se ve algo que desaparecería al recargar.
+- Escuchar el evento `storage`: con la app abierta en dos sitios, la otra se pone al día y no pisa con datos viejos.
+
+**Aprendido**
+- **La caché del navegador engaña en local:** `python -m http.server` no dice «no guardes copia» y Chrome usó un
+  `themes.css` viejo (sin `--error`): «Vaciar» salía sin rojo con el archivo bien en disco. Ctrl+F5 al probar; en
+  Pages lo resolverá el service worker con caché por versión (paso 10).
+- **El aviso `close` de un `<dialog>` llega un instante después de `close()`:** una prueba que mira en el mismo
+  momento da un «falso fallo» (el foco sí volvía a la casilla). Una herramienta que falla puede parecer un fallo… o
+  un «todo bien».
+
+**Siguiente**
+- Paso 4: horas extra en la casilla. Pendiente de Nando: puntos de venta (chiringuito, cafetería, pub).
+
 ## 10-nov-2026 — Paso 2: menú «Gestión», temas e imprimir
 
 **Hecho**

@@ -13,6 +13,8 @@
   --text: #333333;
   --muted: #6b7280;
   --border: rgba(0, 0, 0, 0.08);
+  --error: #c0392b;
+  --on-error: #ffffff;
   --tint-mix: 10%;
   color-scheme: light;
 }
@@ -27,6 +29,8 @@
   --text: #1f2328;
   --muted: #5d6470;
   --border: #ddd8cf;
+  --error: #b42318;
+  --on-error: #ffffff;
   --tint-mix: 10%;
   color-scheme: light;
 }
@@ -41,6 +45,8 @@
   --text: #f1f5f9;
   --muted: #94a3b8;
   --border: rgba(255, 255, 255, 0.08);
+  --error: #ef4444;
+  --on-error: #ffffff;
   --tint-mix: 30%;
   color-scheme: dark;
 }
@@ -55,6 +61,8 @@
   --text: #e8eaee;
   --muted: #a2a9b6;
   --border: #333a46;
+  --error: #f97066;
+  --on-error: #14171c;
   --tint-mix: 30%;
   color-scheme: dark;
 }
