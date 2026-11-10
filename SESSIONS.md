@@ -1,5 +1,30 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 9a: descargar y cargar la copia, franja de aviso
+
+**Hecho**
+- `js/backup.js`: descargar (`david-planner-copia-AAAA-MM-DD.json`), cargar con revisión campo a campo
+  (`clean()`: ids, nombres, colores, horas, estados y sitios que existan, horas extra 0,5–16; lo demás se descarta y
+  se cuenta), confirmación con resumen, descarga previa `…antes-de-cargar-…` y recarga. Franja de aviso
+  (`dp_last_export`, `dp_since`, «Más tarde» en `sessionStorage`). Apartado «💾 Copia de seguridad» en Gestión.
+- Verificado (descargas interceptadas, sin tocar la carpeta de Descargas): sin datos y el primer día no hay franja;
+  a los 10 días sí; descargar genera el archivo con todo y la quita; «Hace 9 días…» y «Más tarde» aguanta al recargar;
+  no-JSON, copia de health-tracker y copia sin estados → mensaje claro; copia con 3 trampas → «se descartan 3 datos»;
+  Cancelar no cambia nada; cargar descarga antes lo de ahora y sustituye. Consola limpia.
+- La prueba de cargar cambió el nombre del local de Nando («Bar Importado»): devuelto a «Hotel Monarque».
+
+**Decidido**
+- Presupuesto de ~110 a ~170 líneas: la revisión del archivo es imprescindible (un archivo roto no puede romper el
+  cuadrante; health-tracker se congeló con una fecha «0001-01-01»).
+- La franja no sale la primera semana: pedir copia el primer día sería molestar.
+
+**Aprendido**
+- **Un archivo de fuera es dato no fiable:** se revisa todo antes de guardarlo y se copian solo los campos
+  conocidos (así no se cuela nada que la app no espera).
+
+**Siguiente**
+- Paso 9b: copias automáticas y revisar el menú en el móvil.
+
 ## 10-nov-2026 — Paso 8: copiar la semana anterior
 
 **Hecho**

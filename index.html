@@ -51,6 +51,12 @@
   </header>
 
   <main class="page">
+    <!-- Franja de aviso de copia de seguridad (backup.js): no bloquea; «Más tarde» la oculta hasta volver a abrir -->
+    <div class="backup-bar no-print" id="backup-bar" role="status" hidden>
+      <span class="backup-bar-text">⚠️ <span id="backup-bar-text"></span> Tus turnos solo están en este navegador.</span>
+      <button type="button" id="backup-bar-download">Descargar copia</button>
+      <button type="button" class="secondary" id="backup-bar-later">Más tarde</button>
+    </div>
     <div class="section-header">
       <span class="section-header-title">Cuadrante semanal</span>
       <!-- «Gestión», como en gestion-hosteleria: todo lo que no es el cuadrante. Se cierra al tocar fuera o con Escape -->
@@ -74,6 +80,18 @@
           <button type="button" class="secondary" id="staff-button">👥 Personal</button>
           <button type="button" class="secondary" id="status-button">🏷️ Estados</button>
           <button type="button" class="secondary" id="place-button">📍 Puntos de venta</button>
+          <!-- Paso 9a: descargar y cargar la copia (backup.js) -->
+          <details class="menu-group" id="backup-group">
+            <summary>💾 Copia de seguridad</summary>
+            <div class="copy-form">
+              <p class="help" id="backup-last"></p>
+              <button type="button" id="backup-download">Descargar copia</button>
+              <button type="button" class="secondary" id="backup-load">Cargar una copia…</button>
+              <input type="file" id="backup-file" accept=".json,application/json" hidden>
+              <p class="help">El archivo va a Descargas: guárdalo también fuera del móvil (Drive, correo, el PC).</p>
+              <p class="help" id="backup-result" role="status"></p>
+            </div>
+          </details>
           <!-- Plegado: con las fichas siempre a la vista, un toque que iba a otro sitio caía en un tema -->
           <details class="menu-group">
             <summary>🎨 Tema</summary>
@@ -246,6 +264,20 @@
     </div>
   </dialog>
 
+  <!-- Confirmar antes de cargar una copia (backup.js): sustituye todo -->
+  <dialog id="import-dialog" class="dialog" aria-labelledby="import-title">
+    <div class="dialog-form">
+      <h2 id="import-title">¿Cargar esta copia?</h2>
+      <p id="import-summary"></p>
+      <p class="help">Se sustituye <strong>todo</strong> lo que hay ahora en este navegador. Antes se descargará una copia
+        de lo de ahora, por si te arrepientes.</p>
+      <div class="form-actions">
+        <button type="button" id="import-ok">Sí, cargar la copia</button>
+        <button type="button" class="secondary" id="import-cancel">Cancelar</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Aviso de «Intercambiar con…» (swap.js): abajo, al alcance del pulgar en el móvil -->
   <div id="swap-bar" class="swap-bar no-print" role="status" hidden>
     <span id="swap-text"></span>
@@ -273,5 +305,6 @@
   <script src="js/staff.js"></script>
   <script src="js/states.js"></script>
   <script src="js/places.js"></script>
+  <script src="js/backup.js"></script>
 </body>
 </html>
