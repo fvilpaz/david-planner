@@ -342,8 +342,32 @@ button.danger { background: var(--error); color: var(--on-error); }
   .fervis-dialog .fervis-actions { width: 100%; }
   .fervis-dialog .fervis-guide-button { margin-right: auto; }
 }
+.fervis-guide { flex: 1; min-height: 6rem; overflow-y: auto; display: grid; gap: .75rem; align-content: start; }
+/* «Descargar guía (PDF)»: el botón, arriba del glosario */
+.fervis-guide-print { justify-self: start; min-height: 44px; font-weight: 600; }
+/* La hoja de la guía para imprimir: oculta en pantalla; al imprimir con la guía (body.printing-guide) es lo único que sale, en A4 vertical */
+.guide-print { display: none; }
+@page guide { size: A4 portrait; margin: 0; }
+@media print {
+  body.printing-guide { padding: 0; background: #fff; }
+  body.printing-guide > *:not(.guide-print) { display: none !important; }
+  /* Sin margen de página (así el navegador no pone fecha, dirección ni «1/3» arriba y abajo); el margen de 12 mm lo da el relleno, que se
+     repite en cada hoja (box-decoration-break). Dos columnas para que quepa en dos hojas legibles; el título y la introducción, a todo el ancho. */
+  body.printing-guide .guide-print { display: block; page: guide; color: #000; background: #fff; font-size: 9.5pt; line-height: 1.35;
+                                     padding: 12mm; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+                                     column-count: 2; column-gap: 9mm; }
+  .guide-print h1, .guide-print .guide-print-site, .guide-print .guide-print-intro { column-span: all; }
+  .guide-print h1 { margin: 0; font-size: 20pt; }
+  .guide-print .guide-print-site { margin: .1rem 0 .3rem; font-size: 12pt; font-weight: 600; color: #333; }
+  .guide-print .guide-print-intro { margin: 0 0 .4rem; color: #444; }
+  .guide-print h2 { margin: .7rem 0 .35rem; padding-bottom: .15rem; border-bottom: 1.5px solid #4f545a; font-size: 12pt; break-after: avoid; }
+  .guide-print h2:first-of-type { margin-top: 0; }
+  .guide-print .guide-print-topic { margin: 0 0 .45rem; break-inside: avoid; }
+  .guide-print h3 { margin: 0 0 .12rem; font-size: 10pt; break-after: avoid; }
+  .guide-print ul { margin: 0; padding-left: 1.1rem; }
+  .guide-print li { margin: 0 0 .08rem; }
+  .guide-print .guide-print-foot { margin: .8rem 0 0; color: #555; font-size: 8.5pt; text-align: center; column-span: all; }
 }
-.fervis-guide { flex: 1; min-height: 6rem; overflow-y: auto; display: grid; gap: .5rem; align-content: start; }
 /* Filas como las de health-tracker: la tarjeta (círculo con el emoji, título y subtítulo) y, FUERA de ella, a la derecha, el triangulito azul */
 .fervis-guide summary { cursor: pointer; display: flex; align-items: center; gap: .6rem; list-style: none; }
 .fervis-guide summary::-webkit-details-marker { display: none; }
@@ -358,7 +382,11 @@ button.danger { background: var(--error); color: var(--on-error); }
 .fervis-guide-sub { color: var(--muted); font-size: .85rem; }
 .fervis-guide summary::after { content: "▼"; flex: none; width: 1.6rem; text-align: center; font-size: .75rem; color: var(--primary-text); transition: transform .15s ease; }
 .fervis-guide details[open] > summary::after { transform: rotate(180deg); }
-.fervis-guide-group > .fervis-guide-topic { margin: .5rem 0 0 1rem; }
+/* Jerarquía de padre a hijos (Nando: «no hay jerarquía de padre a hijos ni gap entre las celdas»): los temas cuelgan del grupo, con sangría y una
+   línea guía a la izquierda, y hay hueco entre filas y antes del grupo siguiente */
+.fervis-guide-children { display: grid; gap: .65rem; margin: .8rem 0 .3rem 1.4rem; padding-left: .9rem;
+                         border-left: 2px solid color-mix(in srgb, var(--primary) 45%, var(--border)); }
+.fervis-guide-group[open] { padding-bottom: .4rem; }
 .fervis-guide-topic .fervis-guide-card { min-height: 56px; }
 .fervis-guide-topic .fervis-guide-badge { width: 34px; height: 34px; font-size: 1rem; }
 .fervis-guide-topic ul { margin: .4rem 2.2rem .2rem 0; padding: .8rem 1rem .8rem 2.3rem; display: grid; gap: .45rem;

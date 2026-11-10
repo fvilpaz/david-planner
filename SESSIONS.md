@@ -1,6 +1,18 @@
 # SESSIONS — david-planner
 
 ## 10-nov-2026 — Cierre del día y relevo para la auditoría completa
+**Después del cierre (misma tarde):** Nando: «dale» a la guía descargable.
+- **«🖨️ Descargar guía (PDF)»** arriba del glosario: monta una hoja (`#guide-print`) con todos los temas, el nombre del local y la dirección, y abre la
+  impresión del navegador (`body.printing-guide`, página con nombre `guide` en A4 vertical, dos columnas, margen por relleno con
+  `box-decoration-break: clone` para que no salgan fecha ni dirección). ~2 hojas. Con `#guia-imprimible` en la dirección la hoja viene ya preparada
+  (para verla con Chrome sin ventana y para las pruebas). Prueba nueva con control (una hoja sin un tema → falla).
+- Nando, con capturas: «no hay jerarquía de padre a hijos ni gap entre las celdas» / «no respira». **Causa real: una llave `}` suelta que yo había
+  dejado en el CSS** (en el cambio del botón «Guía») hacía que el navegador se saltara la regla del contenedor del glosario (`display: grid; gap`): salía
+  como `block` y sin hueco. Quitada, y una prueba comprueba que el contenedor es una rejilla con hueco. Además, los temas cuelgan de su grupo
+  (`.fervis-guide-children`: sangría, línea guía y hueco). Control: con la llave suelta, la prueba falla («block / normal»). 47/47.
+- **Aprendido:** un CSS con una llave de más no da ningún error visible: solo se pierde la regla siguiente. Habría que mirar siempre los estilos
+  computados, no solo si el archivo «parece» bien. Para el auditor: comprobar que las llaves de `css/app.css` cuadran (hoy: 302 y 302).
+
 
 **Decidido por Nando (modelo de negocio):** el glosario y la formación **van de la mano**: él da la formación en persona a los locales y les deja
 el glosario de apoyo «por si no queda claro». El glosario se queda (no «cierra la vía» de la formación: la complementa). Y **todos los locales que

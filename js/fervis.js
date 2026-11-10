@@ -570,15 +570,76 @@ window.Fervis = (function () {
     return summary;
   }
 
+  // «Descargar guía (PDF)» (idea de Nando, para entregarla tras la formación): una hoja de impresión con TODOS los temas abiertos y seguidos y el
+  // nombre del local arriba. Sale de los mismos textos (GUIDE), así que no se desfasa de la app. Abre la impresión del navegador («Guardar como PDF»).
+  // Con «#guia-imprimible» en la dirección, la hoja ya viene preparada (para ver el PDF sin pulsar nada, y para las pruebas).
+  function siteInfo() {
+    try { return { name: localStorage.getItem("dp_name") || "David Planner", city: localStorage.getItem("dp_city") || "" }; }
+    catch (error) { return { name: "David Planner", city: "" }; }
+  }
+
+  function prepareGuideSheet() {
+    const old = document.getElementById("guide-print");
+    if (old) { old.remove(); }
+    const info = siteInfo();
+    const sheet = document.body.appendChild(document.createElement("section"));
+    sheet.id = "guide-print";
+    sheet.className = "guide-print";
+    const add = function (parent, tag, text, className) {
+      const el = parent.appendChild(document.createElement(tag));
+      el.textContent = text;
+      if (className) { el.className = className; }
+      return el;
+    };
+    add(sheet, "h1", "Guía de uso");
+    add(sheet, "p", info.name + (info.city ? " · " + info.city : ""), "guide-print-site");
+    add(sheet, "p", "Cómo se usa la app, paso a paso. Si tienes dudas, pregunta a Fervis (el asistente de la app) o abre su botón «Guía».", "guide-print-intro");
+    GUIDE_GROUPS.forEach(function (group) {
+      add(sheet, "h2", group[1] + " " + group[2]);
+      group[3].forEach(function (topicId) {
+        const item = GUIDE.find(function (it) { return it[0] === topicId; });
+        const topic = sheet.appendChild(document.createElement("div"));
+        topic.className = "guide-print-topic";
+        add(topic, "h3", item[1] + " " + item[2]);
+        const steps = topic.appendChild(document.createElement("ul"));
+        item[3].forEach(function (step) { add(steps, "li", step); });
+      });
+    });
+    add(sheet, "p", "David Planner · fvilpaz.github.io/david-planner", "guide-print-foot");
+    document.body.classList.add("printing-guide");
+    return sheet;
+  }
+
+  function printGuide() {
+    const sheet = prepareGuideSheet();
+    const cleanup = function () {
+      document.body.classList.remove("printing-guide");
+      sheet.remove();
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+    window.print();
+  }
+
+  if (location.hash === "#guia-imprimible") { prepareGuideSheet(); }
+
   function buildGuide() {
     guideView.replaceChildren();
+    const printButton = guideView.appendChild(document.createElement("button"));  // arriba del todo, encima de las tarjetas
+    printButton.type = "button";
+    printButton.id = "fervis-guide-print";
+    printButton.className = "secondary fervis-guide-print";
+    printButton.textContent = "🖨️ Descargar guía (PDF)";
+    printButton.addEventListener("click", printGuide);
     GUIDE_GROUPS.forEach(function (group) {
       const groupBox = guideView.appendChild(document.createElement("details"));
       groupBox.className = "fervis-guide-group";
       groupBox.appendChild(guideSummary(group[1], group[2], group[3].length + (group[3].length === 1 ? " tema" : " temas")));
+      const children = groupBox.appendChild(document.createElement("div"));  // los temas cuelgan del grupo: sangría y línea guía (CSS)
+      children.className = "fervis-guide-children";
       group[3].forEach(function (topicId) {
         const item = GUIDE.find(function (it) { return it[0] === topicId; });
-        const topic = groupBox.appendChild(document.createElement("details"));
+        const topic = children.appendChild(document.createElement("details"));
         topic.className = "fervis-guide-topic";
         topic.appendChild(guideSummary(item[1], item[2], item[3].length + (item[3].length === 1 ? " paso" : " pasos")));
         const steps = topic.appendChild(document.createElement("ul"));

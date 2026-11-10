@@ -661,19 +661,23 @@
     ok(!$("#fervis-guide-view").hidden && $("#fervis-messages").hidden && $("#fervis-form").hidden && $("#fervis-key-form").hidden, "se ve el glosario y se esconde el chat");
     equal($$("#fervis-guide-view > details > summary").map(function (x) { return [x.querySelector(".fervis-guide-badge").textContent, x.querySelector(".fervis-guide-title").textContent, x.querySelector(".fervis-guide-sub").textContent]; }),
       [["📅", "Turnos y casillas", "5 temas"], ["🛠️", "Menú Gestión", "7 temas"], ["🏢", "Mi local, la app y Fervis", "3 temas"]], "primero, tres tarjetas: círculo con el emoji, título y subtítulo");
+    const view = w.getComputedStyle($("#fervis-guide-view"));  // la regla del contenedor se aplica (una llave suelta en el CSS la hizo desaparecer)
+    ok(view.display === "grid" && view.rowGap !== "normal" && parseFloat(view.rowGap) >= 8, "el contenedor del glosario es una rejilla con hueco entre filas: " + view.display + " / " + view.rowGap);
+    ok($$("#fervis-guide-view > details > summary").length === 3 && $$("#fervis-guide-view > details > .fervis-guide-children > details").length === 15,
+      "jerarquía: los 15 temas cuelgan de los 3 grupos");
     const group = $("#fervis-guide-view > details");
     ok(!group.open, "cerrado al principio");
     group.querySelector("summary").click();
     await wait(50);  // «toggle» llega un instante después
     ok(group.open, "al tocar el grupo se despliega");
-    equal($$("#fervis-guide-view > details:first-child > details > summary").map(function (x) { return x.querySelector(".fervis-guide-title").textContent + " (" + x.querySelector(".fervis-guide-sub").textContent + ")"; }),
+    equal($$("#fervis-guide-view > details:first-of-type > .fervis-guide-children > details > summary").map(function (x) { return x.querySelector(".fervis-guide-title").textContent + " (" + x.querySelector(".fervis-guide-sub").textContent + ")"; }),
       ["Moverse por el cuadrante (6 pasos)", "Poner o cambiar un turno (6 pasos)", "Horas extra (4 pasos)", "Intercambiar dos turnos (4 pasos)", "Copiar un turno a otras casillas (5 pasos)"], "y salen sus temas, con cuántos pasos tiene cada uno");
     const topic = $$("#fervis-guide-view .fervis-guide-topic").find(function (d) { return d.querySelector(".fervis-guide-title").textContent.includes("Copiar un turno"); });
     topic.querySelector("summary").click();
     await wait(50);
     ok(topic.open && topic.querySelectorAll("li").length === 5 && topic.querySelector("li").textContent.startsWith("Abre una casilla con turno"), "al tocar el tema, sus pasos");
     // acordeón: al abrir otro tema del grupo, el anterior se pliega; y al abrir otro grupo, el primero
-    const other = $$("#fervis-guide-view > details:first-child .fervis-guide-topic")[0];
+    const other = $$("#fervis-guide-view > details:first-of-type .fervis-guide-topic")[0];
     other.querySelector("summary").click();
     await wait(50);
     ok(other.open && !topic.open, "al abrir otro tema, el anterior se pliega");
@@ -689,6 +693,27 @@
     ok(!$("#fervis-guide-view").hidden, "el chip del saludo también abre el glosario");
     $("#fervis-clear").click();
     ok($("#fervis-guide-view").hidden && !$("#fervis-messages").hidden, "la papelera vuelve al chat");
+  });
+
+  test("Descargar guía (PDF): el botón está arriba del glosario y monta la hoja con todos los temas y el nombre del local; al terminar de imprimir se limpia", async function () {
+    const w = await open(fixture(), { extra: [["dp_name", "Local de prueba"], ["dp_city", "Ciudad de prueba"]] });
+    let printed = 0;
+    w.print = function () { printed++; };  // sin abrir de verdad la ventana de impresión
+    w.Fervis.open();
+    $("#fervis-guide").click();
+    const button = $("#fervis-guide-view").firstElementChild;
+    ok(button.id === "fervis-guide-print" && button.textContent.includes("Descargar guía (PDF)"), "el botón va arriba del todo del glosario");
+    button.click();
+    equal(printed, 1, "abre la impresión");
+    const sheet = $("#guide-print");
+    ok(sheet && w.document.body.classList.contains("printing-guide"), "la hoja está montada y el cuerpo en «modo guía»");
+    equal([sheet.querySelector("h1").textContent, sheet.querySelector(".guide-print-site").textContent], ["Guía de uso", "Local de prueba · Ciudad de prueba"], "título y nombre del local");
+    equal(sheet.querySelectorAll("h2").length, 3, "los tres grupos");
+    const topics = w.Fervis.tool("manual_app").split("»): ")[1].split("; ").length;
+    equal(sheet.querySelectorAll("h3").length, topics, "todos los temas de la guía, abiertos y seguidos");
+    ok(Array.from(sheet.querySelectorAll("li")).some(function (li) { return li.textContent.startsWith("Abre una casilla con turno"); }), "con sus pasos");
+    w.dispatchEvent(new w.Event("afterprint"));
+    ok(!$("#guide-print") && !w.document.body.classList.contains("printing-guide"), "al terminar de imprimir, se limpia");
   });
 
   test("La guía de Fervis: cada tema responde, el índice los lista todos y cada botón del menú Gestión y de la casilla sale en ella", async function () {

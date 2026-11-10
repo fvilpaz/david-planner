@@ -74,7 +74,10 @@ plieguan los demás; flechita ▸ que gira): una vista aparte, no el chat, con 3
 burbujas, no llama a Groq y **no necesita clave**; el 📖 alterna con el chat. El modelo la consulta por temas con `manual_app`
 para los «cómo hago…» (la app le pone delante los 2 temas de la guía que más coinciden con la pregunta y le prohíbe decir que algo "no se puede" sin comprobarlo)
 y, si piden «la guía» en general, remite al 📖. Una prueba exige que cada botón del menú Gestión y de la
-ventana de la casilla salga en la guía. Solo lee los turnos.
+ventana de la casilla salga en la guía. **«🖨️ Descargar guía (PDF)»**, arriba del glosario: abre la impresión del navegador con una hoja
+con todos los temas abiertos y seguidos, el nombre del local arriba y la dirección de la app abajo; A4 vertical, a dos columnas, en unas 2 hojas,
+sin encabezado ni pie del navegador; sale de los mismos textos (`GUIDE`), así que no se desfasa. Los temas cuelgan de su grupo con sangría y línea
+guía, con hueco entre filas. Solo lee los turnos.
 
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.
 
