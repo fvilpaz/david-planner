@@ -303,8 +303,11 @@
       <div class="dialog-head">
         <h2 id="fervis-title">💬 Fervis</h2>
         <span class="fervis-actions">
-          <button type="button" class="secondary" id="fervis-key-toggle" aria-expanded="false"
-                  aria-controls="fervis-key-form">🔑 Clave</button>
+          <!-- Ajustes (como en la cartera): el icono de las tres barras abre y cierra el panel de la clave -->
+          <button type="button" class="secondary fervis-icon" id="fervis-key-toggle" aria-expanded="false"
+                  aria-controls="fervis-key-form" aria-label="Ajustes: clave de Groq" title="Ajustes"><svg viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"
+            focusable="false"><path d="M6 4v5M6 13v7M12 4v9M12 17v3M18 4v3M18 11v9M4 11h4M10 15h4M16 9h4"/></svg></button>
           <button type="button" class="secondary" data-close>Cerrar</button>
         </span>
       </div>
@@ -326,7 +329,7 @@
         <input id="fervis-question" maxlength="300" placeholder="Pregunta por los turnos…" aria-label="Tu pregunta">
         <button type="submit" aria-label="Enviar">➤</button>
       </form>
-      <small class="help">Fervis solo lee los turnos: no cambia nada.</small>
+      <small class="help">Fervis solo lee los turnos: no cambia nada. Lo laboral (contratos, descansos) es orientativo: confirma con la gestoría.</small>
     </div>
   </dialog>
 

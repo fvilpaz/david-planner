@@ -44,7 +44,12 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 
 **Fervis** (paso 12): el robot (acento del tema) hace un movimiento al azar, nunca el mismo dos veces seguidas (quieto
 con «reducir movimiento») y abre el chat. Sin clave, lo dice y abre el campo; la clave pegada de un `.env` se limpia;
-lo que no parece una clave no se guarda; «Quitar la clave» la borra. Solo lee los turnos.
+lo que no parece una clave no se guarda; «Quitar la clave» la borra. Lo de la clave vive en Ajustes (icono de tres
+barras): el chat solo saluda, y preguntar sin clave abre Ajustes y deja la pregunta escrita. Contesta de lo general y
+de la app (manual, personal, estados, puntos de venta, quién trabaja ahora, esta semana y la siguiente; otras fechas,
+con la consulta `turnos_entre`, hasta 31 días); reconoce a las personas sin tildes ni mayúsculas; sin personal o sin
+turnos, lo dice. Usa solo los modelos que tiene la cuenta; debajo de cada respuesta, `groq · modelo` (y «(respaldo)»
+si el primero falló). Lo laboral es orientativo (nota en el pie). Solo lee los turnos.
 
 **App instalable**: abre sin conexión; se actualiza sola con conexión; solo atiende y borra lo suyo.
 
@@ -63,7 +68,12 @@ lo que no parece una clave no se guarda; «Quitar la clave» la borra. Solo lee 
 - [P] Descargar; cargar (no JSON, otra app, sin estados, trampas con `__proto__`); copias automáticas; franja.
 - [P] Iniciales y nombres como texto (no HTML).
 - [M] Nombres y días fijos al deslizar (390 px, 800×390, PC). [M] PDF en una hoja (Claro y Carbón en pantalla).
-- [P] Fervis: el robot se mueve y luego abre; sin clave; clave limpia, rechazada y quitada. [P] La clave no sale en la
+- [P] Fervis: quién trabaja ahora (también turnos que cruzan la medianoche), vacaciones, bajas; avisos sin personal o sin
+  turnos; con un Groq de mentira: datos y clave en la petición, consulta de otras fechas, 429 → siguiente modelo con su
+  etiqueta, 401 → aviso, solo modelos de la cuenta. [M] Con una clave real (10-nov): personas sin tildes, vacaciones,
+  baja, charla general. **Sin comprobar:** cuánto aguanta el límite gratuito con uso diario real.
+- [P] Fervis: el robot se mueve y luego abre; el chat no habla de la clave (va en Ajustes); clave limpia, rechazada y
+  quitada. [P] La clave no sale en la
   copia descargada ni en las automáticas. [M] Robot en los 4 temas; 390 px (robot y «Gestión» juntos, sin desplazar).
 - [P] Todo lo que pide la página y los iconos del manifiesto están en la lista `ESSENTIAL` de `sw.js`.
 - [M] Sin conexión con el servidor apagado; versión nueva borra solo cachés propias; lo ajeno no se guarda.

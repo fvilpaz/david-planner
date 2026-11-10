@@ -289,6 +289,8 @@ button.danger { background: var(--error); color: var(--on-error); }
 }
 @media (prefers-reduced-motion: reduce) { .fervis-button[class*="move-"], .fervis-button[class*="move-"] * { animation: none; } }
 .fervis-actions { display: flex; gap: .5rem; }
+.fervis-icon { width: 48px; padding: 0; display: flex; align-items: center; justify-content: center; }
+.fervis-icon svg { width: 22px; height: 22px; }
 .fervis-key { display: grid; gap: .5rem; padding: .75rem; border: 1px solid var(--border); border-radius: var(--radius);
               background: var(--surface); }
 .fervis-key[hidden] { display: none; }
@@ -303,6 +305,8 @@ button.danger { background: var(--error); color: var(--on-error); }
               overflow-wrap: anywhere; }
 .fervis-msg.fervis { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); }
 .fervis-msg.david { align-self: flex-end; background: var(--primary); color: var(--on-primary); }
+.fervis-model { display: block; margin-top: .35rem; font-size: .75rem; color: var(--muted); }  /* quién ha contestado */
+.fervis-model.backup { color: var(--warning); font-weight: 600; }
 
 /* Imprimir / Guardar como PDF: A4 apaisado, solo el título y el cuadrante entero (sin la caja que se desliza).
    Siempre en colores claros aunque en pantalla haya un tema oscuro (si no, casillas oscuras y texto que no se lee). */

@@ -23,7 +23,7 @@ cuando lleguemos a ellos, no antes. 🔲 pendiente · ✅ hecho
 | 10 | ✅ **PWA**: manifiesto, iconos, service worker (funciona sin conexión) y `navigator.storage.persist()` (que el navegador no borre los datos por su cuenta) | Instalarla en el móvil y abrirla sin conexión |
 | 11 | ✅ Publicar en **GitHub Pages** + `audit` (nando-toolkit) | Abrirla desde la dirección pública e instalarla |
 | 12a | ✅ **Fervis** (Nando, 10-nov), ventana y clave (el robot de la cartera, en el acento del tema y con sus movimientos): botón que abre un chat; David pega **su** clave gratuita de Groq (`dp_groq_key`, fuera de la copia de seguridad; limpieza al pegar como en `Crypto_Portafolio/js/fervis.js`). Sin clave, solo explica cómo conseguirla | Pegar una clave, recargar y que siga; descargar copia y que la clave no salga |
-| 12b | 🔲 **Fervis contesta**: IA normal (charla general: «¿qué es un contrato fijo?») y además sabe de la app: un manual corto de cómo se usa + los datos (personal, estados, puntos de venta y turnos de esta semana y la siguiente; para otras fechas, una consulta). Reconoce a cada empleado (aunque se escriba «ana» o sin tilde) y sabe **quién está en turno ahora mismo** y con qué horario, quién libra y quién está de vacaciones o de baja: el «ahora» lo calcula la app (también los turnos que cruzan la medianoche), no la IA. **Solo lee, no cambia turnos.** Sin personal o sin turnos, lo dice y ofrece explicar cómo crearlos. Errores claros (clave mala, límite gratuito, sin internet) | Preguntar «¿quién cierra el sábado?» y «¿qué es un contrato fijo?» con una clave de verdad; en las pruebas, un Groq de mentira |
+| 12b | ✅ **Fervis contesta**: IA normal (charla general: «¿qué es un contrato fijo?») y además sabe de la app: un manual corto de cómo se usa + los datos (personal, estados, puntos de venta y turnos de esta semana y la siguiente; para otras fechas, una consulta). Reconoce a cada empleado (aunque se escriba «ana» o sin tilde) y sabe **quién está en turno ahora mismo** y con qué horario, quién libra y quién está de vacaciones o de baja: el «ahora» lo calcula la app (también los turnos que cruzan la medianoche), no la IA. **Solo lee, no cambia turnos.** Sin personal o sin turnos, lo dice y ofrece explicar cómo crearlos. Errores claros (clave mala, límite gratuito, sin internet) | Preguntar «¿quién cierra el sábado?» y «¿qué es un contrato fijo?» con una clave de verdad; en las pruebas, un Groq de mentira |
 
 ## Propuesta de datos (a confirmar en el paso 3; código en inglés)
 ```
@@ -59,6 +59,7 @@ un parpadeo del tema por defecto).
 - Arrastrar para intercambiar en PC (en móvil se confunde con desplazar).
 - Avisar si los dos tramos de un turno partido se pisan (10–14 y 12–16); ahora no se comprueba.
 - En el móvil, abrir la semana actual desplazada hasta hoy (ahora empieza siempre en el lunes).
+- Fervis: botón de «borrar la conversación» (la papelera de la cartera) y otras preguntas rápidas sugeridas.
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
 - Refactor (solo si Nando lo pide): las ventanas Personal, Estados y Puntos de venta repiten el esqueleto de abrir,
   cerrar, volver y guardar (la lista ordenable y la paleta ya son comunes en `lists.js`). Regla de tres: a la tercera

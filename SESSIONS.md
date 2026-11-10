@@ -1,5 +1,36 @@
 # SESSIONS — david-planner
 
+## 10-nov-2026 — Paso 12b: Fervis contesta
+
+**Hecho**
+- `js/fervis.js`: Groq con la clave de David; modelos `MODELS` filtrados por los que tiene la cuenta (`/models`, una vez por
+  clave) y, si uno falla (429, 5xx), el siguiente; etiqueta `groq · modelo` debajo de cada respuesta («(respaldo)» solo
+  si falló el primero disponible); `console.warn` con el motivo. El mensaje de sistema lleva un manual corto de la app y
+  los datos como texto (personal, estados, puntos de venta, **quién trabaja ahora**, esta semana y la siguiente, avisos
+  si no hay personal o turnos); otras fechas, con la herramienta `turnos_entre` (hasta 31 días). Solo lee.
+- «Ahora» lo calcula la app (también el turno de ayer que cruza la medianoche). Historia de la conversación en memoria.
+- Ajustes como en la cartera (idea de Nando): icono de tres barras que abre el panel de la clave; el chat no habla de la
+  clave (sin ella, preguntar abre Ajustes y deja la pregunta escrita). Nota laboral orientativa en el pie.
+- Pruebas 30–33 (quién trabaja ahora, avisos, Groq de mentira con 429/401, solo modelos de la cuenta). **Controles:** turno
+  de la medianoche, «ya no trabaja aquí» y salto de modelo (fallan justo esos); luego chat con aviso de clave y lista de
+  modelos ignorada (fallan justo esos). Un primer control rompió el archivo (sed mal): no valía, rehecho. 33/33.
+- **Con una clave real** (la de Nando, en el ejemplo con nombres inventados): quién trabaja ahora (Diego, 14:07 ✔),
+  vacaciones (Hugo ✔), «lucia» sin tilde (jueves 10:00–18:00 ✔), baja (Iván desde el domingo ✔), charla general.
+
+**Decidido**
+- La clave y sus explicaciones, en Ajustes y no en el chat (Nando, como la cartera).
+- Lo que Groq ofrece depende de la cuenta: `llama-3.3-70b-versatile` no está en la de Nando; antes salía «(respaldo)» en
+  cada respuesta.
+
+**Aprendido**
+- Seis preguntas seguidas dan 429 (cada una manda el manual y dos semanas de turnos); una de vez en cuando, no. Sin medir
+  aún con uso real. El modelo pequeño explicó mal el fijo discontinuo («tiempo completo»): por eso la nota del pie.
+- El límite gratuito de Groq es por organización (cuenta), no por clave: la clave de David tiene que ser de SU cuenta.
+
+**Siguiente**
+- Probar con David en su móvil (cuenta propia con su correo; el enlace de acceso de Groq solo vale una vez y en el
+  mismo navegador donde se pidió). Luego la lista «❓ Para decidir» de `PLAN.md`.
+
 ## 10-nov-2026 — Paso 12a: Fervis, la ventana y la clave
 
 **Hecho**

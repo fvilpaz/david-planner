@@ -460,17 +460,23 @@
   // =================================================================================================================
   // Fervis (fervis.js). La clave de las pruebas es inventada: no es de nadie ni vale en Groq.
   const FAKE_KEY = "gsk_inventada_para_pruebas_1234";
+  const MODEL_IDS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"];
 
-  test("Fervis sin clave: lo dice y abre el campo; lo que no parece una clave no se guarda; pegada de un .env, se limpia", async function () {
+  test("Fervis sin clave: el chat no habla de la clave (eso va en Ajustes); lo que no parece una clave no se guarda; pegada de un .env, se limpia", async function () {
     await open(fixture());
     $("#fervis-button").click();
     ok(!$("#fervis-dialog").open, "primero el robot se mueve");
     await wait(1100);  // el movimiento más largo dura 1 s
-    ok($("#fervis-dialog").open && !$("#fervis-key-form").hidden, "se abre el chat y, sin clave, el campo de la clave");
+    ok($("#fervis-dialog").open && !$("#fervis-key-form").hidden, "se abre el chat y, sin clave, el panel de Ajustes");
+    equal($$(".fervis-msg").map(function (m) { return m.textContent; }),
+      ["Hola, soy Fervis, el asistente de los turnos. ¿Qué quieres saber?"], "el chat solo saluda");
+    ok($("#fervis-key-state").textContent.includes("Fervis la necesita para contestarte"), "el aviso está en el panel");
+    $("#fervis-key-toggle").click();
+    ok($("#fervis-key-form").hidden, "el botón de Ajustes cierra el panel");
     $("#fervis-question").value = "¿Quién trabaja hoy?";
     $("#fervis-form").requestSubmit();
-    const said = $$(".fervis-msg").map(function (m) { return m.className.replace("fervis-msg ", "") + ": " + m.textContent; });
-    ok(said.length === 3 && said[1] === "david: ¿Quién trabaja hoy?" && said[2].includes("clave gratuita de Groq"), "conversación: " + said.join(" | "));
+    ok(!$("#fervis-key-form").hidden && $("#fervis-question").value === "¿Quién trabaja hoy?" && $$(".fervis-msg").length === 1,
+      "preguntar sin clave abre el panel, no ensucia el chat y deja la pregunta escrita");
     $("#fervis-key").value = "con espacios no vale";
     $("#fervis-key-form").requestSubmit();
     equal(localStorage.getItem("dp_groq_key"), null, "lo que no parece una clave no se guarda");
@@ -489,6 +495,100 @@
     await wait(300);
     ok(files.length === 1 && files[0].text && !files[0].text.includes(FAKE_KEY), "la copia descargada no la lleva");
     ok(localStorage.getItem("dp_copias") && !localStorage.getItem("dp_copias").includes(FAKE_KEY), "la copia automática (hecha al abrir) no la lleva");
+  });
+
+  test("Fervis sabe quién trabaja ahora (también el turno de ayer que cruza la medianoche), las vacaciones y quién ya no está", async function () {
+    const data = fixture();
+    data.statuses.push({ id: "vac", name: "Vacaciones", color: "#16a085", countsAsWork: false, position: 2 });
+    data.shifts["e1|2026-11-09"] = work("22:00", "02:00", null, "p1");      // Ana, lunes por la noche
+    data.shifts["e2|2026-11-10"] = work("10:00", "18:00");                  // Luis, martes
+    data.shifts["e3|2026-11-10"] = { statusId: "vac", slots: [], overtime: null };
+    data.employees[2].leftFrom = "2026-11-12";                               // Marta ya no trabaja desde el jueves
+    const w = await open(data);
+    const at = function (day, h, m) { return w.Fervis.context(new w.Date(2026, 10, day, h, m)); };
+    const now = function (text) { return text.split("\n").find(function (l) { return l.startsWith("Trabajando"); }); };
+    equal(now(at(9, 23, 0)), "Trabajando ahora mismo: Ana (22:00–02:00 en Pub).", "lunes 23:00");
+    equal(now(at(10, 1, 30)), "Trabajando ahora mismo: Ana (22:00–02:00 en Pub, empezó ayer).", "martes 1:30");
+    equal(now(at(10, 2, 0)), "Trabajando ahora mismo: nadie.", "martes 2:00, ya terminó");
+    const noon = at(10, 12, 0);
+    equal(now(noon), "Trabajando ahora mismo: Luis (10:00–18:00).", "martes 12:00");
+    ok(/martes, 10 de noviembre[^\n]*Marta: Vacaciones/.test(noon), "Marta de vacaciones el martes");
+    ok(noon.includes("Marta (ya no trabaja aquí desde el 2026-11-12)"), "en el personal, con su fecha");
+    ok(/miércoles, 11 de noviembre[^\n]*Marta/.test(noon) && !/jueves, 12 de noviembre[^\n]*Marta/.test(noon), "no sale desde el jueves");
+    ok(!noon.includes("AVISO"), "con personal y turnos, sin avisos");
+  });
+
+  test("Fervis avisa si el personal es el de la primera vez, si no hay turnos o si no hay nadie", async function () {
+    let w = await open(null);  // la primera vez: Camarero 1–4 y ningún turno
+    const first = w.Fervis.context(new w.Date(2026, 10, 10, 12, 0));
+    ok(first.includes("AVISO: son los nombres que trae la app") && first.includes("AVISO: todavía no hay ningún turno"), "primera vez");
+    const empty = fixture();
+    empty.employees = [];
+    w = await open(empty);
+    ok(w.Fervis.context(new w.Date(2026, 10, 10, 12, 0)).includes("AVISO: no hay nadie en el personal"), "sin personal");
+  });
+
+  test("Fervis con un Groq de mentira: clave y datos; consulta de otras fechas; 429 → el siguiente modelo con su etiqueta; 401 → aviso", async function () {
+    const data = fixture();
+    data.shifts["e1|2026-12-01"] = work("09:00", "17:00");
+    const w = await open(data, { extra: [["dp_groq_key", FAKE_KEY]] });
+    const sent = [];
+    const replies = [
+      { status: 429 },
+      { status: 200, json: { choices: [{ message: { content: null, tool_calls: [{ id: "c1", type: "function",
+        function: { name: "turnos_entre", arguments: '{"desde":"2026-12-01","hasta":"2026-12-01"}' } }] } }] } },
+      { status: 200, json: { choices: [{ message: { content: "Ana trabaja de 09:00 a 17:00." } }] } },
+    ];
+    const asked = [];  // las veces que se pidió la lista de modelos de la cuenta
+    w.fetch = function (url, options) {
+      if (url.endsWith("/models")) {  // la lista de modelos de la cuenta: los cuatro
+        asked.push(options.headers.Authorization);
+        return Promise.resolve({ ok: true, status: 200, json: function () {
+          return Promise.resolve({ data: MODEL_IDS.map(function (id) { return { id: id }; }) }); } });
+      }
+      sent.push({ url: url, auth: options.headers.Authorization, body: JSON.parse(options.body) });
+      const r = replies.shift();
+      return Promise.resolve({ ok: r.status === 200, status: r.status, json: function () { return Promise.resolve(r.json); } });
+    };
+    w.Fervis.open();
+    $("#fervis-question").value = "¿Qué hace Ana el 1 de diciembre?";
+    $("#fervis-form").requestSubmit();
+    await wait(300);
+    const last = $$(".fervis-msg").pop();
+    equal([last.firstChild.textContent, last.querySelector(".fervis-model").textContent],
+      ["Ana trabaja de 09:00 a 17:00.", "groq · openai/gpt-oss-120b (respaldo)"], "respuesta y etiqueta");
+    equal(sent.map(function (s) { return s.body.model; }), ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-120b"], "modelos");
+    ok(sent.every(function (s) { return s.auth === "Bearer " + FAKE_KEY && s.url.startsWith("https://api.groq.com/"); }), "clave y dirección");
+    ok(sent[1].body.messages[0].content.includes("Personal (3): Ana, Luis, Marta."), "los datos van en el mensaje de sistema");
+    const tool = sent[2].body.messages.find(function (m) { return m.role === "tool"; });
+    ok(tool && tool.content.includes("Ana: Trabajo 09:00–17:00"), "la consulta devuelve el 1 de diciembre");
+    replies.push({ status: 401 });
+    $("#fervis-question").value = "¿Y mañana?";
+    $("#fervis-form").requestSubmit();
+    await wait(300);
+    ok($$(".fervis-msg").pop().textContent.includes("no acepta tu clave"), "401: aviso de la clave");
+    equal(asked, ["Bearer " + FAKE_KEY], "la lista de modelos se pide una sola vez");
+  });
+
+  test("Fervis usa solo los modelos que tiene la cuenta: si falta el primero, no lo prueba ni pone «respaldo»", async function () {
+    const w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
+    const tried = [];
+    w.fetch = function (url, options) {
+      if (url.endsWith("/models")) {
+        return Promise.resolve({ ok: true, status: 200, json: function () {
+          return Promise.resolve({ data: [{ id: "openai/gpt-oss-120b" }, { id: "otro/modelo" }] }); } });
+      }
+      tried.push(JSON.parse(options.body).model);
+      return Promise.resolve({ ok: true, status: 200, json: function () {
+        return Promise.resolve({ choices: [{ message: { content: "Nadie trabaja ahora." } }] }); } });
+    };
+    w.Fervis.open();
+    $("#fervis-question").value = "¿Quién trabaja?";
+    $("#fervis-form").requestSubmit();
+    await wait(300);
+    const last = $$(".fervis-msg").pop();
+    equal([tried, last.querySelector(".fervis-model").textContent, last.querySelector(".fervis-model").classList.contains("backup")],
+      [["openai/gpt-oss-120b"], "groq · openai/gpt-oss-120b", false], "solo el modelo que existe, sin «respaldo»");
   });
 
   // =================================================================================================================

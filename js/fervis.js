@@ -1,4 +1,6 @@
-// Fervis (paso 12, idea de Nando): el asistente de los turnos. Paso 12a: la ventana y la clave de Groq de David.
+// Fervis (paso 12, idea de Nando): el asistente de los turnos. 12a: la ventana y la clave de Groq de David. 12b: que
+// conteste. Habla de lo general y sabe de la app: un manual corto y los datos como texto (personal, estados, puntos de
+// venta, quién trabaja ahora, esta semana y la siguiente); otras fechas, con la consulta turnos_entre. Solo lee.
 // La clave es de David (cuenta gratuita en console.groq.com) y vive SOLO en este navegador, en «dp_groq_key»: no está
 // en el código (el repositorio es público) ni en la copia de seguridad (backup.js copia una lista fija de claves,
 // SETTINGS, y esta no está). La limpieza al pegar es la de Crypto_Portafolio/js/fervis.js. Todo con textContent.
@@ -14,7 +16,6 @@ window.Fervis = (function () {
   const messages = document.getElementById("fervis-messages");
   const chat = document.getElementById("fervis-form");
   const question = document.getElementById("fervis-question");
-  const NO_KEY = "Para contestarte necesito tu clave gratuita de Groq: pégala en «🔑 Clave».";
 
   function readKey() { try { return localStorage.getItem(KEY) || ""; } catch (error) { return ""; } }
 
@@ -41,13 +42,229 @@ window.Fervis = (function () {
     item.className = "fervis-msg " + who;
     item.textContent = text;
     messages.scrollTop = messages.scrollHeight;
+    return item;
+  }
+
+  // ---------- Lo que sabe Fervis (paso 12b): los datos de la app como texto. Lo arma la app, no la IA ----------
+  const DAY = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  const MAX_DAYS = 31;  // la consulta de otras fechas: como mucho un mes de una vez
+
+  function minutes(time) { const parts = String(time).split(":"); return Number(parts[0]) * 60 + Number(parts[1]); }
+
+  function inOrder(list) { return list.slice().sort(function (a, b) { return a.position - b.position; }); }
+
+  function statusOf(data, shift) { return shift && data.statuses.find(function (s) { return s.id === shift.statusId; }); }
+
+  // Quien ya no trabaja aquí desde una fecha no sale ese día ni después (como en el cuadrante)
+  function staffOn(data, iso) {
+    return inOrder(data.employees).filter(function (e) { return !e.leftFrom || e.leftFrom > iso; });
+  }
+
+  function slotText(data, slot) {
+    const place = slot.placeId && data.places.find(function (p) { return p.id === slot.placeId; });
+    return slot.start + "–" + slot.end + (place ? " en " + place.name : "");
+  }
+
+  function shiftText(data, shift) {
+    const status = statusOf(data, shift);
+    if (!status) { return "sin nada puesto"; }
+    let text = status.name;
+    if (status.countsAsWork && shift.slots.length) {
+      text += " " + shift.slots.map(function (slot) { return slotText(data, slot); }).join(" y ");
+    }
+    if (shift.overtime) {
+      text += ", +" + String(shift.overtime.hours).replace(".", ",") + " h extra" +
+        (shift.overtime.reason ? " (" + shift.overtime.reason + ")" : "");
+    }
+    return text;
+  }
+
+  function rangeLines(data, from, days) {
+    const lines = [];
+    for (let i = 0; i < days; i++) {
+      const date = Dates.addDays(from, i);
+      const iso = Dates.toIso(date);
+      const people = staffOn(data, iso);
+      lines.push("- " + DAY.format(date) + " (" + iso + "): " + (people.length ? people.map(function (e) {
+        return e.name + ": " + shiftText(data, data.shifts[e.id + "|" + iso]);
+      }).join("; ") : "nadie en el personal"));
+    }
+    return lines.join("\n");
+  }
+
+  // Quién está trabajando AHORA: los tramos de hoy y los de ayer que cruzan la medianoche (22:00–02:00 acaba hoy)
+  function onShiftNow(data, now) {
+    const time = now.getHours() * 60 + now.getMinutes();
+    const days = [[Dates.toIso(now), false], [Dates.toIso(Dates.addDays(now, -1)), true]];
+    const found = [];
+    inOrder(data.employees).forEach(function (e) {
+      days.forEach(function (day) {
+        const shift = data.shifts[e.id + "|" + day[0]];
+        const status = statusOf(data, shift);
+        if (!status || !status.countsAsWork || (e.leftFrom && e.leftFrom <= day[0])) { return; }
+        shift.slots.forEach(function (slot) {
+          if (!slot.start || !slot.end) { return; }
+          const start = minutes(slot.start);
+          const end = minutes(slot.end);
+          const crosses = end <= start;
+          const working = day[1] ? crosses && time < end : time >= start && (crosses || time < end);
+          if (working) { found.push(e.name + " (" + slotText(data, slot) + (day[1] ? ", empezó ayer" : "") + ")"); }
+        });
+      });
+    });
+    return found;
+  }
+
+  function context(now) {
+    const data = window.Schedule.getData();
+    const monday = Dates.weekStart(now);
+    const people = inOrder(data.employees);
+    const working = onShiftNow(data, now);
+    const setting = function (key) { try { return localStorage.getItem(key) || ""; } catch (error) { return ""; } };
+    const lines = [
+      "Ahora: " + DAY.format(now) + " de " + now.getFullYear() + ", " + String(now.getHours()).padStart(2, "0") + ":" +
+        String(now.getMinutes()).padStart(2, "0") + ".",
+      "Local: " + (setting("dp_name") || "sin nombre") + (setting("dp_city") ? ", " + setting("dp_city") : "") +
+        (setting("dp_person") ? ". Quien usa la app: " + setting("dp_person") : "") + ".",
+      "Personal (" + people.length + "): " + (people.map(function (e) {
+        return e.name + (e.leftFrom ? " (ya no trabaja aquí desde el " + e.leftFrom + ")" : "");
+      }).join(", ") || "nadie") + ".",
+    ];
+    if (!people.length) { lines.push("AVISO: no hay nadie en el personal."); }
+    else if (people.every(function (e) { return /^Camarero \d+$/.test(e.name); })) {
+      lines.push("AVISO: son los nombres que trae la app la primera vez (Camarero 1, 2…): aún no está el personal de verdad.");
+    }
+    if (!Object.keys(data.shifts).length) { lines.push("AVISO: todavía no hay ningún turno puesto en ninguna semana."); }
+    lines.push(
+      "Estados: " + inOrder(data.statuses).map(function (s) { return s.name + (s.countsAsWork ? " (con horario)" : ""); }).join(", ") + ".",
+      "Puntos de venta: " + (inOrder(data.places).map(function (p) { return p.name; }).join(", ") || "ninguno") + ".",
+      "Trabajando ahora mismo: " + (working.join("; ") || "nadie") + ".",
+      "Esta semana:\n" + rangeLines(data, monday, 7),
+      "La semana que viene:\n" + rangeLines(data, Dates.addDays(monday, 7), 7));
+    return lines.join("\n");
+  }
+
+  // La consulta que Fervis puede pedir para otras fechas
+  function lookUp(args) {
+    const from = Dates.parseIso(args && args.desde);
+    const to = Dates.parseIso(args && args.hasta);
+    if (!from || !to || to < from) { return "Fechas no válidas: AAAA-MM-DD, y «hasta» no puede ser antes que «desde»."; }
+    const days = Math.round((to - from) / 86400000) + 1;  // redondeo: un día con cambio de hora no mide 24 h
+    if (days > MAX_DAYS) { return "Como mucho " + MAX_DAYS + " días de una vez."; }
+    return rangeLines(window.Schedule.getData(), from, days);
+  }
+
+  const MANUAL = [
+    "Cómo se usa la app (para explicarlo si preguntan):",
+    "- Cuadrante semanal, de lunes a domingo: ‹ y › cambian de semana, tocar el título abre el calendario, «Hoy» vuelve a esta semana.",
+    "- Tocar una casilla abre su ventana: estado (Trabajo, Libre, Vacaciones…), horario (si el fin es antes que el inicio, acaba al día siguiente), «+ Segundo tramo» para el turno partido, «Dónde» (punto de venta) y horas extra con su motivo. «Guardar»; «Vaciar» la deja vacía.",
+    "- «⇄ Intercambiar con…» (en la ventana de una casilla) y tocar otra casilla: se cambian, también entre personas o semanas; «Deshacer» unos segundos.",
+    "- Tocar el nombre de una persona en el cuadrante abre su ficha.",
+    "- Menú «Gestión»: Imprimir / PDF; Copiar la semana anterior (en 1 a 8 semanas, solo en casillas vacías); Personal (añadir, nombre, color y orden arrastrando ⠿ o con el número; «Quitar»: sin turnos se borra, con turnos deja de salir desde la semana que se ve); Estados; Puntos de venta; Copia de seguridad (descargar y cargar el archivo; copias automáticas semanales); Tema.",
+    "- El lápiz de arriba a la izquierda cambia el nombre del local y la ciudad; el círculo de la derecha, el nombre de quien la usa.",
+    "- Los datos viven solo en este navegador: conviene descargar la copia de seguridad a menudo y guardarla fuera del móvil.",
+  ].join("\n");
+
+  function system(model) {
+    return "Eres Fervis, el asistente de «David Planner», la app de turnos de este local de hostelería. Contesta en " +
+      "castellano, breve y claro, en texto normal: sin markdown (ni asteriscos ni almohadillas); para listas, una línea " +
+      "por punto empezando con «- ». Puedes charlar de cualquier tema general (por ejemplo, qué es un contrato fijo o " +
+      "fijo discontinuo, descansos u horas extra): da información general y, para un caso concreto, recomienda mirar el " +
+      "convenio o preguntar a la gestoría. Para los turnos usa SOLO los datos de abajo o la herramienta turnos_entre " +
+      "(fechas fuera de esta semana y la siguiente); nunca inventes turnos ni personas. Reconoce a cada persona aunque " +
+      "la escriban en minúsculas, sin tildes o solo con el nombre; si hay dos posibles, pregunta. «Trabajando ahora " +
+      "mismo» ya está calculado: úsalo tal cual. Solo lees: si piden cambiar un turno, explica cómo hacerlo en la app. " +
+      "Si hay un AVISO de que falta personal o turnos, dilo y ofrece explicar paso a paso cómo crearlos. Si preguntan " +
+      "qué IA eres: Fervis es tu nombre y te ejecuta el modelo " + model + " en Groq.\n\n" + MANUAL +
+      "\n\nDATOS DE LA APP:\n" + context(new Date());
+  }
+
+  // ---------- Groq, con la clave de David. Si un modelo está saturado o falla, se prueba el siguiente ----------
+  const GROQ = "https://api.groq.com/openai/v1/chat/completions";
+  const GROQ_MODELS = "https://api.groq.com/openai/v1/models";
+  const MODELS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"];
+  const TOOLS = [{ type: "function", function: {
+    name: "turnos_entre",
+    description: "Turnos de todo el personal, día a día, entre dos fechas (como mucho 31 días). Para fechas que no estén en «Esta semana» ni en «La semana que viene».",
+    parameters: { type: "object", required: ["desde", "hasta"], properties: {
+      desde: { type: "string", description: "AAAA-MM-DD" }, hasta: { type: "string", description: "AAAA-MM-DD" } } },
+  } }];
+  const history = [];  // la conversación, para entender «¿y mañana?» (hasta recargar la página)
+  let busy = false;
+
+  function failure(text, tryNext, limit) {
+    const error = new Error(text);
+    error.tryNext = tryNext;
+    error.limit = limit;
+    return error;
+  }
+
+  async function post(key, body) {
+    let response;
+    try {
+      response = await fetch(GROQ, { method: "POST", body: JSON.stringify(body), signal: AbortSignal.timeout(30000),
+        headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" } });
+    } catch (error) { throw failure("No he podido conectar con Groq (¿sin internet?).", false); }
+    if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en «🔑 Clave» que esté entera.", false); }
+    if (!response.ok) { throw failure("Groq ha fallado (código " + response.status + ").", true, response.status === 429); }
+    return response.json();
+  }
+
+  async function converse(key, model, conversation) {
+    const turn = [{ role: "system", content: system(model) }].concat(conversation);
+    for (let round = 0; round < 4; round++) {
+      const reply = await post(key, { model: model, temperature: 0.2, max_tokens: 700, tools: TOOLS, tool_choice: "auto", messages: turn });
+      const message = reply && reply.choices && reply.choices[0] && reply.choices[0].message;
+      if (!message) { throw failure("Groq ha contestado algo vacío.", true); }
+      if (!message.tool_calls || !message.tool_calls.length) { return String(message.content || "").trim() || "(sin respuesta)"; }
+      turn.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
+      message.tool_calls.forEach(function (call) {
+        let args = null;
+        try { args = JSON.parse(call.function.arguments || "{}"); } catch (error) { args = null; }
+        turn.push({ role: "tool", tool_call_id: call.id,
+          content: call.function.name === "turnos_entre" ? lookUp(args) : "No existe esa herramienta." });
+      });
+    }
+    throw failure("Demasiadas consultas para una sola pregunta.", true);
+  }
+
+  // Los modelos de MODELS que de verdad tiene la cuenta de David, en orden (como en la cartera): si Groq retira uno, no se
+  // pierde una petición en él cada vez ni se etiqueta como «respaldo» lo que es el primero disponible.
+  let ladder = null;
+  async function accountModels(key) {
+    if (ladder) { return ladder; }
+    let ids = [];
+    try {
+      const response = await fetch(GROQ_MODELS, { headers: { Authorization: "Bearer " + key }, signal: AbortSignal.timeout(15000) });
+      if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en «🔑 Clave» que esté entera.", false); }
+      if (response.ok) { ids = ((await response.json()).data || []).map(function (m) { return m.id; }); }
+    } catch (error) { if (error.tryNext === false) { throw error; } }  // sin red o sin lista: se prueban todos
+    const mine = MODELS.filter(function (id) { return ids.includes(id); });
+    if (ids.length && !mine.length) { throw failure("Tu cuenta de Groq no tiene ninguno de los modelos que uso.", false); }
+    if (mine.length) { ladder = mine; }
+    return mine.length ? mine : MODELS;
+  }
+
+  async function answer(key, conversation) {
+    let limited = false;
+    const models = await accountModels(key);
+    for (const model of models) {
+      try { return { text: await converse(key, model, conversation), model: model, backup: model !== models[0] }; } catch (error) {
+        console.warn("Fervis: " + model + " no ha contestado → " + error.message);  // para saber por qué se pasó al siguiente
+        if (!error.tryNext) { throw error; }
+        limited = limited || error.limit;
+      }
+    }
+    throw failure(limited ? "Los modelos gratuitos de Groq están al límite ahora mismo. Prueba otra vez en un minuto."
+      : "Ningún modelo de Groq ha podido contestar. Prueba a preguntarlo de otra forma.", false);
   }
 
   function showKeyForm(show) {
     const key = readKey();
     keyForm.hidden = !show;
     keyToggle.setAttribute("aria-expanded", String(show));
-    keyState.textContent = key ? "Clave guardada: " + mask(key) : "Sin clave todavía.";
+    // Lo de la clave vive aquí, en el panel (como los Ajustes de la cartera), no en la conversación
+    keyState.textContent = key ? "Clave guardada: " + mask(key) : "Sin clave todavía: Fervis la necesita para contestarte.";
     keyRemove.hidden = !key;
     if (show) { keyInput.focus(); }
   }
@@ -62,6 +279,7 @@ window.Fervis = (function () {
     }
     if (!writeKey(key)) { keyState.textContent = "No se ha podido guardar: el navegador no lo deja (¿modo privado?)."; return; }
     keyInput.value = "";  // la clave no se queda escrita en la página
+    ladder = null;        // con otra clave, otra cuenta: los modelos se vuelven a preguntar
     showKeyForm(false);
     say("fervis", "Clave guardada (" + mask(key) + ")." +
       (key.startsWith("gsk_") ? "" : " Ojo: las de Groq empiezan por gsk_; si no funciona, mira que esté entera."));
@@ -70,24 +288,41 @@ window.Fervis = (function () {
 
   keyRemove.addEventListener("click", function () {
     writeKey("");
+    ladder = null;
     showKeyForm(true);
     say("fervis", "Clave quitada de este navegador.");
   });
 
   keyToggle.addEventListener("click", function () { showKeyForm(keyForm.hidden); });
 
-  chat.addEventListener("submit", function (event) {
+  chat.addEventListener("submit", async function (event) {
     event.preventDefault();
     const text = question.value.trim();
-    if (!text) { return; }
-    question.value = "";
-    say("david", text);
-    if (!readKey()) {
-      say("fervis", NO_KEY);
+    if (!text || busy) { return; }
+    const key = readKey();
+    if (!key) {  // sin clave no hay conversación: se abre el panel y la pregunta se queda escrita para cuando la pegue
       showKeyForm(true);
       return;
     }
-    say("fervis", "Ya tengo tu clave. Las respuestas llegan en el paso siguiente (12b).");  // lo sustituye el 12b
+    question.value = "";
+    say("david", text);
+    busy = true;
+    const reply = say("fervis", "Pensando…");
+    history.push({ role: "user", content: text });
+    try {
+      const result = await answer(key, history.slice(-9));  // las últimas preguntas y respuestas, empezando por una pregunta
+      reply.textContent = result.text;
+      // Debajo, quién ha contestado (como en la cartera); «respaldo» si el primero estaba saturado
+      const label = reply.appendChild(document.createElement("small"));
+      label.className = "fervis-model" + (result.backup ? " backup" : "");
+      label.textContent = "groq · " + result.model + (result.backup ? " (respaldo)" : "");
+      history.push({ role: "assistant", content: result.text });
+    } catch (error) {
+      reply.textContent = error.message;
+      history.pop();  // la pregunta sin respuesta no se queda en la conversación
+    }
+    messages.scrollTop = messages.scrollHeight;
+    busy = false;
   });
 
   dialog.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
@@ -114,12 +349,12 @@ window.Fervis = (function () {
     dialog.showModal();
     const key = readKey();
     if (!messages.children.length) {
-      say("fervis", "Hola, soy Fervis, el asistente de los turnos. " + (key ? "¿Qué quieres saber?" : NO_KEY));
+      say("fervis", "Hola, soy Fervis, el asistente de los turnos. ¿Qué quieres saber?");
     }
     showKeyForm(!key);
     // En el móvil, el cursor en la casilla saca el teclado y tapa el saludo: ahí se escribe al tocarla (como en la cartera)
     if (key && window.matchMedia("(pointer: fine)").matches) { question.focus(); }
   }
 
-  return { open: open };
+  return { open: open, context: context };  // context: para las pruebas (con una hora fija)
 })();
