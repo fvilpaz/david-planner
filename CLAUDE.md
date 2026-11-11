@@ -31,6 +31,8 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | Intercambiar | «Intercambiar con…» y tocar otra casilla: misma persona en dos días, dos personas el mismo día o cualquier combinación. Dos toques, no arrastrar (se confunde con desplazar en el móvil). |
 | Horas extra | Número y motivo opcional en la casilla. Se ve con **borde de aviso + texto «+2 h extra»** (nunca solo color). **Salen en el PDF.** No se copian al copiar semanas. |
 | Puntos de venta | Lista editable (Chiringuito, Cafetería, Pub…). Un «Dónde» por tramo. Se ve como **texto pequeño debajo de la hora** (en blanco y negro el texto sigue ahí). Cada punto tiene su **color** (paleta de 20) y en Gestión → «Colorear por» se elige **Persona** (como siempre, por defecto) o **Punto de venta** (el tramo toma el color de su sitio; sin sitio, el de la persona); el ajuste es por aparato (`dp_color_by`) y solo sale si hay puntos de venta. Con la lista vacía no aparece nada. |
+| Color por punto de venta (14a) | Cada punto tiene su color (paleta de 20). Gestión → «Colorear por»: **Persona** (por defecto) o **Punto de venta**; por aparato (`dp_color_by`), solo sale si hay puntos. |
+| Clientes y camareros por día (14b) | **Segunda tabla** bajo el cuadrante (misma `.schedule-table`, mismas columnas por CSS, hueco de 4 px, se deslizan juntas): su cabecera son los **clientes previstos** (por fecha, `data.clients`, se guardan al escribir); debajo, **camareros** (total y etiqueta por sitio con su color; quien trabaja en dos sitios cuenta 1 vez en el total) y **clientes por camarero** (verde hasta el «Ideal», naranja hasta +25 %, rojo por encima; `data.ratioMax`, 20 por defecto, lo fija cada local). «Copiar semanas» no copia clientes. Entra en la copia de seguridad y en la impresión (una hoja). |
 | Menú «Gestión» | Imprimir / PDF · Copiar la semana anterior (en 1–8 semanas) · Personal · Estados · Puntos de venta · Copia de seguridad · Colorear por · Tema. |
 | Copiar semanas | Como `gestion-hosteleria`: la semana anterior a la que se ve se repite en esta y en las siguientes (1–8), **solo en casillas vacías** y sin quien esté de baja en la semana de destino. |
 | Personal | La primera vez: **Camarero 1–4** sin turnos (se renombran tocando el nombre). Añadir, nombre, color (paleta de 20, sin rosas ni fucsias; un estado nuevo nace con uno que no lleve nadie), orden (número o arrastrar por ⠿). **Quitar**: sin ningún turno se borra del todo; con turnos, **se da de baja desde la semana que se ve** (sigue en las anteriores) y se puede volver a dar de alta. |
@@ -64,7 +66,7 @@ Con el servidor encendido, abrir **`http://localhost:8731/tests/`**: carga la ap
 pruebas (`tests/tests.js`, sacadas de las reglas de este archivo). Verde = todo bien; en rojo, cada fallo dice qué
 esperaba y qué salió. **Pasarlas antes de cada commit** y añadir la prueba de cada regla nueva. Guardan los datos
 `dp_*` del navegador y los devuelven al terminar; en la web publicada no se ejecutan (podrían tocar datos de David).
-Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
+Hoy: **67 pruebas**. Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
 **Archivo nuevo que carga la página → apuntarlo en `ESSENTIAL` de `sw.js`**: si no, con internet va bien y sin
 internet la app instalada se abre rota, sin avisar. Lo vigila la prueba «Todo lo que pide la página… está en ESSENTIAL».
 
