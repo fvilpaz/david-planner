@@ -45,7 +45,7 @@
 - Controles: el deslizado roto → la prueba cae. Las columnas rotas → la prueba NO cae (con ese marco tan ancho salen iguales de todas formas): no se puede demostrar en pantalla, solo en el PDF. Lo dejo dicho.
 
 **Siguiente**
-- Auditoría, documentación y refactor (Nando, con Opus). Push al terminar todo; ya nada por Telegram.
+- Ver «📌 Pendiente» en `PLAN.md`: auditoría, documentación y refactor (con Opus), **actualizar el glosario** (lista de temas a repasar allí) y NO rehacer el vídeo. Push al terminar todo; ya nada por Telegram.
 
 ## 11-nov-2026 — Paso 14a: color por punto de venta y «Colorear por»
 
