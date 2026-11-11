@@ -73,6 +73,7 @@ un parpadeo del tema por defecto).
 - Sitio por defecto de cada persona (que «Dónde» se rellene solo al poner un turno); hoy se elige en cada casilla
   (el copiar semanas lo arrastra).
 - Exportar el cuadrante como imagen PNG / botón «Compartir» a WhatsApp.
+- Nombre de producto si se vende a otros locales (Nando, 11-nov): hoy «David Planner», y así sale en el CV y en freeCodeCamp; cambiarlo sería de una vez en título, icono instalable, pie y vídeos. La dirección /david-planner/ puede quedarse.
 - Juntar el esqueleto de las listas (Personal, Estados y Puntos de venta repiten abrir, cerrar, volver y guardar):
   **solo si aparece una cuarta lista**. Nando, 10-nov: mejor tres con el mismo molde; cada una tiene sus excepciones
   y lo común ya está en `lists.js` (composición: cada ventana coge las piezas que le sirven).
