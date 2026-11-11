@@ -939,13 +939,14 @@
     equal(rgb(chipOf("e1|2026-11-10")), rgb(chipOf("e1|2026-11-09")), "en oscuro, igual que hasta ahora");
   });
 
-  test("Color de las etiquetas (Gestión → Tema): una barra de 0 (suave, como antes) a 100 (vivo) que cambia al momento, se guarda en el aparato y en la copia; solo en los temas claros", async function () {
+  test("Color de las etiquetas (Gestión → Tema): una barra de 0 (suave, como antes) a 100 (vivo) que cambia al momento, se guarda en el aparato y en la copia; en los temas claros y en los oscuros", async function () {
     const data = fixture();
     data.shifts["e1|2026-11-09"] = work("10:00", "18:00");
     const w = await open(data, { extra: [["dp_theme", "claro"]] });
     const root = w.document.documentElement;
     const range = $("#tint-intensity");
     ok(range && range.closest(".menu-group").querySelector("summary").textContent.includes("Tema"), "la barra está en Gestión → Tema");
+    equal($(".intensity").textContent.trim(), "Color de las etiquetas", "sin «(temas claros)»: vale para todos");
     equal([range.min, range.max, range.value, root.dataset.intensity], ["0", "100", "0", "0"], "de 0 a 100; en 0 por defecto: como estaba");
     // El color que pinta de verdad, pasado a rojo/verde/azul con un lienzo (el navegador puede devolverlo en oklch)
     const paint = w.document.createElement("canvas").getContext("2d");
@@ -965,9 +966,10 @@
     const medium = chroma();
     ok(medium > soft && medium < vivid, "en 50, entre los dos: " + soft + " < " + medium + " < " + vivid);
     w.Theme.apply("oscuro");
-    const dark = chroma();
+    range.value = "0";  fire(range, "input");
+    const darkSoft = chroma();
     range.value = "100";  fire(range, "input");
-    equal(chroma(), dark, "en los temas oscuros no cambia");
+    ok(chroma() > darkSoft + 15, "en oscuro también: " + darkSoft + " → " + chroma());
     w.Theme.apply("claro");
     range.value = "50";  fire(range, "input");
     const files = catchDownloads(w);

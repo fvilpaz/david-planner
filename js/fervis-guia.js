@@ -89,7 +89,7 @@ window.FervisGuide = (function () {
       "Los datos viven solo en el navegador de ese aparato: si se borran, se pierden."]],
     ["temas", "🎨", "Temas de color", [
       "Gestión → «Tema»: Claro, Lino, Oscuro y Carbón; cambia el cuadrante y también la tabla de clientes.",
-      "Debajo, «Color de las etiquetas»: desliza de Suave (0) a Vivo (100) para ver los colores más vivos (en los temas claros; los oscuros ya lo son).",
+      "Debajo, «Color de las etiquetas»: desliza de Suave (0) a Vivo (100) para ver los colores más vivos, en cualquier tema.",
       "Se recuerda en cada aparato.",
       "Al imprimir siempre sale en claro."]],
     ["local_y_persona", "🏢", "Nombre del local y de la persona", [
