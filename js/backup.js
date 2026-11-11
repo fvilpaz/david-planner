@@ -160,8 +160,10 @@ window.Backup = (function () {
   function applyPending() {
     const copy = pending;
     pending = null;
-    download("david-planner-antes-de-cargar-");  // lo de ahora, por si te arrepientes…
-    autoCopy(true);                              // …y también como copia automática
+    // Lo de ahora, por si te arrepientes: como copia automática, dentro del navegador (se recupera en «Copias automáticas»).
+    // Antes además se descargaba un archivo siempre, y en el PC salía la ventana «Guardar como» en mitad de cargar. Solo si
+    // había datos de verdad y la copia no cupo (navegador casi lleno) se descarga: sería la única copia de lo de ahora.
+    if (!autoCopy(true) && !window.Store.DEMO && get(window.Store.KEY) !== null) { download("david-planner-antes-de-cargar-"); }
     if (!window.Store.save(copy.data)) {
       importDialog.close();
       result.textContent = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";

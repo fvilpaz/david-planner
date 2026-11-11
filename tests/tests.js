@@ -457,9 +457,29 @@
     const next = reloaded();
     $("#import-ok").click();
     await next;
-    ok(files[0] && files[0].name.startsWith("david-planner-antes-de-cargar-"), "descargó antes lo de ahora");
+    equal(files.length, 0, "al cargar una copia no se descarga nada (salía la ventana de guardar)");
+    equal(saved("dp_copias").length, 2, "lo de ahora quedó como copia automática (la de al abrir y la de antes de cargar)");
+    equal(Object.keys(saved("dp_copias")[1].data.shifts).length, 0, "y es lo de ANTES de cargar (sin turnos)");
     equal(Object.keys(saved().shifts), ["e1|2026-11-10"], "solo el turno bueno");
     equal(localStorage.getItem("dp_name"), "Cargado", "la barra");
+  });
+
+  test("Cargar una copia con el navegador casi lleno (no cabe la copia automática): como no habría otra copia de lo de ahora, sí se descarga un archivo", async function () {
+    const w = await open(fixture());
+    const files = catchDownloads(w);
+    breakStorage(w, "dp_copias");   // la copia automática ya no cabe
+    const copy = { app: "david-planner", version: 1, exportedAt: "2026-11-10T10:00:00Z", data: fixture(), settings: {} };
+    const transfer = new w.DataTransfer();
+    transfer.items.add(new w.File([JSON.stringify(copy)], "copia.json", { type: "application/json" }));
+    const input = $("#backup-file");
+    input.files = transfer.files;
+    fire(input, "change");
+    await wait(250);
+    ok($("#import-dialog").open, "pide confirmación");
+    const next = reloaded();
+    $("#import-ok").click();
+    await next;
+    ok(files[0] && files[0].name.startsWith("david-planner-antes-de-cargar-"), "sin copia automática, se descarga lo de ahora (descargas: " + files.length + ")");
   });
 
   test("Copias automáticas: una al abrir, no se repite en la semana, a los 8 días otra, máximo 5, nunca en el ejemplo", async function () {
@@ -845,7 +865,7 @@
       fire(input, "change");
       await wait(250);
       ok($("#import-dialog").open, "la copia se acepta: " + $("#backup-result").textContent);
-      catchDownloads(win);   // cargar descarga antes «lo de ahora»: en CADA ventana se desvía aquí, para que no llegue a Descargas
+      catchDownloads(win);   // por si acaso: cargar no debe descargar nada, pero si un día lo hiciera no llegaría a Descargas
       const next = reloaded();
       $("#import-ok").click();
       return next;

@@ -77,7 +77,7 @@ window.FervisGuide = (function () {
     ["copia_seguridad", "💾", "Copia de seguridad", [
       "Gestión → «Copia de seguridad».",
       "«Descargar copia» guarda un archivo con todo: guárdalo también fuera del móvil (Drive, correo, el PC).",
-      "«Cargar una copia…» lo recupera, pide confirmación y descarga antes lo que había.",
+      "«Cargar una copia…» la recupera y pide confirmación; antes guarda lo que había como copia automática (se recupera en «Copias automáticas»), sin descargar nada.",
       "Hay copias automáticas dentro del navegador: una por semana, las 5 últimas, con «Recuperar».",
       "Si pasan 7 días sin descargar copia, sale un aviso arriba.",
       "Los datos viven solo en el navegador de ese aparato: si se borran, se pierden."]],
