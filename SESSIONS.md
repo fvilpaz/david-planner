@@ -1,5 +1,16 @@
 # SESSIONS — david-planner
 
+## 11-nov-2026 (tarde, Opus) — Auditoría, glosario y lista de refactor
+
+**Hecho**
+- Auditoría (nando-toolkit en WSL): gitleaks limpio (80 commits y lo que git podría subir), bandit/semgrep limpios, ESLint 0 errores y **54 avisos** (referencia anterior 40; los 14 nuevos, todos `detect-object-injection` del paso 14). Leídos uno a uno: las claves son fechas `AAAA-MM-DD` validadas, niveles internos o datos ya limpiados por la copia → falsos positivos, **salvo uno real**: el recuento por sitio de `crew()` en un objeto normal. Un sitio con id `constructor` o `__proto__` (la regla de ids `^[\w-]{1,40}$` los admite) salía «function Object()…1». Arreglado con `Object.create(null)`, como el de estados del 10-nov; prueba vista fallar (68 pruebas). **Nueva referencia: 54 avisos.**
+- Sin `innerHTML`/`eval`, sin CSS huérfano (comprobadas las clases de las idas y vueltas del diseño).
+- Glosario al día (Moverse, Copiar semanas, Imprimir, Temas, Fervis) sin cambiar el número de pasos; el buscador de la guía lleva cada pregunta a su tema (comprobado a mano; quitado un empate «imprimir» con el tema de clientes).
+
+**Aprendido**
+- Un aviso de ESLint no es un fallo ni un no-fallo: hay que leer de dónde sale la clave. Aquí 13 de 14 eran inofensivos y 1 rompía la pantalla.
+
+
 ## 11-nov-2026 — Paso 14b, parte 1: clientes previstos y camareros por día
 
 **Hecho**

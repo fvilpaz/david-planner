@@ -20,7 +20,7 @@ window.FervisGuide = (function () {
       "‹ y › cambian de semana.",
       "Toca el título (con el 📅) para abrir un calendario y saltar a cualquier fecha.",
       "«Hoy» vuelve a esta semana (solo sale si estás en otra).",
-      "Los nombres y los días se quedan fijos al deslizar.",
+      "Los nombres y los días se quedan fijos al deslizar; la tabla de clientes y camareros de debajo se desliza a la vez.",
       "Toca una casilla para editarla y un nombre para abrir la ficha de esa persona."]],
     ["casilla", "✏️", "Poner o cambiar un turno", [
       "Toca la casilla del día y la persona.",
@@ -34,7 +34,7 @@ window.FervisGuide = (function () {
       "«Clientes previstos» (su cabecera azul): escribe cuántos clientes esperas ese día (un número entero; vacío lo quita). Cámbialo cuando haga falta, por ejemplo si llega un vuelo.",
       "«Camareros»: lo cuenta la app sola (quien tiene un estado con horario y algún tramo): el total y, debajo, una etiqueta por punto de venta con su color («2 Cafetería»). Quien trabaja en dos sitios el mismo día cuenta una vez en el total y en los dos sitios.",
       "«Clientes por camarero»: los clientes entre los camareros. Verde hasta el «Ideal», naranja hasta un 25 % más y rojo por encima. El «Ideal» (20 al principio) es el número de clientes por camarero que te parece bien: lo cambias en esa misma fila según tu local (no es lo mismo un restaurante que un bufé o una barra) y los colores cambian en cuanto lo escribes. Aparece cuando escribes los clientes.",
-      "Los clientes van por fecha: al repetir una semana entera, los clientes no se repiten (hay que escribirlos). Entran en la copia de seguridad y salen al imprimir."]],
+      "Los clientes van por fecha: al repetir una semana entera, los clientes no se repiten (hay que escribirlos). Entran en la copia de seguridad y en el papel."]],
     ["horas_extra", "⏱️", "Horas extra", [
       "En la ventana de la casilla, en «Horas extra», pon cuántas: de 0,5 a 16, con coma o punto, en medias horas.",
       "Si quieres, escribe el motivo.",
@@ -55,7 +55,7 @@ window.FervisGuide = (function () {
       "Gestión → «Copiar la semana anterior».",
       "Elige en cuántas semanas (de 1 a 8) y pulsa Copiar.",
       "La semana anterior a la que ves se repite en esta y en las siguientes.",
-      "Solo en casillas vacías, sin horas extra y sin quien ya no trabaje aquí; el sitio sí se copia."]],
+      "Solo en casillas vacías, sin horas extra y sin quien ya no trabaje aquí; el sitio sí se copia. Los clientes previstos no (van por fecha)."]],
     ["personal", "👥", "Personal", [
       "Gestión → «Personal»: la lista. «+ Añadir persona».",
       "Toca a alguien para cambiar su nombre y su color (hay 20).",
@@ -76,10 +76,10 @@ window.FervisGuide = (function () {
       "Gestión → «Colorear por»: «Persona» (cada tramo lleva el color de quien trabaja, como siempre) o «Punto de venta» (el color del sitio: ves de un vistazo dónde va cada uno). Solo sale si hay puntos creados.",
       "Uno en uso no se puede quitar, pero su nombre y su color sí se pueden cambiar."]],
     ["imprimir", "🖨️", "Imprimir o guardar en PDF", [
-      "Gestión → «Imprimir / PDF» abre la impresión del navegador con la semana que ves.",
+      "Gestión → «Imprimir / PDF» abre la impresión del navegador con la semana que ves y, debajo, la tabla de clientes y camareros.",
       "Sale en una hoja A4 apaisada y siempre en colores claros.",
       "Para guardar un PDF, elige «Guardar como PDF» como destino.",
-      "También se lee bien en blanco y negro (se pierde el color por persona)."]],
+      "También se lee bien en blanco y negro (se pierde el color por persona o por sitio)."]],
     ["copia_seguridad", "💾", "Copia de seguridad", [
       "Gestión → «Copia de seguridad».",
       "«Descargar copia» guarda un archivo con todo: guárdalo también fuera del móvil (Drive, correo, el PC).",
@@ -88,7 +88,7 @@ window.FervisGuide = (function () {
       "Si pasan 7 días sin descargar copia, sale un aviso arriba.",
       "Los datos viven solo en el navegador de ese aparato: si se borran, se pierden."]],
     ["temas", "🎨", "Temas de color", [
-      "Gestión → «Tema»: Claro, Lino, Oscuro y Carbón.",
+      "Gestión → «Tema»: Claro, Lino, Oscuro y Carbón; cambia el cuadrante y también la tabla de clientes.",
       "Se recuerda en cada aparato.",
       "Al imprimir siempre sale en claro."]],
     ["local_y_persona", "🏢", "Nombre del local y de la persona", [
@@ -101,7 +101,7 @@ window.FervisGuide = (function () {
     ["fervis", "🤖", "Qué puede hacer Fervis", [
       "Se abre con el robot de arriba.",
       "Dice quién trabaja ahora o cualquier día y qué turno tiene cada persona.",
-      "Cuenta: turnos partidos o seguidos, fines de semana libres, vacaciones, bajas.",
+      "Cuenta: turnos partidos o seguidos, fines de semana libres, vacaciones, bajas; y de cada día, los clientes previstos, los camareros por sitio y los clientes por camarero.",
       "Explica cómo se usa la app y charla de cosas generales (contratos, descansos…), siempre orientativo.",
       "Solo lee los turnos: no cambia nada.",
       "Necesita la clave gratuita de Groq: icono de tres barras → Ajustes (se crea en console.groq.com).",

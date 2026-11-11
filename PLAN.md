@@ -67,7 +67,7 @@ un parpadeo del tema por defecto).
 
 ## 📌 Pendiente (Nando, 11-nov) — para la próxima sesión (con Opus)
 1. **Auditoría** (nando-toolkit `audit` en WSL; referencia 0 errores / 40 avisos), **documentación** y **refactor** (proponer la lista antes de tocar nada).
-2. **Actualizar el glosario** (`js/fervis-guia.js`): han cambiado cosas desde que se escribió y hay que repasar tema a tema. Seguro: **Imprimir** (ahora sale también la tabla de clientes y camareros), **Copiar semanas** (copia turnos, no clientes), **Temas** (también la tabla de clientes), **Fervis** (sabe de clientes y camareros con `clientes_entre`), **Moverse por el cuadrante** (hay dos tablas que se deslizan juntas en el móvil). Ya puestos al día: Puntos de venta («Colorear por»), Clientes previstos y camareros («Ideal»), Copia de seguridad (cargar no descarga).
+2. ✅ (11-nov) **Actualizar el glosario** (`js/fervis-guia.js`): han cambiado cosas desde que se escribió y hay que repasar tema a tema. Seguro: **Imprimir** (ahora sale también la tabla de clientes y camareros), **Copiar semanas** (copia turnos, no clientes), **Temas** (también la tabla de clientes), **Fervis** (sabe de clientes y camareros con `clientes_entre`), **Moverse por el cuadrante** (hay dos tablas que se deslizan juntas en el móvil). Ya puestos al día: Puntos de venta («Colorear por»), Clientes previstos y camareros («Ideal»), Copia de seguridad (cargar no descarga).
 3. **El vídeo NO se rehace** (decisión de Nando: gasto de recursos tonto). Da la idea; lo nuevo lo cubren el glosario y Fervis.
 
 ## 💡 Aparcado

@@ -98,7 +98,7 @@ window.Schedule = (function () {
   // Debajo del cuadrante, una segunda tabla (con un hueco entre las dos) y con las mismas columnas: su cabecera son los clientes
   // previstos (se escriben), y debajo los camareros que trabajan ese día (se cuentan solos: el total y, por
   // sitio, en etiquetas como las de las casillas, con el color del sitio) y la proporción de clientes por camarero (verde hasta
-  // el máximo, naranja hasta un 25 % más, rojo por encima). Los clientes van por FECHA, no por persona.
+  // el «Ideal», naranja hasta un 25 % más, rojo por encima). Los clientes van por FECHA, no por persona.
   const RATIO_COLORS = { ok: "#27ae60", warn: "#e67e22", bad: "#c0392b" };
   const RATIO_WORDS = { ok: "en el ideal o por debajo", warn: "algo por encima del ideal", bad: "muy por encima del ideal" };
   const ratioFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
@@ -146,7 +146,7 @@ window.Schedule = (function () {
     return { clients: clients, total: total, ratio: ratio, level: level };
   }
 
-  // Cambios en los clientes o en el máximo: si el navegador no deja guardar, se deshace. Devuelve si se ha guardado.
+  // Cambios en los clientes o en el ideal (`ratioMax` en los datos): si el navegador no deja guardar, se deshace. Devuelve si se ha guardado.
   function setClients(iso, value) {
     const before = data.clients[iso];
     if (value === null) { delete data.clients[iso]; } else { data.clients[iso] = value; }
