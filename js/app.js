@@ -7,6 +7,7 @@ window.Schedule = (function () {
   const Dates = window.Dates;
   let data = window.Store.load();
   const grid = document.getElementById("schedule-grid");
+  const summaryGrid = document.getElementById("summary-grid");   // la tabla de clientes y camareros (paso 14b)
   const title = document.getElementById("week-title");
   const picker = document.getElementById("week-picker");
   const dayName = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric" });
@@ -94,8 +95,8 @@ window.Schedule = (function () {
   }
 
   // ---------- Clientes previstos y camareros por día (paso 14b) ----------
-  // Debajo del cuadrante, separado por un hueco (como una segunda tabla) y con las mismas columnas: una fila con el color de la
-  // cabecera para los clientes previstos (se escriben), los camareros que trabajan ese día (se cuentan solos: el total y, por
+  // Debajo del cuadrante, una segunda tabla (con un hueco entre las dos) y con las mismas columnas: su cabecera son los clientes
+  // previstos (se escriben), y debajo los camareros que trabajan ese día (se cuentan solos: el total y, por
   // sitio, en etiquetas como las de las casillas, con el color del sitio) y la proporción de clientes por camarero (verde hasta
   // el máximo, naranja hasta un 25 % más, rojo por encima). Los clientes van por FECHA, no por persona.
   const RATIO_COLORS = { ok: "#27ae60", warn: "#e67e22", bad: "#c0392b" };
@@ -188,18 +189,19 @@ window.Schedule = (function () {
     return Number.isInteger(n) && n >= min && n <= max ? n : undefined;
   }
 
-  function summaryFoot(days) {
-    const foot = el("tfoot", "summary-foot");
+  function summaryTable(days) {
+    const table = el("table", "schedule-table summary-table");
+    const clientsRow = table.appendChild(el("thead")).appendChild(el("tr", "summary-head"));
+    clientsRow.appendChild(el("th", "", "Clientes previstos"));
+    const body = table.appendChild(el("tbody"));
     const today = Dates.toIso(new Date());
     function addRow(className, ...content) {
-      const tr = foot.appendChild(el("tr", className));
+      const tr = body.appendChild(el("tr", className));
       const th = tr.appendChild(el("th"));
       th.scope = "row";
       th.append(...content);
       return tr;
     }
-    foot.appendChild(el("tr", "summary-gap")).appendChild(el("td")).colSpan = 8;   // el hueco entre las dos tablas
-    const clientsRow = addRow("summary-head", "Clientes previstos");
     const crewRow = addRow("summary-row", "Camareros");
     const maxLabel = el("label", "ratio-max", "Ideal ");
     maxLabel.title = "Ideal de clientes por camarero: lo pone cada local (no es lo mismo un restaurante que un bufé o una barra). " +
@@ -255,8 +257,12 @@ window.Schedule = (function () {
       maxInput.value = String(ratioMax());
       ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); });
     });
-    return foot;
+    return table;
   }
+
+  // Las dos tablas tienen las mismas columnas por CSS; en el móvil, deslizar una desliza la otra
+  grid.addEventListener("scroll", function () { if (summaryGrid.scrollLeft !== grid.scrollLeft) { summaryGrid.scrollLeft = grid.scrollLeft; } });
+  summaryGrid.addEventListener("scroll", function () { if (grid.scrollLeft !== summaryGrid.scrollLeft) { grid.scrollLeft = summaryGrid.scrollLeft; } });
 
   function render() {
     const scroll = { left: grid.scrollLeft, top: grid.scrollTop };  // al repintar, no saltar al lunes
@@ -304,10 +310,11 @@ window.Schedule = (function () {
       const empty = body.appendChild(el("tr")).appendChild(el("td", "empty", "Todavía no hay personal."));
       empty.colSpan = 8;
     }
-    table.appendChild(summaryFoot(days));
     grid.replaceChildren(table);
+    summaryGrid.replaceChildren(summaryTable(days));
     grid.scrollLeft = scroll.left;
     grid.scrollTop = scroll.top;
+    summaryGrid.scrollLeft = grid.scrollLeft;
     syncColorBy();
   }
 

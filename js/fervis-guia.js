@@ -30,8 +30,8 @@ window.FervisGuide = (function () {
       "«Dónde» elige el punto de venta (si los has creado).",
       "Guardar. «Vaciar» deja la casilla en blanco."]],
     ["clientes_camareros", "👥", "Clientes previstos y camareros", [
-      "Debajo del cuadrante, separado por un pequeño hueco, hay otra tabla con tres filas y la misma columna por día.",
-      "«Clientes previstos» (la fila azul, como la cabecera): escribe cuántos clientes esperas ese día (un número entero; vacío lo quita). Cámbialo cuando haga falta, por ejemplo si llega un vuelo.",
+      "Debajo del cuadrante hay otra tabla, con la misma columna por día.",
+      "«Clientes previstos» (su cabecera azul): escribe cuántos clientes esperas ese día (un número entero; vacío lo quita). Cámbialo cuando haga falta, por ejemplo si llega un vuelo.",
       "«Camareros»: lo cuenta la app sola (quien tiene un estado con horario y algún tramo): el total y, debajo, una etiqueta por punto de venta con su color («2 Cafetería»). Quien trabaja en dos sitios el mismo día cuenta una vez en el total y en los dos sitios.",
       "«Clientes por camarero»: los clientes entre los camareros. Verde hasta el «Ideal», naranja hasta un 25 % más y rojo por encima. El «Ideal» (20 al principio) es el número de clientes por camarero que te parece bien: lo cambias en esa misma fila según tu local (no es lo mismo un restaurante que un bufé o una barra) y los colores cambian en cuanto lo escribes. Aparece cuando escribes los clientes.",
       "Los clientes van por fecha: al repetir una semana entera, los clientes no se repiten (hay que escribirlos). Entran en la copia de seguridad y salen al imprimir."]],

@@ -137,42 +137,56 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .schedule-scroll { overflow: auto; max-height: calc(100dvh - var(--topbar-height) - 1rem); margin-top: 1rem;
                    border-radius: 16px; border: 1px solid var(--border); background: var(--surface); }
 .schedule-table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 13px; }
+/* Las dos tablas (cuadrante y clientes) con las mismas columnas: la primera fija y los 7 días a partes iguales, como mínimo 130 px.
+   Así cuadran una con otra sin medir nada */
+.schedule-table { table-layout: fixed; min-width: calc(120px + 7 * 130px); }
+.schedule-table thead th:first-child { width: 120px; }
 .schedule-table th, .schedule-table td { border: 1px solid var(--border); padding: .25rem; vertical-align: middle;
                                          text-align: center; }
-/* Los colores de la cabecera los comparte la fila de clientes del pie: es como una segunda tabla con su propia cabecera, y así
-   hereda también los temas */
-.schedule-table thead th, .schedule-table .summary-head th, .schedule-table .summary-head th[scope=row] {
+/* Cabecera: la de los días y la de la tabla de clientes (es otra .schedule-table), así las dos heredan los temas */
+.schedule-table thead th {
   background: var(--primary); color: var(--on-primary); font-weight: 600; border-color: var(--primary); }
-.schedule-table thead th.today, .schedule-table .summary-head th.today { background: color-mix(in srgb, var(--primary) 75%, #000); }  /* hoy, más oscuro */
+.schedule-table thead th.today { background: color-mix(in srgb, var(--primary) 75%, #000); }  /* hoy, más oscuro */
 .schedule-table thead th { position: sticky; top: 0; z-index: 2; padding: .6rem .5rem; }
 /* Columna de nombres fija al deslizar en horizontal; con fondo propio para tapar lo que pasa por debajo.
    El borde se pinta con una sombra: con border-collapse, el borde de verdad se quedaría atrás al deslizar. */
 .schedule-table th[scope=row] { position: sticky; left: 0; z-index: 1; min-width: 120px; font-weight: 600;
                                 background: var(--surface); box-shadow: 2px 0 0 var(--border); }
 .schedule-table thead th:first-child { left: 0; z-index: 3; box-shadow: 2px 0 0 var(--border); }  /* la esquina, encima de todo */
-@media (max-width: 600px) { .schedule-table th[scope=row] { min-width: 110px; max-width: 110px; font-size: .85rem; } }
+@media (max-width: 600px) { .schedule-table th[scope=row] { min-width: 110px; max-width: 110px; font-size: .85rem; }
+                            .schedule-table { min-width: calc(110px + 7 * 130px); } .schedule-table thead th:first-child { width: 110px; } }
 /* Cada día a tamaño completo: si no cabe en la pantalla, se desliza con el dedo y los nombres se quedan fijos */
 .schedule-table td, .schedule-table thead th:not(:first-child) { min-width: 130px; }
 .schedule-table td { height: 48px; }  /* en una tabla, la altura de la celda es su mínimo */
 .schedule-table td.today { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
 .schedule-table .empty { color: var(--muted); padding: 2rem; }
 
-/* Pie (paso 14b): una segunda tabla visual bajo el cuadrante, separada por un hueco. Su primera fila (los clientes previstos) lleva
-   el color de la cabecera; debajo, camareros (total y una etiqueta por sitio, como las casillas) y clientes por camarero. */
-.summary-foot .summary-gap td { height: .25rem; padding: 0; border: 0; background: var(--bg); }
-.schedule-table .summary-head th { padding: .3rem .25rem; font-size: .8rem; }
-.schedule-table .summary-head th[scope=row] { text-align: left; padding-left: .5rem; }
-.clients-input { width: 5.5rem; max-width: 100%; min-height: 32px; padding: 2px 6px; text-align: center; font-size: .95rem;
-                 border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
-/* Pie: camareros (total y una etiqueta por sitio, como las de las casillas) y clientes por camarero. La línea doble lo separa. */
-.summary-foot td { height: auto; padding: .35rem .25rem; vertical-align: top; }
-.summary-foot th[scope=row] { font-weight: 600; text-align: left; padding: .35rem .5rem; }
-.summary-foot th[scope=row] > span { display: block; }
+/* Tabla de clientes y camareros (paso 14b): otra tabla como la del cuadrante, con un hueco pequeño entre las dos. Su cabecera son
+   los clientes previstos; debajo, camareros (total y una etiqueta por sitio, como las casillas) y clientes por camarero. */
+.summary-scroll { margin-top: .25rem; max-height: none; }
+/* El hueco de la barra vertical, reservado en las dos: si no, el cuadrante (que sí la tiene) es más estrecho y al deslizar se descuadran */
+.schedule-scroll { scrollbar-gutter: stable; }
+/* Los clientes: una cajita translúcida dentro de la cabecera (se ve que ahí se escribe, sin romper el azul ni hacer más alta la fila);
+   al pasar por encima se aclara y al escribir se vuelve un campo blanco normal. Con los colores del tema. */
+.summary-table thead th { padding-top: .4rem; padding-bottom: .4rem; }
+.clients-input { width: 4.5rem; max-width: 100%; min-height: 0; padding: 2px 6px; line-height: 1.25; text-align: center;
+                 font: inherit; color: inherit; cursor: text; border-radius: 6px;
+                 background: color-mix(in srgb, var(--on-primary) 16%, transparent);
+                 border: 1px solid color-mix(in srgb, var(--on-primary) 45%, transparent);
+                 -moz-appearance: textfield; appearance: textfield; }
+.clients-input::-webkit-inner-spin-button, .clients-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.clients-input::placeholder { color: inherit; opacity: .75; }
+.clients-input:hover { background: color-mix(in srgb, var(--on-primary) 26%, transparent); }
+.clients-input:focus { background: var(--bg); color: var(--text); border-color: var(--bg); outline: 2px solid var(--on-primary); outline-offset: 1px; }
+.summary-table td { height: auto; padding: .35rem .25rem; vertical-align: top; }
+.summary-table th[scope=row] { font-weight: 600; text-align: left; padding: .35rem .5rem; }
+.summary-table th[scope=row] > span { display: block; }
 .ratio-max { display: block; margin-top: .15rem; font-size: .75rem; font-weight: 500; color: var(--muted); }
 .ratio-max-input { width: 3.6rem; min-height: 28px; padding: 0 4px; text-align: center; font-size: .8rem;
                    border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
 .crew-total { display: block; margin-bottom: .2rem; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
 .crew-chips { display: flex; flex-direction: column; gap: .25rem; }
+.crew-chips .chip { white-space: normal; overflow-wrap: anywhere; }  /* «2 Restaurante principal» parte línea en vez de salirse */
 .summary-empty { color: var(--muted); }
 
 /* Casilla: un botón con uno o dos tramos, uno debajo de otro; si hay uno, ocupa toda la casilla. Vacía, un «+» */
@@ -200,7 +214,8 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 /* Teñido con el color de la persona o del estado (--tint, lo pone app.js), mezclado con los colores del tema
    para que se lea igual en los claros y en los oscuros */
 .chip { flex-direction: column; }  /* la hora y, debajo, el punto de venta */
-.chip-place { display: block; font-size: .7rem; font-weight: 500; opacity: .85; line-height: 1.2; }
+.chip-place { display: block; font-size: .7rem; font-weight: 500; opacity: .85; line-height: 1.2;
+              white-space: normal; overflow-wrap: anywhere; }  /* un sitio de nombre largo parte línea: las columnas son fijas */
 .chip[data-tint] { background: color-mix(in srgb, var(--tint) var(--tint-mix), var(--surface));
                    color: color-mix(in srgb, var(--tint) 35%, var(--text));
                    border-color: color-mix(in srgb, var(--tint) 35%, var(--surface)); }
@@ -448,8 +463,8 @@ button.danger { background: var(--error); color: var(--on-error); }
   /* Cabecera clara y con letras oscuras: las rayas entre días se ven (gris oscuro sobre azul oscuro no se distinguía), se
      gasta menos tinta y en blanco y negro sale gris claro. El día de hoy, un poco más marcado. Siempre el mismo azul,
      sea cual sea el tema de la pantalla. */
-  .schedule-table thead th, .schedule-table .summary-head th, .schedule-table .summary-head th[scope=row] { border-color: #4f545a; background: #d9e6fb; color: #0f2a52; }
-  .schedule-table thead th.today, .schedule-table .summary-head th.today { background: #aac6f3; }
+  .schedule-table thead th { border-color: #4f545a; background: #d9e6fb; color: #0f2a52; }
+  .schedule-table thead th.today { background: #aac6f3; }
   /* En papel nada se desliza: sin «sticky». Con él, Chrome pierde las rayas de las celdas fijas (el nombre de cada persona
      salía sin líneas entre filas) */
   .schedule-table th, .schedule-table thead th, .schedule-table th[scope=row], .schedule-table thead th:first-child {
@@ -457,16 +472,17 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-table td, .schedule-table thead th:not(:first-child) { min-width: 0; }  /* en papel cabe la semana entera */
   .schedule-table td { height: 34px; }
   .chip[data-tint] { border-color: color-mix(in srgb, var(--tint) 45%, #3a3f45); }  /* borde de cada casilla más marcado: en blanco y negro el tono se pierde y queda el contorno */
-  /* El pie, más apretado que en pantalla: así la semana entera (con el pie) cabe en una hoja. Su fila de clientes, con la
-     cabecera clara de papel. */
-  .summary-foot .summary-gap td { height: 1.5mm; padding: 0; }
-  .schedule-table .summary-head th { padding: 1px 2px; }
-  .schedule-table .summary-head th[scope=row] { padding-left: 4px; }
-  .summary-foot td { height: auto; padding: 1px 2px; }
-  .summary-foot th[scope=row] { padding: 1px 4px; }
+  /* En papel, la primera columna algo más estrecha; los días, a partes iguales en las dos tablas */
+  .schedule-table { min-width: 0; }
+  .schedule-table thead th:first-child { width: 32mm; }
+  /* La tabla de clientes, más apretada que en pantalla: así la semana entera (con ella) cabe en una hoja */
+  .summary-scroll { margin-top: 1.5mm; }
+  .summary-table thead th { padding: 1px 2px; }
+  .summary-table td { height: auto; padding: 1px 2px; }
+  .summary-table th[scope=row] { padding: 1px 4px; }
   .crew-total { font-size: 9pt; line-height: 1.1; margin: 0; }
   .crew-chips { gap: 1px; }
-  .summary-foot .chip { padding: 0 4px; font-size: 7pt; margin: 1px 0; }
+  .summary-table .chip { padding: 0 4px; font-size: 7pt; margin: 1px 0; }
   .ratio-max { margin: 0; font-size: 6.5pt; }
   .clients-input, .ratio-max-input { min-height: 0; width: 100%; font-size: 9pt; border: 0; background: transparent; padding: 0; font-weight: 600; -moz-appearance: textfield; appearance: textfield; }
   .clients-input::-webkit-inner-spin-button, .ratio-max-input::-webkit-inner-spin-button { display: none; }

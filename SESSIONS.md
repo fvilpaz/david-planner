@@ -37,6 +37,13 @@
 - Reproducido tecleando de verdad: el campo marcaba 10, lo guardado seguía en 58 y los colores igual. La app solo guardaba en `change` (al salir del campo: Tab, Enter o clic fuera). Arreglo: también en `input`, si el número es válido; vaciar sigue esperando a salir (si no, al corregir una cifra se perdería el dato). Prueba nueva vista fallar antes del arreglo; comprobado tecleando «25» sin salir: guardado y recoloreado al momento.
 - Además la confusión: Nando leía el número del campo como «clientes de ese día» y creía la lógica al revés (con 1 todo rojo). Era el tope: más clientes por camarero, más rojo. Renombrado a «Ideal», con una ayuda (al pasar el ratón) que explica los tres colores y que cada local pone el suyo; las mismas palabras en Fervis y en la guía. 67 pruebas.
 
+**Dos tablas de verdad (Nando: «si me hicieras caso tendrías dos tablas… una encima de otra con un gap»)**
+- Mi «una tabla con un hueco dentro» no daba las esquinas redondeadas de la segunda ni parecía otra tabla. Ahora `#summary-grid` es otra caja `.schedule-scroll` con otra `.schedule-table`: su `thead` es la fila de clientes, así que reutiliza tal cual el estilo de la cabecera (y los temas). Hueco de 4 px entre cajas.
+- Columnas: primero las copiaba midiendo con JS y al estrechar la ventana no se realineaban (dentro del marco no llega el aviso `resize`). Nando: «la tabla y el estilo los tienes, es solo llamarlo y replicarlo». Ahora es CSS: `table-layout: fixed` con la primera columna fija y los días a partes iguales en las dos. En pantalla ya salían iguales (mínimo 130 px por día); donde de verdad hace falta es en papel (sin mínimo, el sábado con «+2 h extra» se ensanchaba): comprobado en el PDF. Con columnas fijas, el nombre largo de un sitio parte línea en vez de salirse.
+- En el móvil se deslizan juntas (aviso `scroll` de cada caja). `scrollbar-gutter: stable` en las dos: si no, la barra vertical del cuadrante le quitaba 21 px y al final del deslizado se descuadraban.
+- El campo de clientes: la raya discontinua no se entendía («bonito no es»): cajita translúcida dentro del azul que se aclara al pasar y se vuelve blanca al escribir; el alto de la fila igual que el de arriba (prueba).
+- Controles: el deslizado roto → la prueba cae. Las columnas rotas → la prueba NO cae (con ese marco tan ancho salen iguales de todas formas): no se puede demostrar en pantalla, solo en el PDF. Lo dejo dicho.
+
 **Siguiente**
 - Auditoría, documentación y refactor (Nando, con Opus). Push al terminar todo; ya nada por Telegram.
 

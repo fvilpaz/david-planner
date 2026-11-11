@@ -1017,18 +1017,42 @@
     equal([input.value, saved().clients["2026-11-09"]], ["90", 90], "se queda el 90");
   });
 
-  test("Clientes previstos: una fila con el color de la cabecera, abajo y separada del cuadrante por un hueco (como dos tablas); la cabecera de arriba es solo la de los días", async function () {
-    await open(crewFixture());
-    equal([$$("tfoot .clients-input").length, $$("thead .clients-input").length], [7, 0], "las siete casillas están abajo, no en la cabecera");
-    equal($$("thead tr").length, 1, "la cabecera de arriba sigue siendo solo la de los días");
-    equal($$(".summary-row").length, 2, "debajo de la de clientes: camareros y clientes por camarero");
-    const color = function (element) { return frame.contentWindow.getComputedStyle(element).backgroundColor; };
-    equal([color($(".summary-head th:not(:first-child)")), color($(".summary-head th"))],
-      [color($("thead th:not(:first-child)")), color($("thead th"))], "la fila de clientes y su rótulo tienen el color de la cabecera");
-    equal($(".summary-head").previousElementSibling, $(".summary-gap"), "justo antes, el hueco");
-    const gap = $(".summary-gap").getBoundingClientRect().height;
-    ok(gap >= 3 && gap <= 8, "y es pequeño, como el hueco entre los dos tramos de una casilla (3–8 px): " + gap + " px");
-    ok($(".summary-gap").previousElementSibling === null, "y el hueco abre el pie, tras la última persona (el pie es otra tabla visual)");
+  test("Clientes previstos: una SEGUNDA tabla bajo el cuadrante, con su propia cabecera igual que la de los días, un hueco pequeño entre las dos y las columnas alineadas; en el móvil se deslizan juntas", async function () {
+    const data = crewFixture();
+    data.shifts["e1|2026-11-14"] = work("18:00", "02:00", { hours: 2, reason: "Cierre" }, "p2");   // un día con más contenido: arriba ensancharía su columna
+    await open(data);
+    const tables = $$(".schedule-table");
+    equal(tables.length, 2, "dos tablas");
+    const main = tables[0];
+    const summary = tables[1];
+    equal([main.querySelectorAll(".clients-input").length, summary.tHead.querySelectorAll(".clients-input").length], [0, 7], "los clientes son la cabecera de la segunda tabla");
+    equal([main.tHead.rows.length, summary.querySelectorAll(".summary-row").length], [1, 2], "arriba solo los días; abajo, camareros y clientes por camarero");
+    const css = function (element) { return frame.contentWindow.getComputedStyle(element); };
+    const h1 = main.tHead.rows[0].cells;
+    const h2 = summary.tHead.rows[0].cells;
+    equal([css(h2[1]).backgroundColor, css(h2[0]).backgroundColor, css(h2[1]).color], [css(h1[1]).backgroundColor, css(h1[0]).backgroundColor, css(h1[1]).color], "la misma cabecera: fondo y letra");
+    const box = function (element) { return element.getBoundingClientRect(); };
+    ok(Math.abs(box(summary.tHead.rows[0]).height - box(main.tHead.rows[0]).height) <= 4, "y del mismo alto: " + box(summary.tHead.rows[0]).height + " frente a " + box(main.tHead.rows[0]).height + " px");
+    const gap = box(summary.parentElement).top - box(main.parentElement).bottom;
+    ok(gap >= 3 && gap <= 8, "un hueco pequeño entre las dos (3–8 px): " + gap + " px");
+    ok(css(summary.parentElement).borderTopLeftRadius !== "0px", "la de abajo con sus esquinas redondeadas, como la de arriba");
+    const lefts = function (table) { return Array.from(table.tHead.rows[0].cells).map(function (c) { return Math.round(box(c).left); }); };
+    equal(lefts(summary), lefts(main), "columnas alineadas");
+    try {
+      frame.style.width = "360px";
+      await wait(200);
+      equal(lefts(summary), lefts(main), "a 360 px, también alineadas");
+      equal(summary.parentElement.clientWidth, main.parentElement.clientWidth, "las dos cajas con el mismo ancho útil (la barra vertical del cuadrante no descuadra)");
+      // el aviso de «scroll» llega en el siguiente fotograma, que en una pestaña poco activa tarda: se espera hasta 3 s a que se igualen
+      const together = async function () {
+        for (let i = 0; i < 30 && Math.abs(summary.parentElement.scrollLeft - main.parentElement.scrollLeft) > 1; i++) { await wait(100); }
+        return Math.abs(summary.parentElement.scrollLeft - main.parentElement.scrollLeft) <= 1;
+      };
+      main.parentElement.scrollLeft = 200;
+      ok(await together() && main.parentElement.scrollLeft > 100, "deslizar el cuadrante desliza la de clientes");
+      summary.parentElement.scrollLeft = 50;
+      ok(await together() && main.parentElement.scrollLeft < 100, "y al revés: " + main.parentElement.scrollLeft);
+    } finally { frame.style.width = ""; }
   });
 
   test("Datos de antes (sin clientes) se abren con clientes vacíos y máximo 20", async function () {
