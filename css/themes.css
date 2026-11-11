@@ -2,7 +2,8 @@
    (app/core/static/core/themes.css): Claro y Oscuro son los de auryapp; Lino y Carbón, los propios.
    Cada tema solo define colores. --primary-text = el color principal usado como TEXTO.
    --warning = el aviso de horas extra (fucsia: no se confunde con los colores cálidos del personal).
-   --tint-mix = cuánto color lleva cada turno: 10 % en los claros, 30 % en los oscuros (con 10 % casi no se veía). */
+   --tint-mix = cuánto color lleva cada turno: 10 % en los claros, 30 % en los oscuros (con 10 % casi no se veía).
+   --tint-mix-status = lo mismo para los estados que no son trabajar (Libre, Vacaciones, Baja…): 22 % en los claros (Nando, 11-nov). */
 
 /* ☀️ Claro (por defecto) */
 :root, [data-theme="claro"] {
@@ -18,6 +19,7 @@
   --on-error: #ffffff;
   --warning: #be185d;
   --tint-mix: 10%;
+  --tint-mix-status: 22%;  /* Libre, Vacaciones…: más color, para distinguirlos (con 10 % casi no se distinguían) */
   color-scheme: light;
 }
 
@@ -35,6 +37,7 @@
   --on-error: #ffffff;
   --warning: #be185d;
   --tint-mix: 10%;
+  --tint-mix-status: 22%;  /* Libre, Vacaciones…: más color, para distinguirlos (con 10 % casi no se distinguían) */
   color-scheme: light;
 }
 
@@ -52,6 +55,7 @@
   --on-error: #ffffff;
   --warning: #f472b6;
   --tint-mix: 30%;
+  --tint-mix-status: 30%;  /* en oscuro ya se distinguen: igual que los turnos */
   color-scheme: dark;
 }
 
@@ -69,5 +73,6 @@
   --on-error: #14171c;
   --warning: #f472b6;
   --tint-mix: 30%;
+  --tint-mix-status: 30%;  /* en oscuro ya se distinguen: igual que los turnos */
   color-scheme: dark;
 }

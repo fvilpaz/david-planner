@@ -77,6 +77,7 @@ window.Schedule = (function () {
     } else if (status) {
       texts.push(status.name);
       slotsBox.append(chip(status.name, status.color));
+      slotsBox.lastChild.classList.add("chip-status");   // Libre, Vacaciones…: algo más de color en los temas claros (themes.css)
     } else {
       slotsBox.append(el("span", "cell-empty", "+"));
     }

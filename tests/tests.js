@@ -924,6 +924,21 @@
   function summaryCell(row, index) { return $$(".summary-row")[row].querySelectorAll("td")[index]; }
   function ratioChip(index) { return summaryCell(1, index).querySelector(".chip"); }
 
+  test("Temas claros: las etiquetas de estados que no son trabajar (Libre, Vacaciones…) llevan más color que los turnos, para distinguirlas; los oscuros no cambian", async function () {
+    const data = fixture();
+    data.employees[0].color = "#8e44ad";   // Ana, del mismo color que «Libre»: así solo cambia cuánto color lleva cada una
+    data.shifts["e1|2026-11-09"] = work("10:00", "18:00");
+    data.shifts["e1|2026-11-10"] = { statusId: "off", slots: [], overtime: null };
+    const w = await open(data, { extra: [["dp_theme", "claro"]] });
+    const chipOf = function (key) { return $('[data-key="' + key + '"] .chip'); };
+    const rgb = function (node) { return w.getComputedStyle(node).backgroundColor.match(/\d+/g).slice(0, 3).map(Number); };
+    const light = function (node) { return rgb(node).reduce(function (a, b) { return a + b; }, 0); };   // cuanto más bajo, más color
+    ok(chipOf("e1|2026-11-10").classList.contains("chip-status") && !chipOf("e1|2026-11-09").classList.contains("chip-status"), "el estado lleva su clase; el turno no");
+    ok(light(chipOf("e1|2026-11-10")) < light(chipOf("e1|2026-11-09")) - 30, "en claro, «Libre» con más color que el turno del mismo color: " + rgb(chipOf("e1|2026-11-10")) + " frente a " + rgb(chipOf("e1|2026-11-09")));
+    w.Theme.apply("oscuro");
+    equal(rgb(chipOf("e1|2026-11-10")), rgb(chipOf("e1|2026-11-09")), "en oscuro, igual que hasta ahora");
+  });
+
   test("Camareros por día: cuenta una vez cada persona que trabaja (no libres ni bajas) y desglosa por sitio, con el turno partido en los dos", async function () {
     const w = await open(crewFixture());
     const crew = w.Schedule.crew("2026-11-09");

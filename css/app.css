@@ -215,6 +215,7 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .chip[data-tint] { background: color-mix(in srgb, var(--tint) var(--tint-mix), var(--surface));
                    color: color-mix(in srgb, var(--tint) 35%, var(--text));
                    border-color: color-mix(in srgb, var(--tint) 35%, var(--surface)); }
+.chip-status[data-tint] { background: color-mix(in srgb, var(--tint) var(--tint-mix-status, var(--tint-mix)), var(--surface)); }
 
 /* Ventana de la casilla (la .dialog de gestion-hosteleria). El formulario ocupa toda la ventana: así, tocar fuera
    de ella (el fondo oscuro) la cierra y tocar dentro no. */
@@ -445,7 +446,7 @@ button.danger { background: var(--error); color: var(--on-error); }
      de 10 mm lo pone el cuerpo */
   @page { size: A4 landscape; margin: 0; }
   html[data-theme] { --bg: #fff; --surface: #fff; --text: #000; --muted: #5d6470; --border: #b0b5bc;
-                     --tint-mix: 10%; color-scheme: light; }
+                     --tint-mix: 10%; --tint-mix-status: 10%; color-scheme: light; }  /* el papel, como estaba */
   body { background: #fff; display: block; font-size: 10pt; padding: 10mm; box-sizing: border-box; }
   .topbar, .no-print, .section-header { display: none !important; }
   .page { padding: 0; }

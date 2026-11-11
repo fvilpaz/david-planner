@@ -7,6 +7,9 @@
 - Fervis: `clientes_entre` da clientes, camareros con sitios y clientes por camarero, sin ideal ni avisos (prueba: el texto no contiene «ideal», «verde», «naranja», «rojo» ni «aviso»). Guía actualizada.
 - Pruebas reescritas primero (fallaron con el código de los colores) y después en verde: **67** (la del ideal desaparece con la función). Ejemplo y PDF mirados (una hoja). Auditoría: 0 errores, **54 avisos** (nueva referencia).
 
+**Después: estados con más color en los temas claros (Nando)**
+- En claro, «Libre» y «Vacaciones» casi no se distinguían (todas las etiquetas llevaban un 10 % de su color). Ahora los estados que no son trabajar llevan un 22 % en claro y lino (`--tint-mix-status` en `themes.css`, clase `.chip-status`); los turnos, los temas oscuros y el papel, igual que antes. Prueba vista fallar antes (68). Si se quiere más suave o más fuerte, es cambiar ese 22 %.
+
 **Aprendido**
 - La lógica estaba bien y aun así no servía: un número editable junto a los datos se lee como un dato. Cuando una función se explica tres veces y sigue confundiendo, lo correcto puede ser quitarla.
 
