@@ -27,9 +27,10 @@
 - Con esto el 14b queda ✅ (65 pruebas).
 
 **Ajuste de diseño (Nando, por Telegram)**
-- Dijo que los puntos de colores no iban con el cuadrante: los clientes previstos pasan a una segunda fila de la cabecera, bajo cada día (azul, fija; su `top` es el alto de la primera, y una prueba lo comprueba), y el desglose de camareros son etiquetas enteras (la misma `.chip` de las casillas) con el color del punto de venta; «sin sitio» en gris. Elegida la opción A (siempre el color del sitio, sin depender del interruptor «Colorear por»).
-- Los cuatro temas (claro, lino, oscuro, carbón) se aplican a la celda: lo usa todo `var(--…)`; mirados los cuatro en pantalla.
-- Impresión: sigue en una hoja; en papel el rótulo de clientes también es claro. Dos roturas a propósito (la fila fija y las etiquetas) cayeron en sus pruebas. 66 pruebas.
+- Dijo que los puntos de colores no iban con el cuadrante. **Lo entendí mal a la primera** (puse los clientes bajo «Empleado», en la cabecera): lo que quería era la fila de clientes ABAJO, donde estaba, con el estilo de la cabecera y separada del cuadrante por un hueco pequeño, «como dos tablas, una pone lunes y otra clientes». Ahora: una fila `.summary-head` en el pie que comparte las reglas de color de la cabecera (así hereda también los temas y el «hoy» más oscuro), con un hueco de ~4 px (como el de los dos tramos de una casilla), y el desglose de camareros en etiquetas enteras (la misma `.chip` de las casillas) con el color del punto de venta; «sin sitio» en gris. Elegida la opción A (siempre el color del sitio, sin depender del interruptor «Colorear por»).
+- Los cuatro temas (claro, lino, oscuro, carbón): medidos los colores reales de las dos cabeceras en cada uno, idénticos.
+- Control que destapó un fallo: rompí el hueco y la prueba (que pedía solo «≥ 3 px») seguía pasando; el hueco real medía 10,5 px porque `.summary-foot td` (más específica) le ponía relleno. Arreglada la regla y la prueba exige 3–8 px (con la regla vieja falla: 10,46 px).
+- Impresión: sigue en una hoja; en papel el rótulo de clientes también es claro. 66 pruebas.
 - Nando preguntó si Fervis puede dar estos números: ya lo hace desde la parte 3 (`clientes_entre`), la app calcula y Fervis solo lee. Sin probar con una conversación real con Groq (la clave es suya y no la toco): lo comprobado es la herramienta y que Groq la recibe.
 
 **Siguiente**

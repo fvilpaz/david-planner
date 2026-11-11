@@ -139,9 +139,12 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .schedule-table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 13px; }
 .schedule-table th, .schedule-table td { border: 1px solid var(--border); padding: .25rem; vertical-align: middle;
                                          text-align: center; }
-.schedule-table thead th { position: sticky; top: 0; z-index: 2; background: var(--primary); color: var(--on-primary);
-                           font-weight: 600; padding: .6rem .5rem; border-color: var(--primary); }
-.schedule-table thead th.today { background: color-mix(in srgb, var(--primary) 75%, #000); }  /* hoy, más oscuro */
+/* Los colores de la cabecera los comparte la fila de clientes del pie: es como una segunda tabla con su propia cabecera, y así
+   hereda también los temas */
+.schedule-table thead th, .schedule-table .summary-head th, .schedule-table .summary-head th[scope=row] {
+  background: var(--primary); color: var(--on-primary); font-weight: 600; border-color: var(--primary); }
+.schedule-table thead th.today, .schedule-table .summary-head th.today { background: color-mix(in srgb, var(--primary) 75%, #000); }  /* hoy, más oscuro */
+.schedule-table thead th { position: sticky; top: 0; z-index: 2; padding: .6rem .5rem; }
 /* Columna de nombres fija al deslizar en horizontal; con fondo propio para tapar lo que pasa por debajo.
    El borde se pinta con una sombra: con border-collapse, el borde de verdad se quedaría atrás al deslizar. */
 .schedule-table th[scope=row] { position: sticky; left: 0; z-index: 1; min-width: 120px; font-weight: 600;
@@ -154,16 +157,14 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .schedule-table td.today { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
 .schedule-table .empty { color: var(--muted); padding: 2rem; }
 
-/* Clientes previstos (paso 14b): una segunda fila de la cabecera, pegada a la de los días y fija como ella. Su «top» es el alto
-   de la primera fila (la primera se fija a --head-h para que coincidan). */
-.schedule-table { --head-h: 2.6rem; }
-.schedule-table thead tr:first-child th { height: var(--head-h); box-sizing: border-box; }
-.schedule-table thead .head-clients th { top: var(--head-h); padding: .3rem .25rem; font-size: .8rem; }
-.schedule-table thead .head-clients th[scope=row] { text-align: left; padding-left: .5rem; background: var(--primary); color: var(--on-primary); }
+/* Pie (paso 14b): una segunda tabla visual bajo el cuadrante, separada por un hueco. Su primera fila (los clientes previstos) lleva
+   el color de la cabecera; debajo, camareros (total y una etiqueta por sitio, como las casillas) y clientes por camarero. */
+.summary-foot .summary-gap td { height: .25rem; padding: 0; border: 0; background: var(--bg); }
+.schedule-table .summary-head th { padding: .3rem .25rem; font-size: .8rem; }
+.schedule-table .summary-head th[scope=row] { text-align: left; padding-left: .5rem; }
 .clients-input { width: 5.5rem; max-width: 100%; min-height: 32px; padding: 2px 6px; text-align: center; font-size: .95rem;
                  border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
 /* Pie: camareros (total y una etiqueta por sitio, como las de las casillas) y clientes por camarero. La línea doble lo separa. */
-.summary-foot .summary-row:first-child > * { border-top: 3px double var(--border); }
 .summary-foot td { height: auto; padding: .35rem .25rem; vertical-align: top; }
 .summary-foot th[scope=row] { font-weight: 600; text-align: left; padding: .35rem .5rem; }
 .summary-foot th[scope=row] > span { display: block; }
@@ -447,8 +448,8 @@ button.danger { background: var(--error); color: var(--on-error); }
   /* Cabecera clara y con letras oscuras: las rayas entre días se ven (gris oscuro sobre azul oscuro no se distinguía), se
      gasta menos tinta y en blanco y negro sale gris claro. El día de hoy, un poco más marcado. Siempre el mismo azul,
      sea cual sea el tema de la pantalla. */
-  .schedule-table thead th { border-color: #4f545a; background: #d9e6fb; color: #0f2a52; }
-  .schedule-table thead th.today { background: #aac6f3; }
+  .schedule-table thead th, .schedule-table .summary-head th, .schedule-table .summary-head th[scope=row] { border-color: #4f545a; background: #d9e6fb; color: #0f2a52; }
+  .schedule-table thead th.today, .schedule-table .summary-head th.today { background: #aac6f3; }
   /* En papel nada se desliza: sin «sticky». Con él, Chrome pierde las rayas de las celdas fijas (el nombre de cada persona
      salía sin líneas entre filas) */
   .schedule-table th, .schedule-table thead th, .schedule-table th[scope=row], .schedule-table thead th:first-child {
@@ -456,10 +457,11 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-table td, .schedule-table thead th:not(:first-child) { min-width: 0; }  /* en papel cabe la semana entera */
   .schedule-table td { height: 34px; }
   .chip[data-tint] { border-color: color-mix(in srgb, var(--tint) 45%, #3a3f45); }  /* borde de cada casilla más marcado: en blanco y negro el tono se pierde y queda el contorno */
-  /* Cabecera de clientes y pie, más apretados que en pantalla: así la semana entera (con el pie) cabe en una hoja */
-  .schedule-table thead tr:first-child th { height: auto; }
-  .schedule-table thead .head-clients th { padding: 1px 2px; }
-  .schedule-table thead .head-clients th[scope=row] { background: #d9e6fb; color: #0f2a52; }  /* como el resto de la cabecera en papel */
+  /* El pie, más apretado que en pantalla: así la semana entera (con el pie) cabe en una hoja. Su fila de clientes, con la
+     cabecera clara de papel. */
+  .summary-foot .summary-gap td { height: 1.5mm; padding: 0; }
+  .schedule-table .summary-head th { padding: 1px 2px; }
+  .schedule-table .summary-head th[scope=row] { padding-left: 4px; }
   .summary-foot td { height: auto; padding: 1px 2px; }
   .summary-foot th[scope=row] { padding: 1px 4px; }
   .crew-total { font-size: 9pt; line-height: 1.1; margin: 0; }
