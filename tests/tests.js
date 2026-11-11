@@ -939,6 +939,46 @@
     equal(rgb(chipOf("e1|2026-11-10")), rgb(chipOf("e1|2026-11-09")), "en oscuro, igual que hasta ahora");
   });
 
+  test("Color de las etiquetas (Gestión → Tema): una barra de 0 (suave, como antes) a 100 (vivo) que cambia al momento, se guarda en el aparato y en la copia; solo en los temas claros", async function () {
+    const data = fixture();
+    data.shifts["e1|2026-11-09"] = work("10:00", "18:00");
+    const w = await open(data, { extra: [["dp_theme", "claro"]] });
+    const root = w.document.documentElement;
+    const range = $("#tint-intensity");
+    ok(range && range.closest(".menu-group").querySelector("summary").textContent.includes("Tema"), "la barra está en Gestión → Tema");
+    equal([range.min, range.max, range.value, root.dataset.intensity], ["0", "100", "0", "0"], "de 0 a 100; en 0 por defecto: como estaba");
+    // El color que pinta de verdad, pasado a rojo/verde/azul con un lienzo (el navegador puede devolverlo en oklch)
+    const paint = w.document.createElement("canvas").getContext("2d");
+    const chroma = function () {
+      paint.clearRect(0, 0, 1, 1);
+      paint.fillStyle = w.getComputedStyle($('[data-key="e1|2026-11-09"] .chip')).backgroundColor;
+      paint.fillRect(0, 0, 1, 1);
+      const p = paint.getImageData(0, 0, 1, 1).data;
+      return Math.max(p[0], p[1], p[2]) - Math.min(p[0], p[1], p[2]);   // cuanto más, más color (0 = gris)
+    };
+    const soft = chroma();
+    range.value = "100";  fire(range, "input");
+    equal([root.dataset.intensity, localStorage.getItem("dp_intensity")], ["100", "100"], "en 100: se aplica al momento y se guarda");
+    const vivid = chroma();
+    ok(vivid > soft + 15, "y la etiqueta tiene más color: " + soft + " → " + vivid);
+    range.value = "50";  fire(range, "input");
+    const medium = chroma();
+    ok(medium > soft && medium < vivid, "en 50, entre los dos: " + soft + " < " + medium + " < " + vivid);
+    w.Theme.apply("oscuro");
+    const dark = chroma();
+    range.value = "100";  fire(range, "input");
+    equal(chroma(), dark, "en los temas oscuros no cambia");
+    w.Theme.apply("claro");
+    range.value = "50";  fire(range, "input");
+    const files = catchDownloads(w);
+    $("#backup-download").click();
+    await wait(300);
+    equal(JSON.parse(files[0].text).settings.dp_intensity, "50", "entra en la copia de seguridad, como el tema");
+    frame.contentWindow.location.reload();
+    const again = await reloaded();
+    equal([$("#tint-intensity").value, again.document.documentElement.dataset.intensity], ["50", "50"], "al volver a abrir, sigue");
+  });
+
   test("Camareros por día: cuenta una vez cada persona que trabaja (no libres ni bajas) y desglosa por sitio, con el turno partido en los dos", async function () {
     const w = await open(crewFixture());
     const crew = w.Schedule.crew("2026-11-09");

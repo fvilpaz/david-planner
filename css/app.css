@@ -84,6 +84,12 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .menu-group[open] > summary::after { content: "▴"; }
 .theme-list { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; padding: .25rem; }  /* claros arriba, oscuros abajo */
 .theme-list button { min-height: 44px; padding: 0 .6rem; white-space: nowrap; }
+/* Color de las etiquetas (Gestión → Tema): una barra de 0 (suave) a 100 (vivo) */
+.intensity { display: block; padding: .6rem .5rem 0; font-size: .85rem; font-weight: 600; }
+.intensity small { font-weight: 400; color: var(--muted); }
+.intensity-range { display: block; width: calc(100% - 1rem); margin: .4rem .5rem 0; padding: 0; min-height: 0;
+                   border: 0; background: transparent; accent-color: var(--primary); }
+.intensity-scale { display: flex; justify-content: space-between; padding: 0 .5rem .5rem; font-size: .75rem; color: var(--muted); }
 
 /* «Copiar la semana anterior» dentro del menú (paso 8) */
 .copy-form { display: grid; gap: .5rem; padding: .25rem .5rem .5rem; max-width: 300px; }
@@ -216,6 +222,18 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
                    color: color-mix(in srgb, var(--tint) 35%, var(--text));
                    border-color: color-mix(in srgb, var(--tint) 35%, var(--surface)); }
 .chip-status[data-tint] { background: color-mix(in srgb, var(--tint) var(--tint-mix-status, var(--tint-mix)), var(--surface)); }
+/* Más de 0 (temas claros): en vez de mezclar con blanco, que apaga el color (un rojo acaba «color carne»), la etiqueta guarda
+   una claridad suave y toma más intensidad de su color cuanto más se sube la barra (OKLCH: claridad, intensidad y tono por
+   separado; --intensity va de 0 a 1). En 100 es el «Vivo» que eligió Nando. Los estados que no son trabajar, un punto más
+   fuertes. En 0, las reglas de siempre. Solo en pantalla: en papel, suave como siempre. */
+@media screen {
+  html:not([data-intensity="0"]):not([data-theme="oscuro"]):not([data-theme="carbon"]) .chip[data-tint] {
+    background: oklch(from var(--tint) calc(0.975 - 0.02 * var(--intensity)) calc(c * (0.1 + 0.32 * var(--intensity))) h);
+    border-color: oklch(from var(--tint) calc(0.88 - 0.04 * var(--intensity)) calc(c * (0.3 + 0.3 * var(--intensity))) h);
+    color: oklch(from var(--tint) 0.37 calc(c * (0.7 + 0.15 * var(--intensity))) h); }
+  html:not([data-intensity="0"]):not([data-theme="oscuro"]):not([data-theme="carbon"]) .chip-status[data-tint] {
+    background: oklch(from var(--tint) calc(0.95 - 0.04 * var(--intensity)) calc(c * (0.22 + 0.33 * var(--intensity))) h); }
+}
 
 /* Ventana de la casilla (la .dialog de gestion-hosteleria). El formulario ocupa toda la ventana: así, tocar fuera
    de ella (el fondo oscuro) la cierra y tocar dentro no. */

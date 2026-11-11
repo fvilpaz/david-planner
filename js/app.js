@@ -370,6 +370,11 @@ window.Schedule = (function () {
     themeButtons.forEach(function (button) { button.setAttribute("aria-pressed", String(button.dataset.themeChoice === now)); });
   }
 
+  // Color de las etiquetas (temas claros): se desliza de 0 (suave) a 100 (vivo) y se ve al momento; se guarda como el tema
+  const intensityRange = document.getElementById("tint-intensity");
+  intensityRange.value = String(window.Theme.intensity());
+  intensityRange.addEventListener("input", function () { window.Theme.applyIntensity(Number(intensityRange.value)); });
+
   themeButtons.forEach(function (button) {
     button.addEventListener("click", function () { window.Theme.apply(button.dataset.themeChoice); markTheme(); });
   });

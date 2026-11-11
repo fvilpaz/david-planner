@@ -8,7 +8,7 @@ window.Backup = (function () {
   "use strict";
   const APP = "david-planner";
   const VERSION = 1;
-  const SETTINGS = ["dp_name", "dp_city", "dp_person", "dp_theme", "dp_color_by"];  // la barra, el tema y «colorear por»
+  const SETTINGS = ["dp_name", "dp_city", "dp_person", "dp_theme", "dp_color_by", "dp_intensity"];  // la barra, el tema, «colorear por» y el color de las etiquetas
   const LAST = "dp_last_export";     // cuándo se descargó la última copia
   const SINCE = "dp_since";          // desde cuándo se usa la app (la primera semana no se avisa)
   const SNOOZE = "dp_backup_later";  // «Más tarde» (sessionStorage: hasta volver a abrir la app)

@@ -10,6 +10,9 @@
 **Después: estados con más color en los temas claros (Nando)**
 - En claro, «Libre» y «Vacaciones» casi no se distinguían (todas las etiquetas llevaban un 10 % de su color). Ahora los estados que no son trabajar llevan un 22 % en claro y lino (`--tint-mix-status` en `themes.css`, clase `.chip-status`); los turnos, los temas oscuros y el papel, igual que antes. Prueba vista fallar antes (68). Si se quiere más suave o más fuerte, es cambiar ese 22 %.
 
+**Después: «Color de las etiquetas», una barra de 0 a 100 (Nando)**
+- En claro los colores se veían apagados («el rojo parece color carne»): mezclar un 10 % de color con blanco lo agrisa. Probadas en su pantalla tres versiones (Ahora · Medio · Vivo, con botones de prueba que no tocaban la app) y pidió poder elegir: Gestión → Tema → «Color de las etiquetas (temas claros)», una barra de 0 (como siempre) a 100 (vivo) que cambia al momento. Por debajo: `--intensity` (0–1) y OKLCH, que mantiene la claridad suave y sube la intensidad del color sin oscurecerlo. Se guarda por aparato (`dp_intensity`, en `theme.js`, antes de pintar, como el tema) y entra en la copia. Los oscuros y el papel, igual. Prueba (con un lienzo para medir el color real) vista fallar antes: 69.
+
 **Aprendido**
 - La lógica estaba bien y aun así no servía: un número editable junto a los datos se lee como un dato. Cuando una función se explica tres veces y sigue confundiendo, lo correcto puede ser quitarla.
 
