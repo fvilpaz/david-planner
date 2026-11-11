@@ -10,8 +10,14 @@
 window.Clients = (function () {
   "use strict";
   const Dates = window.Dates;
-  const RATIO_COLORS = { ok: "#27ae60", warn: "#e67e22", bad: "#c0392b" };
-  const RATIO_WORDS = { ok: "en el ideal o por debajo", warn: "algo por encima del ideal", bad: "muy por encima del ideal" };
+  // Los tres avisos de «clientes por camarero», en un solo sitio: los usan esta tabla y Fervis (fervis-datos.js), que así dicen
+  // siempre lo mismo. Verde hasta el ideal; naranja hasta WARN_FACTOR veces el ideal (un 25 % más); rojo por encima.
+  const WARN_FACTOR = 1.25;
+  const LEVELS = {
+    ok: { color: "#27ae60", colorName: "verde", words: "en el ideal o por debajo" },
+    warn: { color: "#e67e22", colorName: "naranja", words: "algo por encima del ideal" },
+    bad: { color: "#c0392b", colorName: "rojo", words: "muy por encima del ideal" },
+  };
   const ratioFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
   const NO_PLACE_COLOR = "#7f8c8d";   // gris: «sin sitio» no es un punto de venta y no tiene color propio
 
@@ -22,6 +28,30 @@ window.Clients = (function () {
     if (clean === "") { return input.validity.badInput ? undefined : null; }
     const n = Number(clean);
     return Number.isInteger(n) && n >= min && n <= max ? n : undefined;
+  }
+
+  // Un campo de número entero (los clientes de un día o el ideal). `field`: read() lo guardado (o null), write(n) guardarlo,
+  // repaint() repintar lo que depende de él y emptyOk (si vaciarlo quita el dato). Al escribir un número válido se guarda y se
+  // repinta ya; al salir del campo se aplica también el vacío (si vale) y se enseña lo que quedó guardado. Lo no válido
+  // (negativo, decimal, «12e»…) se descarta. Vaciar no se aplica mientras se escribe: al corregir una cifra se perdería el dato.
+  function bindNumber(input, min, max, field) {
+    input.type = "number";
+    input.min = String(min);
+    input.max = String(max);
+    input.step = "1";
+    input.inputMode = "numeric";
+    function show() { const value = field.read(); input.value = value === null ? "" : String(value); }
+    show();
+    input.addEventListener("input", function () {
+      const value = wholeNumber(input, min, max);
+      if (value !== undefined && value !== null) { field.write(value); field.repaint(); }
+    });
+    input.addEventListener("change", function () {
+      const value = wholeNumber(input, min, max);
+      if (value !== undefined && (value !== null || field.emptyOk)) { field.write(value); }
+      show();
+      field.repaint();
+    });
   }
 
   function create(deps) {
@@ -65,7 +95,7 @@ window.Clients = (function () {
       const total = crew(iso).total;
       if (clients === null) { return { clients: null, total: total, ratio: null, level: null }; }
       const ratio = total ? clients / total : null;   // sin camareros no hay proporción
-      const level = !total ? (clients > 0 ? "bad" : null) : ratio <= ratioMax() ? "ok" : ratio <= ratioMax() * 1.25 ? "warn" : "bad";
+      const level = !total ? (clients > 0 ? "bad" : null) : ratio <= ratioMax() ? "ok" : ratio <= ratioMax() * WARN_FACTOR ? "warn" : "bad";
       return { clients: clients, total: total, ratio: ratio, level: level };
     }
 
@@ -99,9 +129,9 @@ window.Clients = (function () {
     function paintRatio(cell, iso) {
       const info = ratioInfo(iso);
       if (info.level === null) { cell.replaceChildren(el("span", "summary-empty", "—")); return; }
-      const node = chip(info.ratio === null ? "sin camareros" : ratioFormat.format(info.ratio) + " por camarero", RATIO_COLORS[info.level]);
+      const node = chip(info.ratio === null ? "sin camareros" : ratioFormat.format(info.ratio) + " por camarero", LEVELS[info.level].color);
       node.title = info.ratio === null ? "Hay clientes previstos y nadie trabaja" :
-        ratioFormat.format(info.ratio) + " clientes por camarero: " + RATIO_WORDS[info.level] + " (ideal " + ratioMax() + ")";
+        ratioFormat.format(info.ratio) + " clientes por camarero: " + LEVELS[info.level].words + " (ideal " + ratioMax() + ")";
       cell.replaceChildren(node);
     }
 
@@ -123,12 +153,6 @@ window.Clients = (function () {
       maxLabel.title = "Ideal de clientes por camarero: lo pone cada local (no es lo mismo un restaurante que un bufé o una barra). " +
         "Hasta ese número, la etiqueta sale en verde; hasta un 25 % más, en naranja; por encima, en rojo.";
       const maxInput = maxLabel.appendChild(el("input", "ratio-max-input"));
-      maxInput.type = "number";
-      maxInput.min = "1";
-      maxInput.max = "999";
-      maxInput.step = "1";
-      maxInput.inputMode = "numeric";
-      maxInput.value = String(ratioMax());
       maxInput.setAttribute("aria-label", "Ideal de clientes por camarero");
       const ratioRow = addRow("summary-row", el("span", "", "Clientes por camarero"), maxLabel);
       const ratioCells = [];
@@ -137,41 +161,24 @@ window.Clients = (function () {
         const iso = Dates.toIso(day);
         const mark = iso === today ? "today" : "";
         const input = clientsRow.appendChild(el("th", mark)).appendChild(el("input", "clients-input"));
-        input.type = "number";
-        input.min = "0";
-        input.max = "99999";
-        input.step = "1";
-        input.inputMode = "numeric";
         input.placeholder = "—";
-        input.value = clientsOf(iso) === null ? "" : String(clientsOf(iso));
         input.setAttribute("aria-label", "Clientes previstos el " + dayName.format(day));
         paintCrew(crewRow.appendChild(el("td", mark)), iso);
         const ratioCell = ratioRow.appendChild(el("td", mark));
         paintRatio(ratioCell, iso);
         ratioCells.push([ratioCell, iso]);
-        input.addEventListener("input", function () {   // mientras se escribe: un número válido se guarda y se recolorea ya; vaciar espera a salir
-          const value = wholeNumber(input, 0, 99999);
-          if (value !== undefined && value !== null) { setClients(iso, value); paintRatio(ratioCell, iso); }
-        });
-        input.addEventListener("change", function () {
-          const value = wholeNumber(input, 0, 99999);
-          if (value !== undefined) { setClients(iso, value); }   // lo no válido (negativo, decimal, texto) se descarta
-          input.value = clientsOf(iso) === null ? "" : String(clientsOf(iso));   // se ve lo que quedó guardado
-          paintRatio(ratioCell, iso);
+        bindNumber(input, 0, 99999, {
+          read: function () { return clientsOf(iso); },
+          write: function (value) { setClients(iso, value); },
+          repaint: function () { paintRatio(ratioCell, iso); },
+          emptyOk: true,   // vaciar quita los clientes de ese día
         });
       });
-      maxInput.addEventListener("input", function () {
-        const value = wholeNumber(maxInput, 1, 999);
-        if (value !== undefined && value !== null) {
-          setRatioMax(value);
-          ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); });
-        }
-      });
-      maxInput.addEventListener("change", function () {
-        const value = wholeNumber(maxInput, 1, 999);
-        if (value !== undefined && value !== null) { setRatioMax(value); }
-        maxInput.value = String(ratioMax());
-        ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); });
+      bindNumber(maxInput, 1, 999, {
+        read: ratioMax,
+        write: setRatioMax,
+        repaint: function () { ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); }); },
+        emptyOk: false,  // el ideal no se puede quedar vacío
       });
       return summary;
     }
@@ -179,5 +186,5 @@ window.Clients = (function () {
     return { crew: crew, ratioInfo: ratioInfo, clientsOf: clientsOf, ratioMax: ratioMax, table: table };
   }
 
-  return { create: create };
+  return { create: create, LEVELS: LEVELS, WARN_FACTOR: WARN_FACTOR };
 })();

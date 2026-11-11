@@ -196,12 +196,16 @@ window.FervisData = (function () {
   }
 
   // Clientes previstos, camareros y proporción de cada día (paso 14b): lo calcula la app (Schedule.crew / ratioInfo, lo mismo que
-  // ve David en el pie del cuadrante), el modelo solo lo repite. «hasta 31 días» como turnos_entre.
+  // ve David en la tabla de debajo del cuadrante), el modelo solo lo repite. «hasta 31 días» como turnos_entre. Las palabras y
+  // los colores de cada aviso salen de clientes.js (Clients.LEVELS), los mismos que en pantalla.
   const RATIO_FORMAT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
-  const RATIO_WORDS = { ok: "en el ideal o por debajo", warn: "algo por encima del ideal (aviso naranja)", bad: "muy por encima del ideal (aviso rojo)" };
+  function levelText(level) {
+    const item = window.Clients.LEVELS[level];
+    return item.words + (level === "ok" ? "" : " (aviso " + item.colorName + ")");
+  }
   function clientLines(from, days) {
     const max = window.Schedule.ratioMax();
-    const lines = ["Ideal de clientes por camarero: " + max + " (hasta ese número, verde; hasta un 25 % más, naranja; por encima, rojo; lo fija cada local). " +
+    const lines = ["Ideal de clientes por camarero: " + max + " (hasta ese número, verde; hasta un " + Math.round((window.Clients.WARN_FACTOR - 1) * 100) + " % más, naranja; por encima, rojo; lo fija cada local). " +
       "Quien trabaja en dos sitios el mismo día cuenta en los dos sitios pero una sola vez en el total de camareros."];
     for (let i = 0; i < days; i++) {
       const date = Dates.addDays(from, i);
@@ -212,7 +216,7 @@ window.FervisData = (function () {
       if (crew.noPlace && crew.byPlace.length) { places.push(crew.noPlace + " sin sitio"); }
       const ratio = info.level === null ? "" :
         info.ratio === null ? "; nadie trabaja (aviso rojo)" :
-        "; " + RATIO_FORMAT.format(info.ratio) + " clientes por camarero: " + RATIO_WORDS[info.level];
+        "; " + RATIO_FORMAT.format(info.ratio) + " clientes por camarero: " + levelText(info.level);
       lines.push("- " + DAY.format(date) + " (" + iso + "): " + (info.clients === null ? "sin clientes previstos" : info.clients + " clientes previstos") +
         "; " + crew.total + " camareros" + (places.length ? " (" + places.join(", ") + ")" : "") + ratio);
     }
