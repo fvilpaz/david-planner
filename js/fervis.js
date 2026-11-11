@@ -57,7 +57,7 @@ window.Fervis = (function () {
       "inventes ni lo cuentes tú a ojo: turnos_entre da los turnos concretos (qué turno tiene alguien, quién trabaja un " +
       "día; con «persona» solo los de esa persona), resumen_entre da lo ya contado por persona (días de turno partido o " +
       "seguido, libres, vacaciones, bajas, fines de semana completos sin trabajar y sábados o domingos sueltos), " +
-      "clientes_entre da los clientes previstos de cada día, los camareros que trabajan (con sitios) y los clientes por camarero con su aviso, ya calculados, y " +
+      "clientes_entre da los clientes previstos de cada día, los camareros que trabajan (con sitios) y los clientes por camarero, ya calculados, y " +
       "manual_app(tema) es la guía de la app: cómo se hace cada cosa y qué puede hacer cada parte (úsala para todo «cómo hago…» y «qué puedes hacer»; si dudas del tema, sin tema da el índice). Si piden la guía o el manual en general, no la recites: di en una línea que pulsen el botón 📖 de arriba (el glosario de la app, por temas) y, si preguntan algo concreto, explícalo con manual_app. Nunca digas que algo «no se puede hacer» en la app si no lo has comprobado en la guía (manual_app o la guía relevante): si no estás seguro, dilo y remite al glosario. Cuando expliques cómo se hace algo de la app, termina con una línea breve: «Tienes más detalle en el glosario (botón 📖 de arriba).» Solo en esas respuestas. Si la pregunta es de fines de semana, di SIEMPRE los fines de semana " +
       "completos (sábado y domingo) y los días sueltos por separado, sin mezclarlos en «días libres». Para «quién tiene " +
       "más…» usa las líneas RANKING ya calculadas y di siempre el motivo: vacaciones o baja NO es librar. «Sin nada puesto» " +
@@ -83,7 +83,7 @@ window.Fervis = (function () {
       description: "Resumen YA CONTADO por persona entre dos fechas (hasta 93 días): cuántos días de turno partido, de turno seguido y de cada estado (libre, vacaciones, baja…), cuántos fines de semana completos (sábado y domingo) no trabaja y qué sábados o domingos sueltos. Para CONTAR o comparar: «quién ha librado los fines de semana», «cuántos días libra cada uno», «quién tiene turno partido».",
       parameters: { type: "object", required: ["desde", "hasta"], properties: DATE_PARAMS } } },
     { type: "function", function: { name: "clientes_entre",
-      description: "Clientes previstos de cada día entre dos fechas (hasta 31 días), cuántos camareros trabajan (total y por punto de venta) y los clientes por camarero con su aviso (en el ideal, naranja o rojo). Para «¿vamos justos de camareros el sábado?», «¿cuántos clientes hay previstos?» o «qué días van pasados de clientes por camarero».",
+      description: "Clientes previstos de cada día entre dos fechas (hasta 31 días), cuántos camareros trabajan (total y por punto de venta) y los clientes por camarero (clientes entre camareros). Para «¿cuántos clientes hay previstos?», «¿cuántos camareros hay el sábado?» o «¿a cuántos clientes por camarero salimos cada día?».",
       parameters: { type: "object", required: ["desde", "hasta"], properties: { desde: DATE_PARAMS.desde, hasta: DATE_PARAMS.hasta } } } },
     { type: "function", function: { name: "manual_app",
       description: "La guía de la app, por temas: cómo se hace cada cosa y qué puede hacer cada parte (casillas, intercambiar, copiar, personal, estados, puntos de venta, imprimir, copia de seguridad, temas, instalar, Fervis…). Para «cómo hago…» y «qué puede hacer…». Sin «tema» devuelve el índice.",

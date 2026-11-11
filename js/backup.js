@@ -101,7 +101,6 @@ window.Backup = (function () {
       const n = source.clients[iso];
       if (window.Dates.parseIso(iso) !== null && Number.isInteger(n) && n >= 0 && n <= 99999) { clients[iso] = n; } else { dropped++; }
     });
-    const ratioMax = Number.isInteger(source.ratioMax) && source.ratioMax >= 1 && source.ratioMax <= 999 ? source.ratioMax : 20;
 
     const has = function (list, id) { return list.some(function (x) { return x.id === id; }); };
     const shifts = {};
@@ -137,7 +136,7 @@ window.Backup = (function () {
       if (typeof value === "string" && value.length <= 40) { settings[key] = value; }
     });
     return {
-      data: { version: VERSION, employees: employees, statuses: statuses, places: places, shifts: shifts, clients: clients, ratioMax: ratioMax },
+      data: { version: VERSION, employees: employees, statuses: statuses, places: places, shifts: shifts, clients: clients },
       settings: settings,
       dropped: dropped,
       exportedAt: copy.exportedAt,

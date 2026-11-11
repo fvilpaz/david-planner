@@ -354,7 +354,6 @@ window.Schedule = (function () {
     crew: clients.crew,          // los usan Fervis y las pruebas: se reenvían desde clientes.js
     ratioInfo: clients.ratioInfo,
     clientsOf: clients.clientsOf,
-    ratioMax: clients.ratioMax,
     focusCell: focusCell,
   };
 })();

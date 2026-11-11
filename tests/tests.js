@@ -967,57 +967,29 @@
     equal(saved().clients, {}, "vacío quita el dato");
   });
 
-  test("Clientes por camarero: verde hasta el máximo, naranja hasta un 25 % más, rojo por encima, y «—» sin clientes", async function () {
-    await open(crewFixture());          // 3 camareros el lunes; máximo por defecto 20
-    equal(summaryCell(1, 0).textContent, "—", "sin clientes: nada que avisar");
-    const tint = function () { return ratioChip(0).dataset.tint; };
-    typeClients(0, "60");  equal([ratioChip(0).textContent, tint()], ["20 por camarero", "#27ae60"], "60/3 = 20 (justo en el máximo): verde");
-    typeClients(0, "61");  equal(tint(), "#e67e22", "20,3: naranja");
-    typeClients(0, "75");  equal(tint(), "#e67e22", "25 (justo en +25 %): naranja");
-    typeClients(0, "76");  equal(tint(), "#c0392b", "25,3: rojo");
-    ok(ratioChip(0).title.includes("muy por encima"), "y el aviso dice por qué (no solo el color)");
+  test("Clientes por camarero: solo el número (clientes entre camareros), sin colores ni ideal; «—» sin clientes y «sin camareros» si nadie trabaja", async function () {
+    await open(crewFixture());          // 3 camareros el lunes
+    equal(summaryCell(1, 0).textContent, "—", "sin clientes: nada");
+    typeClients(0, "60");  equal(ratioChip(0).textContent, "20", "60 entre 3 = 20 (solo el número: la fila ya dice «Clientes por camarero»)");
+    const neutral = ratioChip(0).dataset.tint;
+    typeClients(0, "76");  equal(ratioChip(0).textContent, "25,3", "76 entre 3 = 25,3 (con coma)");
+    typeClients(0, "5");   equal([ratioChip(0).textContent, ratioChip(0).dataset.tint], ["1,7", neutral], "el color no cambia con la cantidad: sin avisos de colores (Nando, 11-nov)");
+    equal([$$(".ratio-max-input").length, $$(".ratio-legend").length], [0, 0], "ni campo de ideal ni leyenda");
     typeClients(1, "30");   // el martes nadie trabaja
-    equal([ratioChip(1).textContent, ratioChip(1).dataset.tint], ["sin camareros", "#c0392b"], "clientes y nadie trabajando: rojo");
+    equal(ratioChip(1).textContent, "sin camareros", "clientes y nadie trabajando");
     typeClients(1, "0");
-    equal(summaryCell(1, 1).textContent, "—", "0 clientes y 0 camareros: nada que avisar");
+    equal(summaryCell(1, 1).textContent, "—", "0 clientes y 0 camareros: nada");
   });
 
-  test("Ideal de clientes por camarero: se cambia en la propia fila, se guarda y recolorea; lo no válido se descarta", async function () {
-    await open(crewFixture());
-    typeClients(0, "75");   // 25 por camarero
-    equal(ratioChip(0).dataset.tint, "#e67e22", "con 20: naranja");
-    const max = $(".ratio-max-input");
-    equal($(".ratio-max").textContent.trim(), "Verde hasta", "el rótulo se lee solo: «Clientes por camarero · Verde hasta [20]» (Nando leía el número como los clientes del día)");
-    equal($(".ratio-legend").textContent, "naranja hasta 25 · rojo más", "y debajo, hasta dónde llega el naranja");
-    ok($(".ratio-max").title.includes("verde") && $(".ratio-max").title.includes("naranja") && $(".ratio-max").title.includes("rojo"), "y su ayuda explica los tres colores: " + $(".ratio-max").title);
-    max.value = "25";  fire(max, "change");
-    equal([saved().ratioMax, ratioChip(0).dataset.tint], [25, "#27ae60"], "con 25: verde y guardado");
-    equal($(".ratio-legend").textContent, "naranja hasta 31,3 · rojo más", "la leyenda se recalcula");
-    max.value = "0";   fire(max, "change");
-    equal([max.value, saved().ratioMax], ["25", 25], "0 no vale");
-    max.value = "x";   fire(max, "change");
-    equal([max.value, saved().ratioMax], ["25", 25], "texto no vale");
-    frame.contentWindow.location.reload();
-    await reloaded();
-    equal($(".ratio-max-input").value, "25", "al volver a abrir sigue");
-  });
-
-  test("Clientes e ideal: al escribir un número válido se guarda y se recolorea al momento (sin salir del campo); vaciar el campo no borra hasta salir", async function () {
-    await open(crewFixture());          // 3 camareros el lunes; ideal por defecto 20
+  test("Clientes: al escribir un número válido se guarda y se recalcula al momento (sin salir del campo); vaciar el campo no borra hasta salir", async function () {
+    await open(crewFixture());          // 3 camareros el lunes
     const clients = $$(".clients-input")[0];
     clients.value = "75";  fire(clients, "input");
-    equal([saved().clients["2026-11-09"], ratioChip(0).dataset.tint], [75, "#e67e22"], "clientes: guardado y recoloreado al escribir");
+    equal([saved().clients["2026-11-09"], ratioChip(0).textContent], [75, "25"], "guardado y recalculado al escribir");
     clients.value = "";  fire(clients, "input");
     equal(saved().clients["2026-11-09"], 75, "vaciar mientras se escribe no borra el dato (se quita al salir del campo)");
     fire(clients, "change");
     equal(saved().clients, {}, "al salir del campo vacío, sí se quita");
-    const ideal = $(".ratio-max-input");
-    typeClients(0, "75");
-    ideal.value = "30";  fire(ideal, "input");
-    equal([saved().ratioMax, ratioChip(0).dataset.tint], [30, "#27ae60"], "ideal: guardado y recoloreado al escribir");
-    equal($(".ratio-legend").textContent, "naranja hasta 37,5 · rojo más", "y la leyenda, también al momento");
-    ideal.value = "";  fire(ideal, "input");
-    equal(saved().ratioMax, 30, "vacío no cambia el ideal");
   });
 
   test("Clientes con el navegador sin espacio: se deshace y se ve lo guardado de antes", async function () {
@@ -1067,36 +1039,39 @@
     } finally { frame.style.width = ""; }
   });
 
-  test("Datos de antes (sin clientes) se abren con clientes vacíos y máximo 20", async function () {
-    const w = await open(fixture());    // la fixture no trae clients ni ratioMax: como una copia de antes del 14b
-    equal([w.Schedule.clientsOf("2026-11-09"), w.Schedule.ratioMax()], [null, 20], "valores por defecto");
+  test("Datos de antes (sin clientes, o con el «ideal» de cuando había colores) se abren con clientes vacíos y sin ideal", async function () {
+    const old = fixture();               // la fixture no trae clients: como unos datos de antes del 14b
+    old.ratioMax = 30;                   // y estos, el «ideal» de cuando había colores
+    const w = await open(old);
+    equal(w.Schedule.clientsOf("2026-11-09"), null, "sin clientes");
+    equal("ratioMax" in w.Schedule.getData(), false, "el ideal de antes ya no se guarda");
     equal($$(".clients-input").length, 7, "y siete casillas de clientes");
   });
 
-  test("Copia de seguridad: guarda y recupera los clientes y el máximo, y descarta lo que no cuadra", async function () {
+  test("Copia de seguridad: guarda y recupera los clientes y descarta lo que no cuadra; una copia vieja con el «ideal» se carga igual (se ignora)", async function () {
     const w = await open(crewFixture());
     typeClients(0, "88");
     const files = catchDownloads(w);
     $("#backup-download").click();
     await wait(300);
     const exported = JSON.parse(files[0].text);
-    equal([exported.data.clients, exported.data.ratioMax], [{ "2026-11-09": 88 }, 20], "la descarga lleva los clientes");
+    equal([exported.data.clients, "ratioMax" in exported.data], [{ "2026-11-09": 88 }, false], "la descarga lleva los clientes y ya no el ideal");
 
     const copy = { app: "david-planner", version: 1, exportedAt: "2026-11-10T10:00:00Z", data: fixture(), settings: {} };
     copy.data.clients = { "2026-11-10": 120, "2026-13-40": 5, "2026-11-11": -3, "2026-11-12": 2.5, "2026-11-13": "9" };
-    copy.data.ratioMax = 15;
+    copy.data.ratioMax = 15;   // de cuando había colores: no es un dato malo, solo ya no se usa
     const transfer = new w.DataTransfer();
     transfer.items.add(new w.File([JSON.stringify(copy)], "copia.json", { type: "application/json" }));
     const input = $("#backup-file");
     input.files = transfer.files;
     fire(input, "change");
     await wait(250);
-    ok($("#import-summary").textContent.includes("se descartan 4 datos"), "cuenta lo malo: " + $("#import-summary").textContent);
+    ok($("#import-summary").textContent.includes("se descartan 4 datos"), "cuenta lo malo (el ideal no cuenta): " + $("#import-summary").textContent);
     catchDownloads(w);
     const next = reloaded();
     $("#import-ok").click();
     await next;
-    equal([saved().clients, saved().ratioMax], [{ "2026-11-10": 120 }, 15], "solo el dato bueno y el máximo de la copia");
+    equal([saved().clients, "ratioMax" in saved()], [{ "2026-11-10": 120 }, false], "solo el dato bueno, sin el ideal");
   });
 
   test("Copiar la semana anterior copia los turnos pero NO los clientes", async function () {
@@ -1109,26 +1084,22 @@
     equal(w.Schedule.crew("2026-11-16").total, 3, "pero los camareros sí se recuentan solos");
   });
 
-  test("Fervis: clientes_entre da, ya calculado, los clientes, los camareros (con sitios) y la proporción de cada día; la guía lo explica", async function () {
+  test("Fervis: clientes_entre da, ya calculado, los clientes, los camareros (con sitios) y los clientes por camarero de cada día, sin colores ni ideal; la guía lo explica", async function () {
     const data = crewFixture();
     data.clients = { "2026-11-09": 60, "2026-11-10": 30 };   // el lunes 3 camareros (20 cada uno); el martes, clientes y nadie trabajando
-    data.ratioMax = 20;
     const w = await open(data);
     const text = w.Fervis.tool("clientes_entre", { desde: "2026-11-09", hasta: "2026-11-11" });
     const line = function (iso) { return text.split("\n").find(function (l) { return l.includes("(" + iso + ")"); }); };
-    ok(text.includes("Ideal de clientes por camarero: 20"), "dice el ideal: " + text);
-    ok(/60 clientes previstos; 3 camareros \(2 Pub, 1 Terraza, 1 sin sitio\); 20 clientes por camarero: en el ideal o por debajo/.test(line("2026-11-09")), "lunes: " + line("2026-11-09"));
-    ok(/30 clientes previstos; 0 camareros; nadie trabaja/.test(line("2026-11-10")), "martes: " + line("2026-11-10"));
-    ok(/sin clientes previstos; 0 camareros/.test(line("2026-11-11")), "miércoles: " + line("2026-11-11"));
+    ok(/60 clientes previstos; 3 camareros \(2 Pub, 1 Terraza, 1 sin sitio\); 20 clientes por camarero$/.test(line("2026-11-09")), "lunes: " + line("2026-11-09"));
+    ok(/30 clientes previstos; 0 camareros; nadie trabaja$/.test(line("2026-11-10")), "martes: " + line("2026-11-10"));
+    ok(/sin clientes previstos; 0 camareros$/.test(line("2026-11-11")), "miércoles: " + line("2026-11-11"));
     ok(text.includes("una sola vez en el total"), "avisa de que quien trabaja en dos sitios cuenta una vez en el total");
-    data.clients["2026-11-09"] = 76;
-    const w2 = await open(data);
-    ok(/25,3 clientes por camarero: muy por encima del ideal/.test(w2.Fervis.tool("clientes_entre", { desde: "2026-11-09", hasta: "2026-11-09" })), "rojo con 76 entre 3");
-    ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-12", hasta: "2026-11-09" }).includes("Fechas no válidas"), "fechas al revés");
-    ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-01", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "tope de 31 días");
-    const guide = w2.Fervis.tool("manual_app", { tema: "clientes_camareros" });
-    ok(guide.includes("Clientes previstos") && guide.includes("naranja") && guide.includes("Verde hasta"), "la guía explica el pie: " + guide);
-    ok(w2.FervisGuide.guideFor("¿cómo pongo los clientes previstos de cada día?").includes("Clientes previstos"), "y la guía relevante lo encuentra");
+    ok(!/ideal|verde|naranja|rojo|aviso/i.test(text), "sin ideal ni colores: " + text);
+    ok(w.Fervis.tool("clientes_entre", { desde: "2026-11-12", hasta: "2026-11-09" }).includes("Fechas no válidas"), "fechas al revés");
+    ok(w.Fervis.tool("clientes_entre", { desde: "2026-11-01", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "tope de 31 días");
+    const guide = w.Fervis.tool("manual_app", { tema: "clientes_camareros" });
+    ok(guide.includes("Clientes previstos") && guide.includes("por camarero") && !/ideal|naranja|verde hasta/i.test(guide), "la guía explica la tabla, sin colores: " + guide);
+    ok(w.FervisGuide.guideFor("¿cómo pongo los clientes previstos de cada día?").includes("Clientes previstos"), "y la guía relevante lo encuentra");
   });
 
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {

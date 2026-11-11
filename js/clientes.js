@@ -5,21 +5,14 @@
 //
 // Debajo del cuadrante, una segunda tabla (con un hueco entre las dos) y con las mismas columnas: su cabecera son los clientes
 // previstos (se escriben), y debajo los camareros que trabajan ese día (se cuentan solos: el total y, por sitio, en etiquetas
-// como las de las casillas, con el color del sitio) y la proporción de clientes por camarero (verde hasta el «Ideal», naranja
-// hasta un 25 % más, rojo por encima). Los clientes van por FECHA, no por persona.
+// como las de las casillas, con el color del sitio) y los clientes por camarero (solo el número: sin colores ni «ideal», que
+// Nando quitó el 11-nov porque confundían más que ayudaban). Los clientes van por FECHA, no por persona.
 window.Clients = (function () {
   "use strict";
   const Dates = window.Dates;
-  // Los tres avisos de «clientes por camarero», en un solo sitio: los usan esta tabla y Fervis (fervis-datos.js), que así dicen
-  // siempre lo mismo. Verde hasta el ideal; naranja hasta WARN_FACTOR veces el ideal (un 25 % más); rojo por encima.
-  const WARN_FACTOR = 1.25;
-  const LEVELS = {
-    ok: { color: "#27ae60", colorName: "verde", words: "en el ideal o por debajo" },
-    warn: { color: "#e67e22", colorName: "naranja", words: "algo por encima del ideal" },
-    bad: { color: "#c0392b", colorName: "rojo", words: "muy por encima del ideal" },
-  };
   const ratioFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
   const NO_PLACE_COLOR = "#7f8c8d";   // gris: «sin sitio» no es un punto de venta y no tiene color propio
+  const RATIO_COLOR = "#2f5d8a";      // un solo tono, siempre el mismo: la etiqueta informa, no avisa
 
   // Un número entero de 0 a `max`; vacío = null (quitar); lo demás, undefined (no vale)
   // (un campo numérico con algo escrito que no es número, como «12e», da "" pero con badInput: eso NO es «vacío»)
@@ -30,10 +23,10 @@ window.Clients = (function () {
     return Number.isInteger(n) && n >= min && n <= max ? n : undefined;
   }
 
-  // Un campo de número entero (los clientes de un día o el ideal). `field`: read() lo guardado (o null), write(n) guardarlo,
-  // repaint() repintar lo que depende de él y emptyOk (si vaciarlo quita el dato). Al escribir un número válido se guarda y se
-  // repinta ya; al salir del campo se aplica también el vacío (si vale) y se enseña lo que quedó guardado. Lo no válido
-  // (negativo, decimal, «12e»…) se descarta. Vaciar no se aplica mientras se escribe: al corregir una cifra se perdería el dato.
+  // Un campo de número entero. `field`: read() lo guardado (o null), write(n) guardarlo (null = quitarlo) y repaint() repintar
+  // lo que depende de él. Al escribir un número válido se guarda y se repinta ya; al salir del campo se aplica también el vacío
+  // y se enseña lo que quedó guardado. Lo no válido (negativo, decimal, «12e»…) se descarta. Vaciar no se aplica mientras se
+  // escribe: al corregir una cifra se perdería el dato.
   function bindNumber(input, min, max, field) {
     input.type = "number";
     input.min = String(min);
@@ -48,7 +41,7 @@ window.Clients = (function () {
     });
     input.addEventListener("change", function () {
       const value = wholeNumber(input, min, max);
-      if (value !== undefined && (value !== null || field.emptyOk)) { field.write(value); }
+      if (value !== undefined) { field.write(value); }
       show();
       field.repaint();
     });
@@ -64,7 +57,6 @@ window.Clients = (function () {
     const shownEmployees = deps.shownEmployees;
 
     function clientsOf(iso) { const data = getData(); return Number.isInteger(data.clients[iso]) ? data.clients[iso] : null; }
-    function ratioMax() { return getData().ratioMax; }
 
     // Los camareros de un día: personas con un estado que cuenta como trabajo y algún tramo. Cada una cuenta UNA vez en el
     // total y una vez en cada sitio donde trabaja ese día (un turno partido en dos sitios suma en los dos).
@@ -89,31 +81,20 @@ window.Clients = (function () {
       return { total: total, noPlace: noPlace, byPlace: byPlace };
     }
 
-    // Clientes, camareros, proporción y color de ese día (null si no se han puesto clientes)
+    // Clientes, camareros y clientes por camarero de ese día. `ratio` es null si no hay clientes o nadie trabaja.
     function ratioInfo(iso) {
       const clients = clientsOf(iso);
       const total = crew(iso).total;
-      if (clients === null) { return { clients: null, total: total, ratio: null, level: null }; }
-      const ratio = total ? clients / total : null;   // sin camareros no hay proporción
-      const level = !total ? (clients > 0 ? "bad" : null) : ratio <= ratioMax() ? "ok" : ratio <= ratioMax() * WARN_FACTOR ? "warn" : "bad";
-      return { clients: clients, total: total, ratio: ratio, level: level };
+      return { clients: clients, total: total, ratio: clients !== null && total ? clients / total : null };
     }
 
-    // Cambios en los clientes o en el ideal (`ratioMax` en los datos): si el navegador no deja guardar, se deshace. Devuelve si se ha guardado.
+    // Cambio en los clientes de un día: si el navegador no deja guardar, se deshace. Devuelve si se ha guardado.
     function setClients(iso, value) {
       const data = getData();
       const before = data.clients[iso];
       if (value === null) { delete data.clients[iso]; } else { data.clients[iso] = value; }
       const saved = window.Store.save(data);
       if (!saved) { if (before === undefined) { delete data.clients[iso]; } else { data.clients[iso] = before; } }
-      return saved;
-    }
-    function setRatioMax(value) {
-      const data = getData();
-      const before = data.ratioMax;
-      data.ratioMax = value;
-      const saved = window.Store.save(data);
-      if (!saved) { data.ratioMax = before; }
       return saved;
     }
 
@@ -126,13 +107,13 @@ window.Clients = (function () {
       if (info.noPlace && info.byPlace.length) { label(info.noPlace + " sin sitio", NO_PLACE_COLOR); }
     }
 
+    // Solo el número («20»: la fila ya dice «Clientes por camarero»); «sin camareros» si hay clientes y nadie trabaja; «—» si no hay
+    // clientes (o son 0 y nadie trabaja)
     function paintRatio(cell, iso) {
       const info = ratioInfo(iso);
-      if (info.level === null) { cell.replaceChildren(el("span", "summary-empty", "—")); return; }
-      const node = chip(info.ratio === null ? "sin camareros" : ratioFormat.format(info.ratio) + " por camarero", LEVELS[info.level].color);
-      node.title = info.ratio === null ? "Hay clientes previstos y nadie trabaja" :
-        ratioFormat.format(info.ratio) + " clientes por camarero: " + LEVELS[info.level].words + " (ideal " + ratioMax() + ")";
-      cell.replaceChildren(node);
+      if (info.ratio !== null) { cell.replaceChildren(chip(ratioFormat.format(info.ratio), RATIO_COLOR)); return; }
+      if (info.clients) { cell.replaceChildren(chip("sin camareros", RATIO_COLOR)); return; }
+      cell.replaceChildren(el("span", "summary-empty", "—"));
     }
 
     function table(days) {
@@ -141,28 +122,14 @@ window.Clients = (function () {
       clientsRow.appendChild(el("th", "", "Clientes previstos"));
       const body = summary.appendChild(el("tbody"));
       const today = Dates.toIso(new Date());
-      function addRow(className, ...content) {
+      function addRow(className, label) {
         const tr = body.appendChild(el("tr", className));
-        const th = tr.appendChild(el("th"));
+        const th = tr.appendChild(el("th", "", label));
         th.scope = "row";
-        th.append(...content);
         return tr;
       }
       const crewRow = addRow("summary-row", "Camareros");
-      // Bajo «Clientes por camarero»: «Verde hasta [20]» y «naranja hasta 25 · rojo más». El rótulo dice qué hace el número (con
-      // «Ideal» a secas, Nando lo leía como los clientes por camarero del día y creía la lógica al revés)
-      const maxLabel = el("label", "ratio-max", "Verde hasta ");
-      maxLabel.title = "Ideal de clientes por camarero: lo pone cada local (no es lo mismo un restaurante que un bufé o una barra). " +
-        "Hasta ese número, la etiqueta sale en verde; hasta un 25 % más, en naranja; por encima, en rojo.";
-      const maxInput = maxLabel.appendChild(el("input", "ratio-max-input"));
-      maxInput.setAttribute("aria-label", "Ideal de clientes por camarero");
-      const legend = el("span", "ratio-legend");
-      function paintLegend() {
-        legend.textContent = LEVELS.warn.colorName + " hasta " + ratioFormat.format(ratioMax() * WARN_FACTOR) + " · " + LEVELS.bad.colorName + " más";
-      }
-      paintLegend();
-      const ratioRow = addRow("summary-row", el("span", "", "Clientes por camarero"), maxLabel, legend);
-      const ratioCells = [];
+      const ratioRow = addRow("summary-row", "Clientes por camarero");
 
       days.forEach(function (day) {
         const iso = Dates.toIso(day);
@@ -173,25 +140,17 @@ window.Clients = (function () {
         paintCrew(crewRow.appendChild(el("td", mark)), iso);
         const ratioCell = ratioRow.appendChild(el("td", mark));
         paintRatio(ratioCell, iso);
-        ratioCells.push([ratioCell, iso]);
         bindNumber(input, 0, 99999, {
           read: function () { return clientsOf(iso); },
           write: function (value) { setClients(iso, value); },
           repaint: function () { paintRatio(ratioCell, iso); },
-          emptyOk: true,   // vaciar quita los clientes de ese día
         });
-      });
-      bindNumber(maxInput, 1, 999, {
-        read: ratioMax,
-        write: setRatioMax,
-        repaint: function () { paintLegend(); ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); }); },
-        emptyOk: false,  // el ideal no se puede quedar vacío
       });
       return summary;
     }
 
-    return { crew: crew, ratioInfo: ratioInfo, clientsOf: clientsOf, ratioMax: ratioMax, table: table };
+    return { crew: crew, ratioInfo: ratioInfo, clientsOf: clientsOf, table: table };
   }
 
-  return { create: create, LEVELS: LEVELS, WARN_FACTOR: WARN_FACTOR };
+  return { create: create };
 })();

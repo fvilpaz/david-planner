@@ -33,7 +33,7 @@ window.FervisGuide = (function () {
       "Debajo del cuadrante hay otra tabla, con la misma columna por día.",
       "«Clientes previstos» (su cabecera azul): escribe cuántos clientes esperas ese día (un número entero; vacío lo quita). Cámbialo cuando haga falta, por ejemplo si llega un vuelo.",
       "«Camareros»: lo cuenta la app sola (quien tiene un estado con horario y algún tramo): el total y, debajo, una etiqueta por punto de venta con su color («2 Cafetería»). Quien trabaja en dos sitios el mismo día cuenta una vez en el total y en los dos sitios.",
-      "«Clientes por camarero»: los clientes entre los camareros. Debajo del rótulo, «Verde hasta [20]»: ese número es tu ideal de clientes por camarero (no los de ese día) y lo cambias ahí mismo según tu local (no es lo mismo un restaurante que un bufé o una barra). Debajo pone hasta dónde llega el naranja (un 25 % más); por encima, rojo. Los colores cambian en cuanto lo escribes. Aparece cuando escribes los clientes.",
+      "«Clientes por camarero»: los clientes entre los camareros de ese día (sale solo el número, por ejemplo «20»), calculado por la app en cuanto escribes los clientes. Si hay clientes y nadie trabaja, pone «sin camareros».",
       "Los clientes van por fecha: al repetir una semana entera, los clientes no se repiten (hay que escribirlos). Entran en la copia de seguridad y en el papel."]],
     ["horas_extra", "⏱️", "Horas extra", [
       "En la ventana de la casilla, en «Horas extra», pon cuántas: de 0,5 a 16, con coma o punto, en medias horas.",

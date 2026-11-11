@@ -195,18 +195,11 @@ window.FervisData = (function () {
     return { from: from, days: days };
   }
 
-  // Clientes previstos, camareros y proporción de cada día (paso 14b): lo calcula la app (Schedule.crew / ratioInfo, lo mismo que
-  // ve David en la tabla de debajo del cuadrante), el modelo solo lo repite. «hasta 31 días» como turnos_entre. Las palabras y
-  // los colores de cada aviso salen de clientes.js (Clients.LEVELS), los mismos que en pantalla.
+  // Clientes previstos, camareros y clientes por camarero de cada día (paso 14b): lo calcula la app (Schedule.crew / ratioInfo, lo
+  // mismo que ve David en la tabla de debajo del cuadrante), el modelo solo lo repite. «hasta 31 días» como turnos_entre.
   const RATIO_FORMAT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
-  function levelText(level) {
-    const item = window.Clients.LEVELS[level];
-    return item.words + (level === "ok" ? "" : " (aviso " + item.colorName + ")");
-  }
   function clientLines(from, days) {
-    const max = window.Schedule.ratioMax();
-    const lines = ["Ideal de clientes por camarero: " + max + " (hasta ese número, verde; hasta un " + Math.round((window.Clients.WARN_FACTOR - 1) * 100) + " % más, naranja; por encima, rojo; lo fija cada local). " +
-      "Quien trabaja en dos sitios el mismo día cuenta en los dos sitios pero una sola vez en el total de camareros."];
+    const lines = ["Quien trabaja en dos sitios el mismo día cuenta en los dos sitios pero una sola vez en el total de camareros."];
     for (let i = 0; i < days; i++) {
       const date = Dates.addDays(from, i);
       const iso = Dates.toIso(date);
@@ -214,9 +207,8 @@ window.FervisData = (function () {
       const crew = window.Schedule.crew(iso);
       const places = crew.byPlace.map(function (p) { return p.n + " " + p.name; });
       if (crew.noPlace && crew.byPlace.length) { places.push(crew.noPlace + " sin sitio"); }
-      const ratio = info.level === null ? "" :
-        info.ratio === null ? "; nadie trabaja (aviso rojo)" :
-        "; " + RATIO_FORMAT.format(info.ratio) + " clientes por camarero: " + levelText(info.level);
+      const ratio = info.ratio !== null ? "; " + RATIO_FORMAT.format(info.ratio) + " clientes por camarero" :
+        info.clients ? "; nadie trabaja" : "";
       lines.push("- " + DAY.format(date) + " (" + iso + "): " + (info.clients === null ? "sin clientes previstos" : info.clients + " clientes previstos") +
         "; " + crew.total + " camareros" + (places.length ? " (" + places.join(", ") + ")" : "") + ratio);
     }

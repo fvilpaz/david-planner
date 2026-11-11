@@ -1,5 +1,16 @@
 # SESSIONS — david-planner
 
+## 11-nov-2026 (final) — Fuera los colores y el ideal: solo el número
+
+**Hecho**
+- Nando, tras varios intentos: «saca lo de los colores, quita eso de cuánto sería el ideal, que solo aplique el ratio de cuántos clientes salen por camarero». Quitados el campo del ideal, la leyenda, los tres niveles (`Clients.LEVELS`, `WARN_FACTOR`) y `data.ratioMax` (en `storage.js` los datos de antes lo pierden al abrir; la copia de seguridad ya no lo guarda, y una copia vieja que lo traiga se carga igual sin contarlo como dato malo). La etiqueta, con un solo tono neutro y **solo el número** («20»; luego pidió quitar también «por camarero», que ya dice el título de la fila); «sin camareros» si hay clientes y nadie trabaja.
+- Fervis: `clientes_entre` da clientes, camareros con sitios y clientes por camarero, sin ideal ni avisos (prueba: el texto no contiene «ideal», «verde», «naranja», «rojo» ni «aviso»). Guía actualizada.
+- Pruebas reescritas primero (fallaron con el código de los colores) y después en verde: **67** (la del ideal desaparece con la función). Ejemplo y PDF mirados (una hoja). Auditoría: 0 errores, **54 avisos** (nueva referencia).
+
+**Aprendido**
+- La lógica estaba bien y aun así no servía: un número editable junto a los datos se lee como un dato. Cuando una función se explica tres veces y sigue confundiendo, lo correcto puede ser quitarla.
+
+
 ## 11-nov-2026 (tarde, Opus) — Auditoría, glosario y lista de refactor
 
 **Hecho**
