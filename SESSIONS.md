@@ -7,6 +7,14 @@
 - Sin `innerHTML`/`eval`, sin CSS huérfano (comprobadas las clases de las idas y vueltas del diseño).
 - Glosario al día (Moverse, Copiar semanas, Imprimir, Temas, Fervis) sin cambiar el número de pasos; el buscador de la guía lleva cada pregunta a su tema (comprobado a mano; quitado un empate «imprimir» con el tema de clientes).
 
+**Refactor (aprobado por Nando: 3, 1 y 2) y el rótulo del ideal**
+- **3 · `js/clientes.js`**: la tabla de clientes y camareros sale de `app.js` (576 → 428 líneas). `app.js` la crea con `Clients.create({ getData, el, chip, statusOf, shiftKey, dayName, shownEmployees })` —**inyección de dependencias**: el módulo recibe lo justo y no toca las tripas del cuadrante; `getData` es una función porque `data` se vuelve a cargar si otra pestaña cambia los datos—. `Schedule` sigue exponiendo `crew`, `ratioInfo`, `clientsOf` y `ratioMax` (Fervis y las pruebas no cambian). Apuntado en `index.html` (antes de `app.js`) y en `ESSENTIAL`. Las 68 pruebas pasaron **sin tocarlas**.
+- **1 · un solo sitio para los avisos**: `Clients.LEVELS` (color, nombre del color y palabras de verde/naranja/rojo) y `WARN_FACTOR` (1,25). Fervis los lee de ahí; antes tenía su copia de las palabras.
+- **2 · `bindNumber`**: un ayudante para los dos campos (clientes e ideal): monta el campo, guarda al escribir un número válido y, al salir, aplica el vacío solo si vale (`emptyOk`) y enseña lo guardado. Sin cambios de comportamiento (68 sin tocarlas).
+- **`ratioMax` no se renombra**: es el nombre en los datos guardados y en las copias; cambiarlo exigiría convertir los antiguos.
+- **El rótulo**: Nando leía «Ideal [30]» como los clientes por camarero del día y creía la lógica al revés (sus capturas: 280 clientes / 4 = 70 por camarero, rojo con 30 y verde con 81: correcto). Ahora, bajo «Clientes por camarero»: «Verde hasta [30]» y «naranja hasta 37,5 · rojo más», recalculado al momento. Pruebas vistas fallar antes; comprobado tecleando de verdad y en el PDF.
+- Auditoría repetida: 0 errores, **55 avisos** (nueva referencia; el de más es `Clients.LEVELS[level]` en Fervis, con `level` interno).
+
 **Aprendido**
 - Un aviso de ESLint no es un fallo ni un no-fallo: hay que leer de dónde sale la clave. Aquí 13 de 14 eran inofensivos y 1 rompía la pantalla.
 

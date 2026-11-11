@@ -182,7 +182,8 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .summary-table th[scope=row] { font-weight: 600; text-align: left; padding: .35rem .5rem; }
 .summary-table th[scope=row] > span { display: block; }
 .ratio-max { display: block; margin-top: .15rem; font-size: .75rem; font-weight: 500; color: var(--muted); }
-.ratio-max-input { width: 3.6rem; min-height: 28px; padding: 0 4px; text-align: center; font-size: .8rem;
+.ratio-legend { font-size: .7rem; font-weight: 500; color: var(--muted); margin-top: .1rem; }
+.ratio-max-input { display: block; margin-top: .15rem; width: 3.6rem; min-height: 28px; padding: 0 4px; text-align: center; font-size: .8rem;
                    border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
 .crew-total { display: block; margin-bottom: .2rem; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
 .crew-chips { display: flex; flex-direction: column; gap: .25rem; }
@@ -483,10 +484,10 @@ button.danger { background: var(--error); color: var(--on-error); }
   .crew-total { font-size: 9pt; line-height: 1.1; margin: 0; }
   .crew-chips { gap: 1px; }
   .summary-table .chip { padding: 0 4px; font-size: 7pt; margin: 1px 0; }
-  .ratio-max { margin: 0; font-size: 6.5pt; }
+  .ratio-max, .ratio-legend { margin: 0; font-size: 6.5pt; }
   .clients-input, .ratio-max-input { min-height: 0; width: 100%; font-size: 9pt; border: 0; background: transparent; padding: 0; font-weight: 600; -moz-appearance: textfield; appearance: textfield; }
   .clients-input::-webkit-inner-spin-button, .ratio-max-input::-webkit-inner-spin-button { display: none; }
-  .ratio-max-input { width: 1.8rem; text-align: left; }  /* «máx. 20» en una sola línea */
+  .ratio-max-input { width: 1.8rem; text-align: center; }  /* «Verde hasta 20 por camarero» en una sola línea */
   .schedule-table tr { break-inside: avoid; }  /* una persona nunca partida entre dos hojas */
   .cell-empty { visibility: hidden; }  /* el «+» de las casillas vacías no va al papel */
   .schedule-table th, .chip, .cell.has-overtime { -webkit-print-color-adjust: exact; print-color-adjust: exact; }  /* que se impriman los colores */

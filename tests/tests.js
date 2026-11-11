@@ -987,10 +987,12 @@
     typeClients(0, "75");   // 25 por camarero
     equal(ratioChip(0).dataset.tint, "#e67e22", "con 20: naranja");
     const max = $(".ratio-max-input");
-    equal($(".ratio-max").firstChild.textContent.trim(), "Ideal", "el rótulo dice «Ideal»: el número que pone cada local y del que salen los colores");
+    equal($(".ratio-max").textContent.trim(), "Verde hasta", "el rótulo se lee solo: «Clientes por camarero · Verde hasta [20]» (Nando leía el número como los clientes del día)");
+    equal($(".ratio-legend").textContent, "naranja hasta 25 · rojo más", "y debajo, hasta dónde llega el naranja");
     ok($(".ratio-max").title.includes("verde") && $(".ratio-max").title.includes("naranja") && $(".ratio-max").title.includes("rojo"), "y su ayuda explica los tres colores: " + $(".ratio-max").title);
     max.value = "25";  fire(max, "change");
     equal([saved().ratioMax, ratioChip(0).dataset.tint], [25, "#27ae60"], "con 25: verde y guardado");
+    equal($(".ratio-legend").textContent, "naranja hasta 31,3 · rojo más", "la leyenda se recalcula");
     max.value = "0";   fire(max, "change");
     equal([max.value, saved().ratioMax], ["25", 25], "0 no vale");
     max.value = "x";   fire(max, "change");
@@ -1013,6 +1015,7 @@
     typeClients(0, "75");
     ideal.value = "30";  fire(ideal, "input");
     equal([saved().ratioMax, ratioChip(0).dataset.tint], [30, "#27ae60"], "ideal: guardado y recoloreado al escribir");
+    equal($(".ratio-legend").textContent, "naranja hasta 37,5 · rojo más", "y la leyenda, también al momento");
     ideal.value = "";  fire(ideal, "input");
     equal(saved().ratioMax, 30, "vacío no cambia el ideal");
   });
@@ -1124,7 +1127,7 @@
     ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-12", hasta: "2026-11-09" }).includes("Fechas no válidas"), "fechas al revés");
     ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-01", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "tope de 31 días");
     const guide = w2.Fervis.tool("manual_app", { tema: "clientes_camareros" });
-    ok(guide.includes("Clientes previstos") && guide.includes("naranja") && guide.includes("Ideal"), "la guía explica el pie: " + guide);
+    ok(guide.includes("Clientes previstos") && guide.includes("naranja") && guide.includes("Verde hasta"), "la guía explica el pie: " + guide);
     ok(w2.FervisGuide.guideFor("¿cómo pongo los clientes previstos de cada día?").includes("Clientes previstos"), "y la guía relevante lo encuentra");
   });
 

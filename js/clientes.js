@@ -149,12 +149,19 @@ window.Clients = (function () {
         return tr;
       }
       const crewRow = addRow("summary-row", "Camareros");
-      const maxLabel = el("label", "ratio-max", "Ideal ");
+      // Bajo «Clientes por camarero»: «Verde hasta [20]» y «naranja hasta 25 · rojo más». El rótulo dice qué hace el número (con
+      // «Ideal» a secas, Nando lo leía como los clientes por camarero del día y creía la lógica al revés)
+      const maxLabel = el("label", "ratio-max", "Verde hasta ");
       maxLabel.title = "Ideal de clientes por camarero: lo pone cada local (no es lo mismo un restaurante que un bufé o una barra). " +
         "Hasta ese número, la etiqueta sale en verde; hasta un 25 % más, en naranja; por encima, en rojo.";
       const maxInput = maxLabel.appendChild(el("input", "ratio-max-input"));
       maxInput.setAttribute("aria-label", "Ideal de clientes por camarero");
-      const ratioRow = addRow("summary-row", el("span", "", "Clientes por camarero"), maxLabel);
+      const legend = el("span", "ratio-legend");
+      function paintLegend() {
+        legend.textContent = LEVELS.warn.colorName + " hasta " + ratioFormat.format(ratioMax() * WARN_FACTOR) + " · " + LEVELS.bad.colorName + " más";
+      }
+      paintLegend();
+      const ratioRow = addRow("summary-row", el("span", "", "Clientes por camarero"), maxLabel, legend);
       const ratioCells = [];
 
       days.forEach(function (day) {
@@ -177,7 +184,7 @@ window.Clients = (function () {
       bindNumber(maxInput, 1, 999, {
         read: ratioMax,
         write: setRatioMax,
-        repaint: function () { ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); }); },
+        repaint: function () { paintLegend(); ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); }); },
         emptyOk: false,  // el ideal no se puede quedar vacío
       });
       return summary;
