@@ -33,8 +33,12 @@
 - Impresión: sigue en una hoja; en papel el rótulo de clientes también es claro. 66 pruebas.
 - Nando preguntó si Fervis puede dar estos números: ya lo hace desde la parte 3 (`clientes_entre`), la app calcula y Fervis solo lee. Sin probar con una conversación real con Groq (la clave es suya y no la toco): lo comprobado es la herramienta y que Groq la recibe.
 
+**«máx.» → «Ideal», y que cambie al escribir (Nando: «lo pongo en 100 y no cambia el color»)**
+- Reproducido tecleando de verdad: el campo marcaba 10, lo guardado seguía en 58 y los colores igual. La app solo guardaba en `change` (al salir del campo: Tab, Enter o clic fuera). Arreglo: también en `input`, si el número es válido; vaciar sigue esperando a salir (si no, al corregir una cifra se perdería el dato). Prueba nueva vista fallar antes del arreglo; comprobado tecleando «25» sin salir: guardado y recoloreado al momento.
+- Además la confusión: Nando leía el número del campo como «clientes de ese día» y creía la lógica al revés (con 1 todo rojo). Era el tope: más clientes por camarero, más rojo. Renombrado a «Ideal», con una ayuda (al pasar el ratón) que explica los tres colores y que cada local pone el suyo; las mismas palabras en Fervis y en la guía. 67 pruebas.
+
 **Siguiente**
-- Lo que decida Nando.
+- Auditoría, documentación y refactor (Nando, con Opus). Push al terminar todo; ya nada por Telegram.
 
 ## 11-nov-2026 — Paso 14a: color por punto de venta y «Colorear por»
 

@@ -99,7 +99,7 @@ window.Schedule = (function () {
   // sitio, en etiquetas como las de las casillas, con el color del sitio) y la proporción de clientes por camarero (verde hasta
   // el máximo, naranja hasta un 25 % más, rojo por encima). Los clientes van por FECHA, no por persona.
   const RATIO_COLORS = { ok: "#27ae60", warn: "#e67e22", bad: "#c0392b" };
-  const RATIO_WORDS = { ok: "dentro del máximo", warn: "algo por encima del máximo", bad: "muy por encima del máximo" };
+  const RATIO_WORDS = { ok: "en el ideal o por debajo", warn: "algo por encima del ideal", bad: "muy por encima del ideal" };
   const ratioFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
   const NO_PLACE_COLOR = "#7f8c8d";   // gris: «sin sitio» no es un punto de venta y no tiene color propio
 
@@ -175,7 +175,7 @@ window.Schedule = (function () {
     if (info.level === null) { cell.replaceChildren(el("span", "summary-empty", "—")); return; }
     const node = chip(info.ratio === null ? "sin camareros" : ratioFormat.format(info.ratio) + " por camarero", RATIO_COLORS[info.level]);
     node.title = info.ratio === null ? "Hay clientes previstos y nadie trabaja" :
-      ratioFormat.format(info.ratio) + " clientes por camarero: " + RATIO_WORDS[info.level] + " (" + ratioMax() + ")";
+      ratioFormat.format(info.ratio) + " clientes por camarero: " + RATIO_WORDS[info.level] + " (ideal " + ratioMax() + ")";
     cell.replaceChildren(node);
   }
 
@@ -201,7 +201,9 @@ window.Schedule = (function () {
     foot.appendChild(el("tr", "summary-gap")).appendChild(el("td")).colSpan = 8;   // el hueco entre las dos tablas
     const clientsRow = addRow("summary-head", "Clientes previstos");
     const crewRow = addRow("summary-row", "Camareros");
-    const maxLabel = el("label", "ratio-max", "máx. ");
+    const maxLabel = el("label", "ratio-max", "Ideal ");
+    maxLabel.title = "Ideal de clientes por camarero: lo pone cada local (no es lo mismo un restaurante que un bufé o una barra). " +
+      "Hasta ese número, la etiqueta sale en verde; hasta un 25 % más, en naranja; por encima, en rojo.";
     const maxInput = maxLabel.appendChild(el("input", "ratio-max-input"));
     maxInput.type = "number";
     maxInput.min = "1";
@@ -209,7 +211,7 @@ window.Schedule = (function () {
     maxInput.step = "1";
     maxInput.inputMode = "numeric";
     maxInput.value = String(ratioMax());
-    maxInput.setAttribute("aria-label", "Máximo recomendado de clientes por camarero");
+    maxInput.setAttribute("aria-label", "Ideal de clientes por camarero");
     const ratioRow = addRow("summary-row", el("span", "", "Clientes por camarero"), maxLabel);
     const ratioCells = [];
 
@@ -229,12 +231,23 @@ window.Schedule = (function () {
       const ratioCell = ratioRow.appendChild(el("td", mark));
       paintRatio(ratioCell, iso);
       ratioCells.push([ratioCell, iso]);
+      input.addEventListener("input", function () {   // mientras se escribe: un número válido se guarda y se recolorea ya; vaciar espera a salir
+        const value = wholeNumber(input, 0, 99999);
+        if (value !== undefined && value !== null) { setClients(iso, value); paintRatio(ratioCell, iso); }
+      });
       input.addEventListener("change", function () {
         const value = wholeNumber(input, 0, 99999);
         if (value !== undefined) { setClients(iso, value); }   // lo no válido (negativo, decimal, texto) se descarta
         input.value = clientsOf(iso) === null ? "" : String(clientsOf(iso));   // se ve lo que quedó guardado
         paintRatio(ratioCell, iso);
       });
+    });
+    maxInput.addEventListener("input", function () {
+      const value = wholeNumber(maxInput, 1, 999);
+      if (value !== undefined && value !== null) {
+        setRatioMax(value);
+        ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); });
+      }
     });
     maxInput.addEventListener("change", function () {
       const value = wholeNumber(maxInput, 1, 999);

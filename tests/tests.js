@@ -973,11 +973,13 @@
     equal(summaryCell(1, 1).textContent, "—", "0 clientes y 0 camareros: nada que avisar");
   });
 
-  test("Máximo de clientes por camarero: se cambia en la propia fila, se guarda y recolorea; lo no válido se descarta", async function () {
+  test("Ideal de clientes por camarero: se cambia en la propia fila, se guarda y recolorea; lo no válido se descarta", async function () {
     await open(crewFixture());
     typeClients(0, "75");   // 25 por camarero
     equal(ratioChip(0).dataset.tint, "#e67e22", "con 20: naranja");
     const max = $(".ratio-max-input");
+    equal($(".ratio-max").firstChild.textContent.trim(), "Ideal", "el rótulo dice «Ideal»: el número que pone cada local y del que salen los colores");
+    ok($(".ratio-max").title.includes("verde") && $(".ratio-max").title.includes("naranja") && $(".ratio-max").title.includes("rojo"), "y su ayuda explica los tres colores: " + $(".ratio-max").title);
     max.value = "25";  fire(max, "change");
     equal([saved().ratioMax, ratioChip(0).dataset.tint], [25, "#27ae60"], "con 25: verde y guardado");
     max.value = "0";   fire(max, "change");
@@ -987,6 +989,23 @@
     frame.contentWindow.location.reload();
     await reloaded();
     equal($(".ratio-max-input").value, "25", "al volver a abrir sigue");
+  });
+
+  test("Clientes e ideal: al escribir un número válido se guarda y se recolorea al momento (sin salir del campo); vaciar el campo no borra hasta salir", async function () {
+    await open(crewFixture());          // 3 camareros el lunes; ideal por defecto 20
+    const clients = $$(".clients-input")[0];
+    clients.value = "75";  fire(clients, "input");
+    equal([saved().clients["2026-11-09"], ratioChip(0).dataset.tint], [75, "#e67e22"], "clientes: guardado y recoloreado al escribir");
+    clients.value = "";  fire(clients, "input");
+    equal(saved().clients["2026-11-09"], 75, "vaciar mientras se escribe no borra el dato (se quita al salir del campo)");
+    fire(clients, "change");
+    equal(saved().clients, {}, "al salir del campo vacío, sí se quita");
+    const ideal = $(".ratio-max-input");
+    typeClients(0, "75");
+    ideal.value = "30";  fire(ideal, "input");
+    equal([saved().ratioMax, ratioChip(0).dataset.tint], [30, "#27ae60"], "ideal: guardado y recoloreado al escribir");
+    ideal.value = "";  fire(ideal, "input");
+    equal(saved().ratioMax, 30, "vacío no cambia el ideal");
   });
 
   test("Clientes con el navegador sin espacio: se deshace y se ve lo guardado de antes", async function () {
@@ -1061,18 +1080,18 @@
     const w = await open(data);
     const text = w.Fervis.tool("clientes_entre", { desde: "2026-11-09", hasta: "2026-11-11" });
     const line = function (iso) { return text.split("\n").find(function (l) { return l.includes("(" + iso + ")"); }); };
-    ok(text.includes("Máximo recomendado: 20 clientes por camarero"), "dice el máximo: " + text);
-    ok(/60 clientes previstos; 3 camareros \(2 Pub, 1 Terraza, 1 sin sitio\); 20 clientes por camarero: dentro del máximo/.test(line("2026-11-09")), "lunes: " + line("2026-11-09"));
+    ok(text.includes("Ideal de clientes por camarero: 20"), "dice el ideal: " + text);
+    ok(/60 clientes previstos; 3 camareros \(2 Pub, 1 Terraza, 1 sin sitio\); 20 clientes por camarero: en el ideal o por debajo/.test(line("2026-11-09")), "lunes: " + line("2026-11-09"));
     ok(/30 clientes previstos; 0 camareros; nadie trabaja/.test(line("2026-11-10")), "martes: " + line("2026-11-10"));
     ok(/sin clientes previstos; 0 camareros/.test(line("2026-11-11")), "miércoles: " + line("2026-11-11"));
     ok(text.includes("una sola vez en el total"), "avisa de que quien trabaja en dos sitios cuenta una vez en el total");
     data.clients["2026-11-09"] = 76;
     const w2 = await open(data);
-    ok(/25,3 clientes por camarero: muy por encima del máximo/.test(w2.Fervis.tool("clientes_entre", { desde: "2026-11-09", hasta: "2026-11-09" })), "rojo con 76 entre 3");
+    ok(/25,3 clientes por camarero: muy por encima del ideal/.test(w2.Fervis.tool("clientes_entre", { desde: "2026-11-09", hasta: "2026-11-09" })), "rojo con 76 entre 3");
     ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-12", hasta: "2026-11-09" }).includes("Fechas no válidas"), "fechas al revés");
     ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-01", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "tope de 31 días");
     const guide = w2.Fervis.tool("manual_app", { tema: "clientes_camareros" });
-    ok(guide.includes("Clientes previstos") && guide.includes("naranja") && guide.includes("máx"), "la guía explica el pie: " + guide);
+    ok(guide.includes("Clientes previstos") && guide.includes("naranja") && guide.includes("Ideal"), "la guía explica el pie: " + guide);
     ok(w2.FervisGuide.guideFor("¿cómo pongo los clientes previstos de cada día?").includes("Clientes previstos"), "y la guía relevante lo encuentra");
   });
 

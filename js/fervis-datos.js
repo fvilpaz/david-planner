@@ -198,10 +198,10 @@ window.FervisData = (function () {
   // Clientes previstos, camareros y proporción de cada día (paso 14b): lo calcula la app (Schedule.crew / ratioInfo, lo mismo que
   // ve David en el pie del cuadrante), el modelo solo lo repite. «hasta 31 días» como turnos_entre.
   const RATIO_FORMAT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
-  const RATIO_WORDS = { ok: "dentro del máximo", warn: "algo por encima del máximo (aviso naranja)", bad: "muy por encima del máximo (aviso rojo)" };
+  const RATIO_WORDS = { ok: "en el ideal o por debajo", warn: "algo por encima del ideal (aviso naranja)", bad: "muy por encima del ideal (aviso rojo)" };
   function clientLines(from, days) {
     const max = window.Schedule.ratioMax();
-    const lines = ["Máximo recomendado: " + max + " clientes por camarero (naranja hasta un 25 % más; rojo por encima). " +
+    const lines = ["Ideal de clientes por camarero: " + max + " (hasta ese número, verde; hasta un 25 % más, naranja; por encima, rojo; lo fija cada local). " +
       "Quien trabaja en dos sitios el mismo día cuenta en los dos sitios pero una sola vez en el total de camareros."];
     for (let i = 0; i < days; i++) {
       const date = Dates.addDays(from, i);
