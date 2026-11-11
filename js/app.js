@@ -39,6 +39,11 @@ window.Schedule = (function () {
     return "?" + params.toString();
   }
 
+  // «Colorear por» (paso 14a): «persona» (como siempre) o «sitio»: cada tramo con punto de venta toma el color de ese
+  // punto. Se guarda en este aparato, como el tema («dp_color_by»), y se lee una sola vez al arrancar.
+  let colorMode = "persona";
+  try { if (localStorage.getItem("dp_color_by") === "sitio") { colorMode = "sitio"; } } catch (e) { /* sin almacenamiento: por persona */ }
+
   // Un tramo pintado en su color: trabajando, el de la persona; libre, vacaciones…, el del estado (como gestion-hosteleria)
   // `place` (opcional): el punto de venta, pequeño debajo de la hora (paso 7b; como «Terraza» en gestion-hosteleria)
   function chip(text, color, place) {
@@ -65,7 +70,8 @@ window.Schedule = (function () {
         const text = slot.start + "–" + slot.end;
         const place = slot.placeId && placeOf(slot.placeId);
         texts.push(text + (place ? " en " + place.name : ""));
-        slotsBox.append(chip(text, employee.color, place && place.name));
+        const tint = colorMode === "sitio" && place && place.color ? place.color : employee.color;  // sin sitio: el de la persona
+        slotsBox.append(chip(text, tint, place && place.name));
       });
     } else if (status) {
       texts.push(status.name);
@@ -138,6 +144,22 @@ window.Schedule = (function () {
     grid.replaceChildren(table);
     grid.scrollLeft = scroll.left;
     grid.scrollTop = scroll.top;
+    syncColorBy();
+  }
+
+  // El interruptor «Colorear por» solo sale si hay puntos de venta; marca el que está puesto
+  function syncColorBy() {
+    const group = document.getElementById("colorby-group");
+    group.hidden = data.places.length === 0;
+    group.querySelectorAll("[data-colorby]").forEach(function (button) {
+      button.setAttribute("aria-pressed", String(button.dataset.colorby === colorMode));
+    });
+  }
+
+  function setColorBy(mode) {
+    colorMode = mode === "sitio" ? "sitio" : "persona";
+    try { localStorage.setItem("dp_color_by", colorMode); } catch (e) { /* se aplica igual, pero no se recordará */ }
+    render();
   }
 
   // Guarda (o vacía, con null) una casilla. Si el navegador no deja guardar, se deshace el cambio: así nunca se ve
@@ -304,6 +326,8 @@ window.Schedule = (function () {
     swap: swap,
     copyShift: copyShift,
     render: render,
+    setColorBy: setColorBy,
+    colorBy: function () { return colorMode; },
     focusCell: focusCell,
   };
 })();
@@ -321,6 +345,11 @@ window.Schedule = (function () {
 
   themeButtons.forEach(function (button) {
     button.addEventListener("click", function () { window.Theme.apply(button.dataset.themeChoice); markTheme(); });
+  });
+
+  // «Colorear por» (paso 14a): Schedule lo guarda y repinta (y lo oculta mientras no haya puntos de venta)
+  menu.querySelectorAll("[data-colorby]").forEach(function (button) {
+    button.addEventListener("click", function () { window.Schedule.setColorBy(button.dataset.colorby); });
   });
 
   // «Copiar la semana anterior»: al abrir el apartado se dice qué semana se copia; el resultado sale ahí mismo

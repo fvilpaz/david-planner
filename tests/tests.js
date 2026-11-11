@@ -777,6 +777,92 @@
     ok(help.includes("el nombre del local y el tuyo") && help.includes("los turnos y el personal"), "aviso completo: " + help.slice(-120));
   });
 
+  // =================================================================================================================
+  // Color por punto de venta y «Colorear por» (paso 14a)
+  test("Colorear por: por defecto, por persona (como siempre); por punto de venta, el tramo con sitio toma el color del sitio y el que no lo tiene, el de la persona; el interruptor se recuerda", async function () {
+    const data = fixture();
+    data.places[0].color = "#16a085";
+    data.shifts["e1|" + WEEK] = work("10:00", "14:00", null, "p1");   // con sitio
+    data.shifts["e2|" + WEEK] = work("10:00", "14:00");              // sin sitio
+    const w = await open(data);
+    const tint = function (key) { return $('[data-key="' + key + '"] .chip').dataset.tint; };
+    equal([tint("e1|" + WEEK), tint("e2|" + WEEK)], ["#2c7be5", "#e67e22"], "por defecto: el color de la persona");
+    equal([w.Schedule.colorBy(), $("#colorby-group").hidden], ["persona", false], "por persona, y el interruptor sale (hay un punto de venta)");
+    $('[data-colorby="sitio"]').click();
+    equal([tint("e1|" + WEEK), tint("e2|" + WEEK)], ["#16a085", "#e67e22"], "por sitio: el del sitio; sin sitio, el de la persona");
+    equal([w.localStorage.getItem("dp_color_by"), $('[data-colorby="sitio"]').getAttribute("aria-pressed")], ["sitio", "true"], "se guarda y se marca");
+    await open(data, { extra: [["dp_color_by", "sitio"]] });   // como si recargaras
+    equal(tint("e1|" + WEEK), "#16a085", "se recuerda al recargar");
+  });
+
+  test("Colorear por: un estado (Libre…) conserva su color en los dos modos, y sin puntos de venta el interruptor no sale", async function () {
+    const data = fixture();
+    data.shifts["e1|" + WEEK] = { statusId: "off", slots: [], overtime: null };
+    await open(data, { extra: [["dp_color_by", "sitio"]] });
+    equal($('[data-key="e1|' + WEEK + '"] .chip').dataset.tint, "#8e44ad", "Libre, con su color, también por sitio");
+    await open(null);   // la primera vez: sin puntos de venta
+    ok($("#colorby-group").hidden, "sin puntos de venta, sin interruptor");
+  });
+
+  test("Puntos de venta con color: uno nuevo nace con un color que no lleva nadie, el de uno en uso se puede cambiar (quitarlo, no) y los de antes del 14a reciben uno al abrir", async function () {
+    const data = fixture();   // el «Pub» no tiene color: es un dato de antes del 14a
+    data.shifts["e1|2026-11-10"] = work("10:00", "14:00", null, "p1");
+    const w = await open(data);
+    const places = function () { return w.Schedule.getData().places; };
+    ok(/^#[0-9a-f]{6}$/i.test(places()[0].color), "el de antes recibe un color al abrir: " + places()[0].color);
+    $("#place-button").click();
+    $("#place-add").click();
+    $("#place-name").value = "Terraza";
+    $("#place-form").requestSubmit();
+    const nuevo = places().find(function (p) { return p.name === "Terraza"; });
+    const otros = w.Schedule.getData().employees.concat(w.Schedule.getData().statuses, places().filter(function (p) { return p !== nuevo; }));
+    ok(nuevo && !otros.some(function (x) { return x.color === nuevo.color; }), "color libre: " + (nuevo && nuevo.color));
+    equal(saved().places.find(function (p) { return p.name === "Terraza"; }).color, nuevo.color, "se guarda");
+    $$("#place-list .sort-row")[0].click();   // el «Pub», que está en uso
+    ok($("#place-remove").hidden, "en uso: sin Quitar");
+    $$("#place-palette button")[5].click();
+    $("#place-form").requestSubmit();
+    equal(saved().places.find(function (p) { return p.id === "p1"; }).color, w.PALETTE[5], "su color se cambia aunque esté en uso");
+    $("#place-dialog").close();
+  });
+
+  test("La copia de seguridad conserva el color de los puntos de venta y «colorear por» (al descargarla y al cargarla); una copia de antes, sin colores, se carga y sus sitios reciben uno", async function () {
+    const data = fixture();
+    data.places[0].color = "#16a085";
+    const w = await open(data, { extra: [["dp_color_by", "sitio"]] });
+    const files = catchDownloads(w);
+    $("#backup-download").click();
+    await wait(300);
+    const copy = JSON.parse(files[0].text);
+    equal([copy.data.places[0].color, copy.settings.dp_color_by], ["#16a085", "sitio"], "la copia lleva el color y el ajuste");
+    // Cargar una copia (en la página que haya ahora): devuelve la ventana ya recargada
+    async function cargar(texto) {
+      const win = frame.contentWindow;
+      const transfer = new win.DataTransfer();
+      transfer.items.add(new win.File([texto], "copia.json", { type: "application/json" }));
+      const input = $("#backup-file");
+      input.files = transfer.files;
+      fire(input, "change");
+      await wait(250);
+      ok($("#import-dialog").open, "la copia se acepta: " + $("#backup-result").textContent);
+      catchDownloads(win);   // cargar descarga antes «lo de ahora»: en CADA ventana se desvía aquí, para que no llegue a Descargas
+      const next = reloaded();
+      $("#import-ok").click();
+      return next;
+    }
+    // Un color que NO es de la paleta: si al cargar se perdiera, el sitio recibiría otro (no este)
+    copy.data.places[0].color = "#abcdef";
+    copy.settings.dp_color_by = "sitio";
+    let win = await cargar(JSON.stringify(copy));
+    equal([win.Schedule.getData().places[0].color, win.Schedule.colorBy()], ["#abcdef", "sitio"], "al cargarla se conserva el color y «colorear por»");
+    // Una copia de antes del 14a: sin color ni ajuste
+    delete copy.data.places[0].color;
+    delete copy.settings.dp_color_by;
+    win = await cargar(JSON.stringify(copy));
+    ok(/^#[0-9a-f]{6}$/i.test(win.Schedule.getData().places[0].color), "sin color en la copia: el sitio recibe uno al abrir");
+    equal(win.Schedule.colorBy(), "persona", "sin el ajuste, por persona");
+  });
+
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
     const w = await open(fixture());
     const ctx = w.Fervis.context(new w.Date(2026, 10, 10, 12, 0));

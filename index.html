@@ -111,6 +111,14 @@
               <ul class="auto-copies" id="auto-copies"></ul>
             </div>
           </details>
+          <!-- Colorear por (paso 14a): por persona, como siempre, o por punto de venta; solo sale si hay puntos de venta -->
+          <details class="menu-group" id="colorby-group" hidden>
+            <summary>🖍️ Colorear por</summary>
+            <div class="theme-list">
+              <button type="button" class="secondary" data-colorby="persona">👥 Persona</button>
+              <button type="button" class="secondary" data-colorby="sitio">📍 Punto de venta</button>
+            </div>
+          </details>
           <!-- Plegado: con las fichas siempre a la vista, un toque que iba a otro sitio caía en un tema -->
           <details class="menu-group">
             <summary>🎨 Tema</summary>
@@ -276,6 +284,10 @@
         <label class="field">Nombre
           <input id="place-name" maxlength="30" autocomplete="off" required>
         </label>
+        <fieldset class="slots" id="place-color">
+          <legend>Color en el cuadrante (si coloreas por punto de venta)</legend>
+          <div class="palette" id="place-palette"></div>
+        </fieldset>
         <p class="help" id="place-note" hidden></p>
         <div class="form-actions">
           <button type="submit">Guardar</button>

@@ -66,7 +66,9 @@ window.FervisGuide = (function () {
       "Gestión → «Puntos de venta»: crea los sitios (Chiringuito, Cafetería, Pub…).",
       "Hasta que no haya uno, «Dónde» no sale en la casilla.",
       "Con puntos creados, cada tramo tiene su «Dónde» y el nombre sale pequeño debajo de la hora.",
-      "Uno en uso no se puede quitar."]],
+      "Cada punto tiene su color (hay 20), como las personas: se elige al crearlo o al tocarlo.",
+      "Gestión → «Colorear por»: «Persona» (cada tramo lleva el color de quien trabaja, como siempre) o «Punto de venta» (el color del sitio: ves de un vistazo dónde va cada uno). Solo sale si hay puntos creados.",
+      "Uno en uso no se puede quitar, pero su nombre y su color sí se pueden cambiar."]],
     ["imprimir", "🖨️", "Imprimir o guardar en PDF", [
       "Gestión → «Imprimir / PDF» abre la impresión del navegador con la semana que ves.",
       "Sale en una hoja A4 apaisada y siempre en colores claros.",

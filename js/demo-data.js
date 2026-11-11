@@ -39,9 +39,9 @@ window.DEMO_DATA = (function () {
 
   // Puntos de venta del ejemplo (paso 7b): cada persona trabaja siempre en el mismo
   const places = [
-    { id: "p1", name: "Chiringuito", position: 0 },
-    { id: "p2", name: "Cafetería", position: 1 },
-    { id: "p3", name: "Pub", position: 2 },
+    { id: "p1", name: "Chiringuito", color: "#2c7be5", position: 0 },   // colores que no se confunden con Libre, Vacaciones ni Baja
+    { id: "p2", name: "Cafetería", color: "#e67e22", position: 1 },
+    { id: "p3", name: "Pub", color: "#b7950b", position: 2 },
   ];
 
   const employees = [];

@@ -15,10 +15,21 @@ window.Store = (function () {
       !Array.isArray(data.shifts);
   }
 
-  // Lo que se añadió después de guardar los primeros datos (paso 7b: puntos de venta) se completa al cargar,
-  // para que unos datos de antes sigan sirviendo sin perder nada
+  // El primer color de la paleta que no lleve ya ninguna persona, estado ni punto de venta (lo usan estados nuevos
+  // «a mano» en states.js; aquí, los puntos de venta nuevos y los de antes de tener color)
+  function freeColor(data) {
+    const used = [].concat(data.employees, data.statuses, data.places || []).map(function (x) { return x.color; });
+    return window.PALETTE.find(function (c) { return !used.includes(c); }) ||
+      window.PALETTE[(data.places || []).length % window.PALETTE.length];
+  }
+
+  // Lo que se añadió después de guardar los primeros datos (paso 7b: puntos de venta; paso 14a: su color) se completa
+  // al cargar, para que unos datos de antes sigan sirviendo sin perder nada. Los colores se guardan con el siguiente cambio.
   function complete(data) {
     if (!Array.isArray(data.places)) { data.places = []; }
+    data.places.forEach(function (place) {
+      if (!/^#[0-9a-fA-F]{6}$/.test(place.color || "")) { place.color = freeColor(data); }
+    });
     return data;
   }
 
@@ -46,5 +57,5 @@ window.Store = (function () {
     }
   }
 
-  return { KEY: KEY, DEMO: DEMO, load: load, save: save };
+  return { KEY: KEY, DEMO: DEMO, load: load, save: save, freeColor: freeColor };
 })();

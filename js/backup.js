@@ -8,7 +8,7 @@ window.Backup = (function () {
   "use strict";
   const APP = "david-planner";
   const VERSION = 1;
-  const SETTINGS = ["dp_name", "dp_city", "dp_person", "dp_theme"];  // la barra y el tema (ver brand.js y theme.js)
+  const SETTINGS = ["dp_name", "dp_city", "dp_person", "dp_theme", "dp_color_by"];  // la barra, el tema y «colorear por»
   const LAST = "dp_last_export";     // cuándo se descargó la última copia
   const SINCE = "dp_since";          // desde cuándo se usa la app (la primera semana no se avisa)
   const SNOOZE = "dp_backup_later";  // «Más tarde» (sessionStorage: hasta volver a abrir la app)
@@ -89,7 +89,11 @@ window.Backup = (function () {
     if (!statuses.length) { throw new Error("La copia no tiene estados: parece incompleta."); }
     const places = keep(source.places, function (p) {
       return ID.test(p.id) && text(p.name, 30) && Number.isFinite(p.position);
-    }).map(function (p) { return { id: p.id, name: p.name, position: p.position }; });
+    }).map(function (p) {
+      const copyPlace = { id: p.id, name: p.name, position: p.position };
+      if (HEX.test(p.color)) { copyPlace.color = p.color; }   // sin color (copias de antes del 14a): lo completa storage.js
+      return copyPlace;
+    });
 
     const has = function (list, id) { return list.some(function (x) { return x.id === id; }); };
     const shifts = {};

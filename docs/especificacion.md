@@ -40,6 +40,8 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 - Personal: la primera vez Camarero 1–4. Añadir, nombre, color (paleta de 20, sin rosa ni fucsia), orden (⠿ o número: la persona se
   cuela en ese puesto). Quitar: sin turnos se borra; con turnos, baja desde la semana que se ve; volver a dar de alta.
 - Un estado nuevo nace con el primer color de la paleta que no lleva ninguna persona ni otro estado.
+- Puntos de venta con color (paso 14a): un punto nuevo nace con el primer color de la paleta que no lleva ninguna persona, estado ni otro punto; los de antes, sin color, lo reciben al abrir. El color se cambia aunque el punto esté en uso (quitarlo, no).
+- «Colorear por» (Gestión; solo con puntos de venta): Persona (por defecto) o Punto de venta; con el segundo, cada tramo con sitio toma el color del sitio, el que no lo tiene el de la persona, y los estados (Libre, Vacaciones, Baja…) conservan el suyo. Por aparato, en `dp_color_by`; va en la copia de seguridad.
 - Estados y Puntos de venta: crear, renombrar, ordenar. En uso no se quitan; un estado en uso tampoco cambia «cuenta
   como trabajo». Los estados con horario no enseñan paleta (su color no se ve).
 - Tema: Claro, Lino, Oscuro, Carbón; por aparato.
@@ -121,7 +123,7 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 ## Datos
 En `localStorage` con prefijo `dp_` (el dominio `fvilpaz.github.io` lo comparten varias apps):
 `dp_data` (personas, estados, puntos de venta y turnos; forma en `PLAN.md`), `dp_name`, `dp_city`, `dp_person`,
-`dp_theme`, `dp_copias`, `dp_last_export`, `dp_since`, `dp_groq_key` (la clave de Fervis: nunca en la copia); `dp_demo_data` para `?demo`; en `sessionStorage`, `dp_swap` y
+`dp_theme`, `dp_color_by`, `dp_copias`, `dp_last_export`, `dp_since`, `dp_groq_key` (la clave de Fervis: nunca en la copia); `dp_demo_data` para `?demo`; en `sessionStorage`, `dp_swap` y
 `dp_backup_later`. Nunca `localStorage.clear()`.
 
 ## Seguridad y privacidad

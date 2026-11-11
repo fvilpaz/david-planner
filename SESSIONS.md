@@ -1,5 +1,21 @@
 # SESSIONS — david-planner
 
+## 11-nov-2026 — Paso 14a: color por punto de venta y «Colorear por»
+
+**Hecho**
+- Idea de David (vía Nando): los colores por punto de venta en vez de por camarero. Cada punto tiene color (paleta de 20; los de antes lo reciben al abrir) y Gestión → «Colorear por» elige Persona (por defecto, igual que siempre) o Punto de venta. Por aparato (`dp_color_by`, va en la copia). ~85 líneas de app, 4 pruebas.
+- Control: rompí a propósito cuatro cosas y las pruebas nuevas fallaron; **la primera vez fallaron 3 de 4**: la de la copia de seguridad borraba el color antes de cargarla y el sitio lo recuperaba por otro camino, así que no demostraba nada. Rehecha con un color que no es de la paleta; ahora fallan las 4.
+- Navegador (demo): modo persona idéntico; modo sitio, cada sitio con su color y los estados con el suyo; ficha con la paleta y la nota «El nombre y el color, sí». Auditoría: 0 errores y 40 avisos (la referencia), sin avisos nuevos. Demo con los tres sitios en azul, naranja y mostaza (no se confunden con Libre, Vacaciones ni Baja).
+
+**Decidido (Nando)**
+- Interruptor Persona / Punto de venta (no solo por sitio). Paso 14b: clientes previstos y camareros por día, con total y desglose por sitio y aviso de proporción; «copiar semana» solo copia turnos.
+
+**Encontrado, no causado por el 14a**
+- Con la demo en un móvil estrecho (título «… · EJEMPLO», más largo), «Gestión» baja de línea alineado a la izquierda y su menú, anclado a la derecha del botón, se sale por la izquierda (`izq: -168 px` a 355 px). En uso real no pasa (el título cabe y el botón queda a la derecha). Arreglo aparte.
+
+**Siguiente**
+- Arreglo del menú en móvil; después el paso 14b.
+
 ## 10-nov-2026 — Auditoría: fases 3 y 4 (arreglos y Fervis partido en tres)
 
 **Hecho**

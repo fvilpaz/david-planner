@@ -1,6 +1,6 @@
 // Ventana «Puntos de venta» (paso 7b, idea de Nando): Chiringuito, Cafetería, Pub… La misma forma que «Estados»
-// (lista ordenable de lists.js y ficha), solo con nombre: en el cuadrante salen como texto pequeño debajo de la hora,
-// sin color (el color ya es la persona o el estado). El orden es el del desplegable «Dónde» de la casilla.
+// (lista ordenable de lists.js y ficha): nombre y color. En el cuadrante salen como texto pequeño debajo de la hora; el
+// color se ve si en Gestión → «Colorear por» eliges «Punto de venta» (paso 14a). El orden es el del desplegable «Dónde».
 // Uno en uso no se puede quitar (sus tramos se quedarían sin sitio); renombrarlo, sí.
 window.Places = (function () {
   "use strict";
@@ -13,8 +13,10 @@ window.Places = (function () {
   const note = document.getElementById("place-note");
   const errorEl = document.getElementById("place-error");
   const removeButton = document.getElementById("place-remove");
+  const palette = document.getElementById("place-palette");
   const SAVE_ERROR = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
   let editing = null;      // el punto de venta de la ficha (null = nuevo)
+  let color = null;        // el color elegido en la ficha
   let confirming = false;  // «Quitar» espera el segundo toque
 
   function places() { return window.Schedule.getData().places; }
@@ -39,7 +41,10 @@ window.Places = (function () {
       row.type = "button";
       row.className = "sort-row";
       row.dataset.id = place.id;
-      row.append("📍 " + place.name);  // texto, nunca HTML
+      const dot = row.appendChild(document.createElement("span"));
+      dot.className = "swatch";
+      dot.style.setProperty("--swatch", place.color);
+      row.append(place.name);  // texto, nunca HTML
       window.Lists.decorate(item, index, place.name);
       return item;
     }));
@@ -55,18 +60,22 @@ window.Places = (function () {
 
   window.Lists.sortable(list, saveOrder);
 
+  function renderPalette() { window.Lists.palette(palette, color, function (c) { color = c; renderPalette(); }); }
+
   function showForm(place) {
     const uses = place ? window.Schedule.placeUses(place.id) : 0;
     editing = place;
     confirming = false;
+    color = place && place.color ? place.color : window.Store.freeColor(window.Schedule.getData());
     title.textContent = place ? "Editar «" + place.name + "»" : "Nuevo punto de venta";
     nameInput.value = place ? place.name : "";
     removeButton.hidden = !place || uses > 0;  // nuevo: nada que quitar; en uso: no se puede
     removeButton.textContent = "Quitar";
     note.hidden = !uses;
     note.textContent = "Se usa en " + uses + (uses === 1 ? " tramo" : " tramos") + ": no se puede quitar " +
-      "(se quedarían sin sitio). El nombre, sí.";
+      "(se quedarían sin sitio). El nombre y el color, sí.";
     showError("");
+    renderPalette();
     listView.hidden = true;
     form.hidden = false;
     nameInput.focus();
@@ -81,13 +90,18 @@ window.Places = (function () {
     event.preventDefault();
     const name = nameInput.value.trim().replace(/\s+/g, " ").slice(0, 30);
     if (!name) { showError("Pon un nombre."); nameInput.focus(); return; }
+    const chosen = color;
     if (editing) {
       const id = editing.id;
-      save(function (all) { all.find(function (p) { return p.id === id; }).name = name; });
+      save(function (all) {
+        const place = all.find(function (p) { return p.id === id; });
+        place.name = name;
+        place.color = chosen;
+      });
     } else {
       const id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);  // único: hora + azar
       const position = Math.max.apply(null, [-1].concat(places().map(function (p) { return p.position; }))) + 1;
-      save(function (all) { all.push({ id: id, name: name, position: position }); });
+      save(function (all) { all.push({ id: id, name: name, color: chosen, position: position }); });
     }
   });
 
