@@ -680,18 +680,18 @@
     $("#fervis-guide").click();
     ok(!$("#fervis-guide-view").hidden && $("#fervis-messages").hidden && $("#fervis-form").hidden && $("#fervis-key-form").hidden, "se ve el glosario y se esconde el chat");
     equal($$("#fervis-guide-view > details > summary").map(function (x) { return [x.querySelector(".fervis-guide-badge").textContent, x.querySelector(".fervis-guide-title").textContent, x.querySelector(".fervis-guide-sub").textContent]; }),
-      [["📅", "Turnos y casillas", "5 temas"], ["🛠️", "Menú Gestión", "7 temas"], ["🏢", "Mi local, la app y Fervis", "3 temas"]], "primero, tres tarjetas: círculo con el emoji, título y subtítulo");
+      [["📅", "Turnos y casillas", "6 temas"], ["🛠️", "Menú Gestión", "7 temas"], ["🏢", "Mi local, la app y Fervis", "3 temas"]], "primero, tres tarjetas: círculo con el emoji, título y subtítulo");
     const view = w.getComputedStyle($("#fervis-guide-view"));  // la regla del contenedor se aplica (una llave suelta en el CSS la hizo desaparecer)
     ok(view.display === "grid" && view.rowGap !== "normal" && parseFloat(view.rowGap) >= 8, "el contenedor del glosario es una rejilla con hueco entre filas: " + view.display + " / " + view.rowGap);
-    ok($$("#fervis-guide-view > details > summary").length === 3 && $$("#fervis-guide-view > details > .fervis-guide-children > details").length === 15,
-      "jerarquía: los 15 temas cuelgan de los 3 grupos");
+    ok($$("#fervis-guide-view > details > summary").length === 3 && $$("#fervis-guide-view > details > .fervis-guide-children > details").length === 16,
+      "jerarquía: los 16 temas cuelgan de los 3 grupos");
     const group = $("#fervis-guide-view > details");
     ok(!group.open, "cerrado al principio");
     group.querySelector("summary").click();
     await wait(50);  // «toggle» llega un instante después
     ok(group.open, "al tocar el grupo se despliega");
     equal($$("#fervis-guide-view > details:first-of-type > .fervis-guide-children > details > summary").map(function (x) { return x.querySelector(".fervis-guide-title").textContent + " (" + x.querySelector(".fervis-guide-sub").textContent + ")"; }),
-      ["Moverse por el cuadrante (6 pasos)", "Poner o cambiar un turno (6 pasos)", "Horas extra (4 pasos)", "Intercambiar dos turnos (4 pasos)", "Copiar un turno a otras casillas (5 pasos)"], "y salen sus temas, con cuántos pasos tiene cada uno");
+      ["Moverse por el cuadrante (6 pasos)", "Poner o cambiar un turno (6 pasos)", "Clientes previstos y camareros (5 pasos)", "Horas extra (4 pasos)", "Intercambiar dos turnos (4 pasos)", "Copiar un turno a otras casillas (5 pasos)"], "y salen sus temas, con cuántos pasos tiene cada uno");
     const topic = $$("#fervis-guide-view .fervis-guide-topic").find(function (d) { return d.querySelector(".fervis-guide-title").textContent.includes("Copiar un turno"); });
     topic.querySelector("summary").click();
     await wait(50);
@@ -1039,6 +1039,28 @@
     equal(w.Schedule.crew("2026-11-16").total, 3, "pero los camareros sí se recuentan solos");
   });
 
+  test("Fervis: clientes_entre da, ya calculado, los clientes, los camareros (con sitios) y la proporción de cada día; la guía lo explica", async function () {
+    const data = crewFixture();
+    data.clients = { "2026-11-09": 60, "2026-11-10": 30 };   // el lunes 3 camareros (20 cada uno); el martes, clientes y nadie trabajando
+    data.ratioMax = 20;
+    const w = await open(data);
+    const text = w.Fervis.tool("clientes_entre", { desde: "2026-11-09", hasta: "2026-11-11" });
+    const line = function (iso) { return text.split("\n").find(function (l) { return l.includes("(" + iso + ")"); }); };
+    ok(text.includes("Máximo recomendado: 20 clientes por camarero"), "dice el máximo: " + text);
+    ok(/60 clientes previstos; 3 camareros \(2 Pub, 1 Terraza, 1 sin sitio\); 20 clientes por camarero: dentro del máximo/.test(line("2026-11-09")), "lunes: " + line("2026-11-09"));
+    ok(/30 clientes previstos; 0 camareros; nadie trabaja/.test(line("2026-11-10")), "martes: " + line("2026-11-10"));
+    ok(/sin clientes previstos; 0 camareros/.test(line("2026-11-11")), "miércoles: " + line("2026-11-11"));
+    ok(text.includes("una sola vez en el total"), "avisa de que quien trabaja en dos sitios cuenta una vez en el total");
+    data.clients["2026-11-09"] = 76;
+    const w2 = await open(data);
+    ok(/25,3 clientes por camarero: muy por encima del máximo/.test(w2.Fervis.tool("clientes_entre", { desde: "2026-11-09", hasta: "2026-11-09" })), "rojo con 76 entre 3");
+    ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-12", hasta: "2026-11-09" }).includes("Fechas no válidas"), "fechas al revés");
+    ok(w2.Fervis.tool("clientes_entre", { desde: "2026-11-01", hasta: "2026-12-31" }).includes("Como mucho 31 días"), "tope de 31 días");
+    const guide = w2.Fervis.tool("manual_app", { tema: "clientes_camareros" });
+    ok(guide.includes("Clientes previstos") && guide.includes("naranja") && guide.includes("máx"), "la guía explica el pie: " + guide);
+    ok(w2.FervisGuide.guideFor("¿cómo pongo los clientes previstos de cada día?").includes("Clientes previstos"), "y la guía relevante lo encuentra");
+  });
+
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
     const w = await open(fixture());
     const ctx = w.Fervis.context(new w.Date(2026, 10, 10, 12, 0));
@@ -1090,6 +1112,8 @@
     ok(sent.every(function (s) { return s.auth === "Bearer " + FAKE_KEY && s.url.startsWith("https://api.groq.com/"); }), "clave y dirección");
     ok(sent[1].body.messages[0].content.includes("Personal (3): Ana, Luis, Marta."), "los datos van en el mensaje de sistema");
     ok(sent[1].body.messages[0].content.includes("glosario (botón 📖 de arriba)"), "el modelo sabe remitir al glosario");
+    ok(sent[1].body.tools.map(function (t) { return t.function.name; }).includes("clientes_entre"), "a Groq se le ofrece clientes_entre");
+    ok(sent[1].body.messages[0].content.includes("clientes_entre da los clientes previstos"), "y el mensaje de sistema dice para qué sirve");
     const tool = sent[2].body.messages.find(function (m) { return m.role === "tool"; });
     ok(tool && tool.content.includes("Ana: Trabajo 09:00–17:00"), "la consulta devuelve el 1 de diciembre");
     replies.push({ status: 401 });

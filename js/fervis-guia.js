@@ -29,6 +29,12 @@ window.FervisGuide = (function () {
       "«+ Segundo tramo» para un turno partido.",
       "«Dónde» elige el punto de venta (si los has creado).",
       "Guardar. «Vaciar» deja la casilla en blanco."]],
+    ["clientes_camareros", "👥", "Clientes previstos y camareros", [
+      "Debajo del cuadrante hay tres filas, una columna por día.",
+      "«Clientes previstos»: escribe cuántos clientes esperas ese día (un número entero; vacío lo quita).",
+      "«Camareros»: lo cuenta la app sola (quien tiene un estado con horario y algún tramo): el total y, debajo, cuántos hay en cada punto de venta con su color. Quien trabaja en dos sitios el mismo día cuenta una vez en el total y en los dos sitios.",
+      "«Clientes por camarero»: los clientes entre los camareros. Verde hasta el máximo, naranja hasta un 25 % más y rojo por encima; el «máx.» (20 al principio) lo cambias en esa misma fila. Aparece cuando escribes los clientes.",
+      "Los clientes van por fecha: al repetir una semana entera, los clientes no se repiten (hay que escribirlos). Entran en la copia de seguridad y salen al imprimir."]],
     ["horas_extra", "⏱️", "Horas extra", [
       "En la ventana de la casilla, en «Horas extra», pon cuántas: de 0,5 a 16, con coma o punto, en medias horas.",
       "Si quieres, escribe el motivo.",
@@ -132,7 +138,7 @@ window.FervisGuide = (function () {
   // vista aparte dentro de la ventana, con grupos y temas que se despliegan. No es el chat: no añade burbujas, no llama a Groq y no
   // necesita clave. El botón 📖 (y el chip «Guía de la app» del saludo) alterna entre el chat y el glosario.
   const GUIDE_GROUPS = [
-    ["turnos", "📅", "Turnos y casillas", ["empezar", "casilla", "horas_extra", "intercambiar", "copiar_turno"]],
+    ["turnos", "📅", "Turnos y casillas", ["empezar", "casilla", "clientes_camareros", "horas_extra", "intercambiar", "copiar_turno"]],
     ["gestion", "🛠️", "Menú Gestión", ["copiar_semanas", "personal", "estados", "puntos_de_venta", "imprimir", "copia_seguridad", "temas"]],
     ["app", "🏢", "Mi local, la app y Fervis", ["local_y_persona", "instalar", "fervis"]],
   ];

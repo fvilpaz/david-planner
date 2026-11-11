@@ -69,7 +69,7 @@ los datos viven en el navegador del aparato y se guardan copias en un archivo.
 - *Qué contesta:* de lo general (lo laboral, orientativo: nota en el pie) y de la app. Recibe un mensaje pequeño
   (personal, estados, puntos de venta, quién trabaja ahora y las fechas de hoy, esta semana, la siguiente y el mes) y
   **pide lo demás a funciones de la app**, que le dan la respuesta ya calculada: `turnos_entre` (día a día, hasta 31
-  días, de todos o de una persona), `resumen_entre` (por persona, hasta 93 días: días de turno partido, seguido y de
+  días, de todos o de una persona), `clientes_entre` (paso 14b: por día, hasta 31, los clientes previstos, los camareros con sus sitios y los clientes por camarero con su aviso; los datos salen a Groq solo al preguntar por ellos, como los turnos), `resumen_entre` (por persona, hasta 93 días: días de turno partido, seguido y de
   cada estado; **fines de semana completos** sin trabajar, con su motivo, aparte de los sábados o domingos sueltos; un
   RANKING ya hecho para «quién tiene más…»; un día sin nada puesto no cuenta como libre) y `manual_app` (la guía, por
   temas). Así gasta ~65 % menos de entrada y no cuenta a ojo. Para «cómo se hace…», la app le pone delante los 2 temas

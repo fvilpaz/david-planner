@@ -1,6 +1,6 @@
 // Fervis — los DATOS (refactor de la auditoría, 10-nov; antes dentro de fervis.js). Lo que la APP calcula para el modelo, que no
 // cuenta nada a ojo: el mensaje pequeño de cada pregunta (context: personal, estados, puntos de venta, quién trabaja ahora y las
-// fechas) y las herramientas que pide el modelo (runTool: turnos_entre y resumen_entre; manual_app la contesta la guía, en
+// fechas) y las herramientas que pide el modelo (runTool: turnos_entre, resumen_entre y clientes_entre; manual_app la contesta la guía, en
 // fervis-guia.js). Solo lee los datos (window.Schedule.getData). Se carga antes que fervis-guia.js y fervis.js.
 window.FervisData = (function () {
   "use strict";
@@ -195,10 +195,38 @@ window.FervisData = (function () {
     return { from: from, days: days };
   }
 
+  // Clientes previstos, camareros y proporción de cada día (paso 14b): lo calcula la app (Schedule.crew / ratioInfo, lo mismo que
+  // ve David en el pie del cuadrante), el modelo solo lo repite. «hasta 31 días» como turnos_entre.
+  const RATIO_FORMAT = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
+  const RATIO_WORDS = { ok: "dentro del máximo", warn: "algo por encima del máximo (aviso naranja)", bad: "muy por encima del máximo (aviso rojo)" };
+  function clientLines(from, days) {
+    const max = window.Schedule.ratioMax();
+    const lines = ["Máximo recomendado: " + max + " clientes por camarero (naranja hasta un 25 % más; rojo por encima). " +
+      "Quien trabaja en dos sitios el mismo día cuenta en los dos sitios pero una sola vez en el total de camareros."];
+    for (let i = 0; i < days; i++) {
+      const date = Dates.addDays(from, i);
+      const iso = Dates.toIso(date);
+      const info = window.Schedule.ratioInfo(iso);
+      const crew = window.Schedule.crew(iso);
+      const places = crew.byPlace.map(function (p) { return p.n + " " + p.name; });
+      if (crew.noPlace && crew.byPlace.length) { places.push(crew.noPlace + " sin sitio"); }
+      const ratio = info.level === null ? "" :
+        info.ratio === null ? "; nadie trabaja (aviso rojo)" :
+        "; " + RATIO_FORMAT.format(info.ratio) + " clientes por camarero: " + RATIO_WORDS[info.level];
+      lines.push("- " + DAY.format(date) + " (" + iso + "): " + (info.clients === null ? "sin clientes previstos" : info.clients + " clientes previstos") +
+        "; " + crew.total + " camareros" + (places.length ? " (" + places.join(", ") + ")" : "") + ratio);
+    }
+    return lines.join("\n");
+  }
+
   function runTool(name, args) {
     const data = window.Schedule.getData();
     if (name === "manual_app") { return window.FervisGuide.manual(args && args.tema); }  // la guía está en fervis-guia.js
-    if (name !== "turnos_entre" && name !== "resumen_entre") { return "No existe esa herramienta."; }
+    if (name !== "turnos_entre" && name !== "resumen_entre" && name !== "clientes_entre") { return "No existe esa herramienta."; }
+    if (name === "clientes_entre") {
+      const wanted = range(args, MAX_DAYS);
+      return wanted.error || clientLines(wanted.from, wanted.days);
+    }
     const asked = range(args, name === "resumen_entre" ? MAX_SUMMARY_DAYS : MAX_DAYS);
     if (asked.error) { return asked.error; }
     const who = args && args.persona ? String(args.persona) : "";

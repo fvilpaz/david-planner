@@ -20,8 +20,14 @@
 **Parte 2 (impresión)**
 - Con el pie sin tocar, la demo ocupaba DOS hojas (el pie solo en la segunda, con la cabecera repetida). Solo en `@media print` se compactó el pie (letra, rellenos y casillas más pequeños) y ahora la semana entera cabe en UNA hoja A4 apaisada. Comprobado generando el PDF con Chrome sin ventana y mirándolo (1 página). Sin prueba automática: el CSS de papel no se puede pasar en el marco de pruebas.
 
+**Parte 3 (Fervis)**
+- `clientes_entre` (hasta 31 días): por día, clientes previstos, camareros (total y por sitio, «sin sitio» aparte) y clientes por camarero con su aviso, todo calculado por la app con las mismas funciones del pie (`Schedule.crew` / `ratioInfo`). Definida para Groq, nombrada en el mensaje de sistema, y un tema nuevo en la guía («Clientes previstos y camareros», en «Turnos y casillas»).
+- Pruebas: la herramienta (cae sin el código: «No existe esa herramienta»), y que Groq la reciba y el mensaje la mencione (cae si se rompe su nombre en la lista). Los recuentos del glosario pasan de 15 a 16 temas a propósito.
+- Encontrado por una prueba vieja: mi primer texto de la guía decía «copia los turnos» y le quitaba el primer puesto a «Copiar un turno» en el buscador de la guía (cuenta palabras por sus 4 primeras letras). Reescrito sin esas palabras.
+- Con esto el 14b queda ✅ (65 pruebas).
+
 **Siguiente**
-- Parte 3: que Fervis lo sepa (herramienta y guía). Después, las fotos por Telegram.
+- Las fotos por Telegram (interruptor y vista de clientes por camarero), como pidió Nando.
 
 ## 11-nov-2026 — Paso 14a: color por punto de venta y «Colorear por»
 
