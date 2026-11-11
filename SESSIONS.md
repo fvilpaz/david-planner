@@ -17,8 +17,11 @@
 **También**
 - Corrección del 14a que faltaba apuntar: cargar una copia ya no abre la ventana de descargar (commit `f7445d8`); antes se descargaba siempre «lo de ahora». Ahora queda como copia automática y solo se descarga si esa copia no cabe.
 
+**Parte 2 (impresión)**
+- Con el pie sin tocar, la demo ocupaba DOS hojas (el pie solo en la segunda, con la cabecera repetida). Solo en `@media print` se compactó el pie (letra, rellenos y casillas más pequeños) y ahora la semana entera cabe en UNA hoja A4 apaisada. Comprobado generando el PDF con Chrome sin ventana y mirándolo (1 página). Sin prueba automática: el CSS de papel no se puede pasar en el marco de pruebas.
+
 **Siguiente**
-- Parte 2: que el pie quepa en la hoja impresa (PDF de prueba). Parte 3: que Fervis lo sepa (herramienta y guía). Después, las fotos por Telegram.
+- Parte 3: que Fervis lo sepa (herramienta y guía). Después, las fotos por Telegram.
 
 ## 11-nov-2026 — Paso 14a: color por punto de venta y «Colorear por»
 

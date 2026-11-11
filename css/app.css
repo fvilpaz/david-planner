@@ -453,7 +453,15 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-table td, .schedule-table thead th:not(:first-child) { min-width: 0; }  /* en papel cabe la semana entera */
   .schedule-table td { height: 34px; }
   .chip[data-tint] { border-color: color-mix(in srgb, var(--tint) 45%, #3a3f45); }  /* borde de cada casilla más marcado: en blanco y negro el tono se pierde y queda el contorno */
-  .summary-foot td { height: auto; }
+  /* El pie, más apretado que en pantalla: así la semana entera (con el pie) cabe en una hoja */
+  .summary-foot td { height: auto; padding: 1px 2px; }
+  .summary-foot th[scope=row] { padding: 1px 4px; }
+  .crew-total { font-size: 9pt; line-height: 1.1; }
+  .crew-place { font-size: 6.5pt; line-height: 1.15; gap: .2rem; }
+  .crew-dot { width: .45rem; height: .45rem; }
+  .summary-foot .chip { padding: 0 4px; font-size: 7pt; flex: 0 1 auto; margin: 1px auto; }
+  .ratio-max { margin: 0; font-size: 6.5pt; }
+  .clients-input { min-height: 0; font-size: 9pt; width: 100%; }
   .clients-input, .ratio-max-input { border: 0; background: transparent; padding: 0; font-weight: 600; -moz-appearance: textfield; appearance: textfield; }
   .clients-input::-webkit-inner-spin-button, .ratio-max-input::-webkit-inner-spin-button { display: none; }
   .crew-dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
