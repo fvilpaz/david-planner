@@ -936,6 +936,15 @@
     ok(Array.from(cell.querySelectorAll(".crew-place")).every(function (n) { return n.classList.contains("chip") && n.dataset.tint; }), "etiquetas enteras (la misma .chip de las casillas), con su color");
   });
 
+  test("Camareros por día: un sitio con id «constructor» o «__proto__» (pasan la regla de ids de la copia) cuenta bien, sin la «llave zombie» del prototipo", async function () {
+    const data = fixture();
+    data.places = [{ id: "constructor", name: "Terraza", color: "#2c7be5", position: 0 }, { id: "__proto__", name: "Barra", color: "#e67e22", position: 1 }];
+    data.shifts["e1|2026-11-09"] = work("10:00", "18:00", null, "constructor");
+    data.shifts["e2|2026-11-09"] = work("10:00", "18:00", null, "__proto__");
+    const w = await open(data);
+    equal(w.Schedule.crew("2026-11-09").byPlace.map(function (p) { return p.name + ":" + p.n; }), ["Terraza:1", "Barra:1"], "cada sitio, 1");
+  });
+
   test("Camareros por día: el desglose usa el color del sitio y se recalcula solo al cambiar un turno", async function () {
     const data = crewFixture();
     data.places[0].color = "#2c7be5";

@@ -118,7 +118,7 @@ window.Schedule = (function () {
   // total y una vez en cada sitio donde trabaja ese día (un turno partido en dos sitios suma en los dos).
   function crew(iso) {
     const monday = Dates.toIso(Dates.weekStart(Dates.parseIso(iso)));
-    const perPlace = {};
+    const perPlace = Object.create(null);   // sin prototipo: un sitio con id «constructor» o «__proto__» no choca (auditoría 11-nov)
     let total = 0;
     let noPlace = 0;
     shownEmployees(monday).forEach(function (employee) {
