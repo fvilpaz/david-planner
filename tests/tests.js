@@ -922,7 +922,7 @@
     return input;
   }
   function summaryCell(row, index) { return $$(".summary-row")[row].querySelectorAll("td")[index]; }
-  function ratioChip(index) { return summaryCell(2, index).querySelector(".chip"); }
+  function ratioChip(index) { return summaryCell(1, index).querySelector(".chip"); }
 
   test("Camareros por día: cuenta una vez cada persona que trabaja (no libres ni bajas) y desglosa por sitio, con el turno partido en los dos", async function () {
     const w = await open(crewFixture());
@@ -930,18 +930,19 @@
     equal([crew.total, crew.noPlace], [3, 1], "3 trabajan (Ana sin sitio, Luis partido, Marta en Pub); el libre y el de baja no");
     equal(crew.byPlace.map(function (p) { return p.name + ":" + p.n; }), ["Pub:2", "Terraza:1"], "Luis suma en Pub y en Terraza, pero una sola vez en el total");
     equal(w.Schedule.crew("2026-11-10").total, 0, "un día vacío: cero");
-    const cell = summaryCell(1, 0);
+    const cell = summaryCell(0, 0);
     equal(cell.querySelector(".crew-total").textContent, "3", "en pantalla, el total");
-    equal(Array.from(cell.querySelectorAll(".crew-place")).map(function (n) { return n.textContent; }), ["2 Pub", "1 Terraza", "1 sin sitio"], "y el desglose");
+    equal(Array.from(cell.querySelectorAll(".crew-place")).map(function (n) { return n.textContent; }), ["2 Pub", "1 Terraza", "1 sin sitio"], "y el desglose, en etiquetas como las de las casillas");
+    ok(Array.from(cell.querySelectorAll(".crew-place")).every(function (n) { return n.classList.contains("chip") && n.dataset.tint; }), "etiquetas enteras (la misma .chip de las casillas), con su color");
   });
 
   test("Camareros por día: el desglose usa el color del sitio y se recalcula solo al cambiar un turno", async function () {
     const data = crewFixture();
     data.places[0].color = "#2c7be5";
     await open(data);
-    equal(summaryCell(1, 0).querySelector(".crew-dot").style.getPropertyValue("--dot"), "#2c7be5", "color del sitio");
+    equal(summaryCell(0, 0).querySelector(".crew-place").dataset.tint, "#2c7be5", "la etiqueta lleva el color del sitio");
     equal(fillCell("e4|2026-11-09", { status: "work", start: "09:00", end: "15:00" }), "", "se rellena un turno nuevo");
-    equal(summaryCell(1, 0).querySelector(".crew-total").textContent, "4", "el total sube sin tocar nada más");
+    equal(summaryCell(0, 0).querySelector(".crew-total").textContent, "4", "el total sube sin tocar nada más");
   });
 
   test("Clientes previstos: se guardan por fecha, vacío los quita y lo no válido (negativo, decimal, texto) se descarta y se ve lo guardado", async function () {
@@ -959,7 +960,7 @@
 
   test("Clientes por camarero: verde hasta el máximo, naranja hasta un 25 % más, rojo por encima, y «—» sin clientes", async function () {
     await open(crewFixture());          // 3 camareros el lunes; máximo por defecto 20
-    equal(summaryCell(2, 0).textContent, "—", "sin clientes: nada que avisar");
+    equal(summaryCell(1, 0).textContent, "—", "sin clientes: nada que avisar");
     const tint = function () { return ratioChip(0).dataset.tint; };
     typeClients(0, "60");  equal([ratioChip(0).textContent, tint()], ["20 por camarero", "#27ae60"], "60/3 = 20 (justo en el máximo): verde");
     typeClients(0, "61");  equal(tint(), "#e67e22", "20,3: naranja");
@@ -969,7 +970,7 @@
     typeClients(1, "30");   // el martes nadie trabaja
     equal([ratioChip(1).textContent, ratioChip(1).dataset.tint], ["sin camareros", "#c0392b"], "clientes y nadie trabajando: rojo");
     typeClients(1, "0");
-    equal(summaryCell(2, 1).textContent, "—", "0 clientes y 0 camareros: nada que avisar");
+    equal(summaryCell(1, 1).textContent, "—", "0 clientes y 0 camareros: nada que avisar");
   });
 
   test("Máximo de clientes por camarero: se cambia en la propia fila, se guarda y recolorea; lo no válido se descarta", async function () {
@@ -995,6 +996,19 @@
     const input = typeClients(0, "200");
     restoreStorage();
     equal([input.value, saved().clients["2026-11-09"]], ["90", 90], "se queda el 90");
+  });
+
+  test("Clientes previstos: van en la cabecera, justo bajo los días (azul, fija al deslizar), una casilla por día; el pie solo lleva camareros y proporción", async function () {
+    const w = await open(crewFixture());
+    equal([$$("thead .clients-input").length, $$("tfoot .clients-input").length], [7, 0], "las siete casillas están en la cabecera");
+    const rows = $$("thead tr");
+    equal(rows.length, 2, "dos filas de cabecera: los días y los clientes");
+    equal(rows[1].querySelector("th").textContent, "Clientes previstos", "con su rótulo a la izquierda");
+    equal($$(".summary-row").length, 2, "el pie: camareros y clientes por camarero");
+    const day = rows[1].querySelectorAll("th")[1];
+    const firstHeight = rows[0].getBoundingClientRect().height;
+    ok(Math.abs(parseFloat(w.getComputedStyle(day).top) - firstHeight) <= 1, "la segunda fila se pega justo debajo de la primera: top " + w.getComputedStyle(day).top + " y la primera mide " + firstHeight);
+    ok(w.getComputedStyle(day).position === "sticky", "y es fija, como los días");
   });
 
   test("Datos de antes (sin clientes) se abren con clientes vacíos y máximo 20", async function () {

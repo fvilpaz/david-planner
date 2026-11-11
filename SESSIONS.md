@@ -26,8 +26,14 @@
 - Encontrado por una prueba vieja: mi primer texto de la guía decía «copia los turnos» y le quitaba el primer puesto a «Copiar un turno» en el buscador de la guía (cuenta palabras por sus 4 primeras letras). Reescrito sin esas palabras.
 - Con esto el 14b queda ✅ (65 pruebas).
 
+**Ajuste de diseño (Nando, por Telegram)**
+- Dijo que los puntos de colores no iban con el cuadrante: los clientes previstos pasan a una segunda fila de la cabecera, bajo cada día (azul, fija; su `top` es el alto de la primera, y una prueba lo comprueba), y el desglose de camareros son etiquetas enteras (la misma `.chip` de las casillas) con el color del punto de venta; «sin sitio» en gris. Elegida la opción A (siempre el color del sitio, sin depender del interruptor «Colorear por»).
+- Los cuatro temas (claro, lino, oscuro, carbón) se aplican a la celda: lo usa todo `var(--…)`; mirados los cuatro en pantalla.
+- Impresión: sigue en una hoja; en papel el rótulo de clientes también es claro. Dos roturas a propósito (la fila fija y las etiquetas) cayeron en sus pruebas. 66 pruebas.
+- Nando preguntó si Fervis puede dar estos números: ya lo hace desde la parte 3 (`clientes_entre`), la app calcula y Fervis solo lee. Sin probar con una conversación real con Groq (la clave es suya y no la toco): lo comprobado es la herramienta y que Groq la recibe.
+
 **Siguiente**
-- Las fotos por Telegram (interruptor y vista de clientes por camarero), como pidió Nando.
+- Lo que decida Nando.
 
 ## 11-nov-2026 — Paso 14a: color por punto de venta y «Colorear por»
 

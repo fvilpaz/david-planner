@@ -94,12 +94,14 @@ window.Schedule = (function () {
   }
 
   // ---------- Clientes previstos y camareros por día (paso 14b) ----------
-  // Debajo del cuadrante, tres filas con las mismas columnas: los clientes previstos (se escriben), los camareros que
-  // trabajan ese día (se cuentan solos: el total y, por sitio, con el color del sitio) y la proporción de clientes por
-  // camarero (verde hasta el máximo, naranja hasta un 25 % más, rojo por encima). Los clientes van por FECHA, no por persona.
+  // Los clientes previstos (se escriben) van en la cabecera, bajo cada día; debajo del cuadrante, con las mismas columnas, los
+  // camareros que trabajan ese día (se cuentan solos: el total y, por sitio, en etiquetas como las de las casillas, con el color
+  // del sitio) y la proporción de clientes por camarero (verde hasta el máximo, naranja hasta un 25 % más, rojo por encima).
+  // Los clientes van por FECHA, no por persona.
   const RATIO_COLORS = { ok: "#27ae60", warn: "#e67e22", bad: "#c0392b" };
   const RATIO_WORDS = { ok: "dentro del máximo", warn: "algo por encima del máximo", bad: "muy por encima del máximo" };
   const ratioFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });
+  const NO_PLACE_COLOR = "#7f8c8d";   // gris: «sin sitio» no es un punto de venta y no tiene color propio
 
   // Quien está de baja desde una semana no sale de esa semana en adelante, pero sí en las anteriores (histórico)
   function shownEmployees(isoMonday) {
@@ -162,13 +164,10 @@ window.Schedule = (function () {
   function paintCrew(cell, iso) {
     const info = crew(iso);
     cell.replaceChildren(el("span", "crew-total", String(info.total)));
-    info.byPlace.forEach(function (place) {
-      const line = cell.appendChild(el("span", "crew-place"));
-      const dot = line.appendChild(el("span", "crew-dot"));
-      dot.style.setProperty("--dot", place.color);
-      line.append(place.n + " " + place.name);
-    });
-    if (info.noPlace && info.byPlace.length) { cell.appendChild(el("span", "crew-place", info.noPlace + " sin sitio")); }
+    const chips = cell.appendChild(el("div", "crew-chips"));
+    function label(text, color) { chips.appendChild(chip(text, color)).classList.add("crew-place"); }
+    info.byPlace.forEach(function (place) { label(place.n + " " + place.name, place.color); });
+    if (info.noPlace && info.byPlace.length) { label(info.noPlace + " sin sitio", NO_PLACE_COLOR); }
   }
 
   function paintRatio(cell, iso) {
@@ -189,18 +188,19 @@ window.Schedule = (function () {
     return Number.isInteger(n) && n >= min && n <= max ? n : undefined;
   }
 
-  function summaryFoot(days) {
+  // Devuelve { head, foot }: la fila de la cabecera con los clientes y el pie con camareros y proporción
+  function summaryRows(days) {
+    const head = el("tr", "head-clients");
     const foot = el("tfoot", "summary-foot");
     const today = Dates.toIso(new Date());
-    function row(...labels) {
-      const tr = foot.appendChild(el("tr", "summary-row"));
+    function rowLabel(tr, ...content) {
       const th = tr.appendChild(el("th"));
       th.scope = "row";
-      th.append(...labels);
-      return tr;
+      th.append(...content);
     }
-    const clientsRow = row("Clientes previstos");
-    const crewRow = row("Camareros");
+    rowLabel(head, "Clientes previstos");
+    const crewRow = foot.appendChild(el("tr", "summary-row"));
+    rowLabel(crewRow, "Camareros");
     const maxLabel = el("label", "ratio-max", "máx. ");
     const maxInput = maxLabel.appendChild(el("input", "ratio-max-input"));
     maxInput.type = "number";
@@ -210,13 +210,14 @@ window.Schedule = (function () {
     maxInput.inputMode = "numeric";
     maxInput.value = String(ratioMax());
     maxInput.setAttribute("aria-label", "Máximo recomendado de clientes por camarero");
-    const ratioRow = row(el("span", "", "Clientes por camarero"), maxLabel);
+    const ratioRow = foot.appendChild(el("tr", "summary-row"));
+    rowLabel(ratioRow, el("span", "", "Clientes por camarero"), maxLabel);
     const ratioCells = [];
 
     days.forEach(function (day) {
       const iso = Dates.toIso(day);
       const mark = iso === today ? "today" : "";
-      const input = clientsRow.appendChild(el("td", mark)).appendChild(el("input", "clients-input"));
+      const input = head.appendChild(el("th", mark)).appendChild(el("input", "clients-input"));
       input.type = "number";
       input.min = "0";
       input.max = "99999";
@@ -242,7 +243,7 @@ window.Schedule = (function () {
       maxInput.value = String(ratioMax());
       ratioCells.forEach(function (pair) { paintRatio(pair[0], pair[1]); });
     });
-    return foot;
+    return { head: head, foot: foot };
   }
 
   function render() {
@@ -261,6 +262,7 @@ window.Schedule = (function () {
     document.getElementById("next-week").href = weekLink(Dates.addDays(monday, 7));
 
     const table = el("table", "schedule-table");
+    const summary = summaryRows(days);
     const headRow = el("tr");
     headRow.append(el("th", "", "Empleado"));
     days.forEach(function (day) {
@@ -268,7 +270,7 @@ window.Schedule = (function () {
       th.scope = "col";
       headRow.append(th);
     });
-    table.appendChild(el("thead")).append(headRow);  // appendChild devuelve el nodo añadido; append no devuelve nada
+    table.appendChild(el("thead")).append(headRow, summary.head);  // appendChild devuelve el nodo añadido; append no devuelve nada
 
     const body = table.appendChild(el("tbody"));
     // Quien está de baja desde una semana no sale de esa semana en adelante, pero sí en las anteriores (histórico)
@@ -291,7 +293,7 @@ window.Schedule = (function () {
       const empty = body.appendChild(el("tr")).appendChild(el("td", "empty", "Todavía no hay personal."));
       empty.colSpan = 8;
     }
-    table.appendChild(summaryFoot(days));
+    table.appendChild(summary.foot);
     grid.replaceChildren(table);
     grid.scrollLeft = scroll.left;
     grid.scrollTop = scroll.top;
