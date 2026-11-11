@@ -13,8 +13,14 @@
 **Encontrado, no causado por el 14a**
 - Con la demo en un móvil estrecho (título «… · EJEMPLO», más largo), «Gestión» baja de línea alineado a la izquierda y su menú, anclado a la derecha del botón, se sale por la izquierda (`izq: -168 px` a 355 px). En uso real no pasa (el título cabe y el botón queda a la derecha). Arreglo aparte.
 
+**Después, el mismo día: el menú en móvil (commit aparte)**
+- Prueba nueva primero (360 y 320 px, con la demo y el `meta viewport`): **falló** con el CSS de entonces («a 360 px el menú va de −155 a 105»). Arreglo de una línea: `.section-header .menu { margin-left: auto }`, para que «Gestión» quede a la derecha aunque baje de línea. Ahora va de 53 a 325 a 355 px. 54 pruebas.
+
+**Lo que pasó con una descarga sin querer**
+- Mi prueba de la copia no desviaba la descarga en su segunda carga y guardó de verdad un archivo en Descargas (con datos de prueba, nada de Nando). Arreglado: `catchDownloads` en cada ventana; comprobado repitiendo las pruebas sin archivos ni ventanas nuevas.
+
 **Siguiente**
-- Arreglo del menú en móvil; después el paso 14b.
+- Paso 14b (clientes previstos y camareros por día).
 
 ## 10-nov-2026 — Auditoría: fases 3 y 4 (arreglos y Fervis partido en tres)
 

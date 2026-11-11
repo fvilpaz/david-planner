@@ -863,6 +863,23 @@
     equal(win.Schedule.colorBy(), "persona", "sin el ajuste, por persona");
   });
 
+  // =================================================================================================================
+  // Móvil estrecho
+  test("En un móvil estrecho (360 y 320 px) el menú «Gestión» no se sale de la pantalla, ni en el ejemplo (título más largo), y la página declara el viewport", async function () {
+    try {
+      for (const ancho of [360, 320]) {
+        frame.style.width = ancho + "px";
+        const w = await open(null, { demo: true });   // el ejemplo: el título lleva « · EJEMPLO» y Gestión baja de línea
+        ok(w.innerWidth <= ancho + 1, "el marco mide un móvil: " + w.innerWidth);
+        $(".manage-menu > summary").click();
+        const list = $(".manage-menu .menu-list").getBoundingClientRect();
+        ok(list.left >= 0 && list.right <= w.innerWidth, "a " + ancho + " px el menú cabe: va de " + Math.round(list.left) + " a " + Math.round(list.right) + " (pantalla " + w.innerWidth + ")");
+      }
+      const viewport = $('meta[name="viewport"]');
+      ok(viewport && viewport.content.includes("width=device-width"), "la página declara el viewport del móvil");
+    } finally { frame.style.width = ""; }
+  });
+
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
     const w = await open(fixture());
     const ctx = w.Fervis.context(new w.Date(2026, 10, 10, 12, 0));

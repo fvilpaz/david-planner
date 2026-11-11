@@ -70,6 +70,9 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .menu > summary { list-style: none; display: inline-flex; align-items: center; min-height: 48px; padding: 0 1rem;
                   border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; }
 .menu summary::-webkit-details-marker { display: none; }
+/* Con el título largo (el ejemplo, «· EJEMPLO») «Gestión» baja de línea y se quedaba a la izquierda: su menú, anclado a la derecha
+   del botón, se salía de la pantalla por la izquierda. Con el margen automático el botón va siempre a la derecha. */
+.section-header .menu { margin-left: auto; }
 .menu > summary::after { content: "▾"; margin-left: .35rem; font-size: .8rem; }
 .menu-list { position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; min-width: 260px; display: grid;
              gap: .25rem; padding: .5rem; background: var(--surface); border: 1px solid var(--border);
