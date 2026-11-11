@@ -27,6 +27,9 @@ window.Store = (function () {
   // al cargar, para que unos datos de antes sigan sirviendo sin perder nada. Los colores se guardan con el siguiente cambio.
   function complete(data) {
     if (!Array.isArray(data.places)) { data.places = []; }
+    // Paso 14b: clientes previstos por FECHA («2026-11-09»: 120) y máximo recomendado de clientes por camarero
+    if (!data.clients || typeof data.clients !== "object" || Array.isArray(data.clients)) { data.clients = {}; }
+    if (!Number.isFinite(data.ratioMax) || data.ratioMax < 1) { data.ratioMax = 20; }
     data.places.forEach(function (place) {
       if (!/^#[0-9a-fA-F]{6}$/.test(place.color || "")) { place.color = freeColor(data); }
     });

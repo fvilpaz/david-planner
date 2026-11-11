@@ -1,5 +1,25 @@
 # SESSIONS — david-planner
 
+## 11-nov-2026 — Paso 14b, parte 1: clientes previstos y camareros por día
+
+**Hecho**
+- Pie del cuadrante con tres filas: «Clientes previstos» (se escribe), «Camareros» (se cuenta: total y por sitio con su color) y «Clientes por camarero» (verde / naranja / rojo; máximo editable en la fila, 20 por defecto). Datos nuevos `clients` (por fecha) y `ratioMax` en `storage.js`, copia de seguridad (se descarta lo que no cuadra) y ejemplo con cifras creíbles. «Copiar semana» no copia clientes (ya era así: copia solo turnos).
+- 9 pruebas nuevas (64). Control: rompí cuatro cosas (contar por tramo en vez de por persona, el umbral `<=`, la copia que perdía los clientes, el no deshacer con el navegador lleno) y cayeron; el umbral lo vi caer solo porque la primera rotura tapaba su prueba.
+- Navegador (demo): se ven las tres filas con los colores de los sitios y los avisos. Tecleando de verdad: «12e» deja el dato como estaba y «100» actualiza el aviso.
+
+**Decidido**
+- Una persona con turno partido en dos sitios cuenta UNA vez en el total y una en cada sitio (así «el total» no se infla pero el desglose dice dónde está cada una).
+- Sin camareros y con clientes, el aviso es rojo («sin camareros»); con 0 clientes y 0 camareros, nada.
+
+**Aprendido**
+- Un `<input type="number">` con algo escrito que no es número (como «12e») da `value === ""`, igual que uno vacío. Para distinguirlos: `input.validity.badInput`. Sin eso, un despiste borraba el dato. Lo vi fallar en una prueba y lo comprobé escribiendo de verdad (por código, `badInput` no se puede provocar).
+
+**También**
+- Corrección del 14a que faltaba apuntar: cargar una copia ya no abre la ventana de descargar (commit `f7445d8`); antes se descargaba siempre «lo de ahora». Ahora queda como copia automática y solo se descarga si esa copia no cabe.
+
+**Siguiente**
+- Parte 2: que el pie quepa en la hoja impresa (PDF de prueba). Parte 3: que Fervis lo sepa (herramienta y guía). Después, las fotos por Telegram.
+
 ## 11-nov-2026 — Paso 14a: color por punto de venta y «Colorear por»
 
 **Hecho**

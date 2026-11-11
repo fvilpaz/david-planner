@@ -64,7 +64,13 @@ window.DEMO_DATA = (function () {
   // Un ejemplo de horas extra: Diego, el sábado de esta semana
   shifts["e4|" + window.Dates.toIso(window.Dates.addDays(thisMonday, 5))].overtime = { hours: 2, reason: "Cierre tarde" };
 
-  return { version: 1, employees: employees, statuses: statuses, places: places, shifts: shifts };
+  // Clientes previstos de las dos semanas con turnos (más a fin de semana): así el ejemplo enseña el aviso de colores
+  const clients = {};
+  [[-7, [75, 80, 90, 110, 130, 125, 100]], [0, [80, 85, 100, 115, 135, 120, 95]]].forEach(function (week) {
+    week[1].forEach(function (n, day) { clients[window.Dates.toIso(window.Dates.addDays(window.Dates.addDays(thisMonday, week[0]), day))] = n; });
+  });
+
+  return { version: 1, employees: employees, statuses: statuses, places: places, shifts: shifts, clients: clients, ratioMax: 20 };
 })();
 
 // Los colores que se ofrecen para el personal: bien distintos entre sí y sin fucsia ni rosas (son el aviso de horas extra)

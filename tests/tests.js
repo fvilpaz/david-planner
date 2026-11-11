@@ -900,6 +900,145 @@
     } finally { frame.style.width = ""; }
   });
 
+  // =================================================================================================================
+  // Clientes previstos y camareros por día (paso 14b)
+  function crewFixture() {
+    const data = fixture();
+    data.places.push({ id: "p2", name: "Terraza", position: 1 });
+    data.employees.push({ id: "e4", name: "Libre", color: "#999999", position: 3, leftFrom: null });
+    data.employees.push({ id: "e5", name: "Ya no está", color: "#888888", position: 4, leftFrom: "2026-11-09" });
+    const day = "2026-11-09";
+    data.shifts["e1|" + day] = work("10:00", "18:00");                      // sin sitio
+    data.shifts["e2|" + day] = { statusId: "work", slots: [{ start: "10:00", end: "14:00", placeId: "p1" }, { start: "18:00", end: "22:00", placeId: "p2" }], overtime: null };  // turno partido en dos sitios
+    data.shifts["e3|" + day] = work("10:00", "18:00", null, "p1");
+    data.shifts["e4|" + day] = { statusId: "off", slots: [{ start: "10:00", end: "18:00" }], overtime: null };  // libre: no cuenta
+    data.shifts["e5|" + day] = work("10:00", "18:00", null, "p1");           // de baja desde esa semana: no cuenta
+    return data;
+  }
+  function typeClients(index, value) {
+    const input = $$(".clients-input")[index];
+    input.value = value;
+    fire(input, "change");
+    return input;
+  }
+  function summaryCell(row, index) { return $$(".summary-row")[row].querySelectorAll("td")[index]; }
+  function ratioChip(index) { return summaryCell(2, index).querySelector(".chip"); }
+
+  test("Camareros por día: cuenta una vez cada persona que trabaja (no libres ni bajas) y desglosa por sitio, con el turno partido en los dos", async function () {
+    const w = await open(crewFixture());
+    const crew = w.Schedule.crew("2026-11-09");
+    equal([crew.total, crew.noPlace], [3, 1], "3 trabajan (Ana sin sitio, Luis partido, Marta en Pub); el libre y el de baja no");
+    equal(crew.byPlace.map(function (p) { return p.name + ":" + p.n; }), ["Pub:2", "Terraza:1"], "Luis suma en Pub y en Terraza, pero una sola vez en el total");
+    equal(w.Schedule.crew("2026-11-10").total, 0, "un día vacío: cero");
+    const cell = summaryCell(1, 0);
+    equal(cell.querySelector(".crew-total").textContent, "3", "en pantalla, el total");
+    equal(Array.from(cell.querySelectorAll(".crew-place")).map(function (n) { return n.textContent; }), ["2 Pub", "1 Terraza", "1 sin sitio"], "y el desglose");
+  });
+
+  test("Camareros por día: el desglose usa el color del sitio y se recalcula solo al cambiar un turno", async function () {
+    const data = crewFixture();
+    data.places[0].color = "#2c7be5";
+    await open(data);
+    equal(summaryCell(1, 0).querySelector(".crew-dot").style.getPropertyValue("--dot"), "#2c7be5", "color del sitio");
+    equal(fillCell("e4|2026-11-09", { status: "work", start: "09:00", end: "15:00" }), "", "se rellena un turno nuevo");
+    equal(summaryCell(1, 0).querySelector(".crew-total").textContent, "4", "el total sube sin tocar nada más");
+  });
+
+  test("Clientes previstos: se guardan por fecha, vacío los quita y lo no válido (negativo, decimal, texto) se descarta y se ve lo guardado", async function () {
+    await open(crewFixture());
+    typeClients(0, "120");
+    equal(saved().clients, { "2026-11-09": 120 }, "guardado por fecha");
+    equal(typeClients(0, "-5").value, "120", "negativo: se queda lo de antes");
+    equal(typeClients(0, "3.5").value, "120", "decimal: igual");
+    equal(typeClients(0, "100000").value, "120", "demasiado grande: igual");
+    equal(saved().clients, { "2026-11-09": 120 }, "y no se ha guardado nada raro");
+    equal(typeClients(0, "0").value, "0", "cero clientes es un dato válido");
+    typeClients(0, "");
+    equal(saved().clients, {}, "vacío quita el dato");
+  });
+
+  test("Clientes por camarero: verde hasta el máximo, naranja hasta un 25 % más, rojo por encima, y «—» sin clientes", async function () {
+    await open(crewFixture());          // 3 camareros el lunes; máximo por defecto 20
+    equal(summaryCell(2, 0).textContent, "—", "sin clientes: nada que avisar");
+    const tint = function () { return ratioChip(0).dataset.tint; };
+    typeClients(0, "60");  equal([ratioChip(0).textContent, tint()], ["20 por camarero", "#27ae60"], "60/3 = 20 (justo en el máximo): verde");
+    typeClients(0, "61");  equal(tint(), "#e67e22", "20,3: naranja");
+    typeClients(0, "75");  equal(tint(), "#e67e22", "25 (justo en +25 %): naranja");
+    typeClients(0, "76");  equal(tint(), "#c0392b", "25,3: rojo");
+    ok(ratioChip(0).title.includes("muy por encima"), "y el aviso dice por qué (no solo el color)");
+    typeClients(1, "30");   // el martes nadie trabaja
+    equal([ratioChip(1).textContent, ratioChip(1).dataset.tint], ["sin camareros", "#c0392b"], "clientes y nadie trabajando: rojo");
+    typeClients(1, "0");
+    equal(summaryCell(2, 1).textContent, "—", "0 clientes y 0 camareros: nada que avisar");
+  });
+
+  test("Máximo de clientes por camarero: se cambia en la propia fila, se guarda y recolorea; lo no válido se descarta", async function () {
+    await open(crewFixture());
+    typeClients(0, "75");   // 25 por camarero
+    equal(ratioChip(0).dataset.tint, "#e67e22", "con 20: naranja");
+    const max = $(".ratio-max-input");
+    max.value = "25";  fire(max, "change");
+    equal([saved().ratioMax, ratioChip(0).dataset.tint], [25, "#27ae60"], "con 25: verde y guardado");
+    max.value = "0";   fire(max, "change");
+    equal([max.value, saved().ratioMax], ["25", 25], "0 no vale");
+    max.value = "x";   fire(max, "change");
+    equal([max.value, saved().ratioMax], ["25", 25], "texto no vale");
+    frame.contentWindow.location.reload();
+    await reloaded();
+    equal($(".ratio-max-input").value, "25", "al volver a abrir sigue");
+  });
+
+  test("Clientes con el navegador sin espacio: se deshace y se ve lo guardado de antes", async function () {
+    const w = await open(crewFixture());
+    typeClients(0, "90");
+    const restoreStorage = breakStorage(w, "dp_data");
+    const input = typeClients(0, "200");
+    restoreStorage();
+    equal([input.value, saved().clients["2026-11-09"]], ["90", 90], "se queda el 90");
+  });
+
+  test("Datos de antes (sin clientes) se abren con clientes vacíos y máximo 20", async function () {
+    const w = await open(fixture());    // la fixture no trae clients ni ratioMax: como una copia de antes del 14b
+    equal([w.Schedule.clientsOf("2026-11-09"), w.Schedule.ratioMax()], [null, 20], "valores por defecto");
+    equal($$(".clients-input").length, 7, "y siete casillas de clientes");
+  });
+
+  test("Copia de seguridad: guarda y recupera los clientes y el máximo, y descarta lo que no cuadra", async function () {
+    const w = await open(crewFixture());
+    typeClients(0, "88");
+    const files = catchDownloads(w);
+    $("#backup-download").click();
+    await wait(300);
+    const exported = JSON.parse(files[0].text);
+    equal([exported.data.clients, exported.data.ratioMax], [{ "2026-11-09": 88 }, 20], "la descarga lleva los clientes");
+
+    const copy = { app: "david-planner", version: 1, exportedAt: "2026-11-10T10:00:00Z", data: fixture(), settings: {} };
+    copy.data.clients = { "2026-11-10": 120, "2026-13-40": 5, "2026-11-11": -3, "2026-11-12": 2.5, "2026-11-13": "9" };
+    copy.data.ratioMax = 15;
+    const transfer = new w.DataTransfer();
+    transfer.items.add(new w.File([JSON.stringify(copy)], "copia.json", { type: "application/json" }));
+    const input = $("#backup-file");
+    input.files = transfer.files;
+    fire(input, "change");
+    await wait(250);
+    ok($("#import-summary").textContent.includes("se descartan 4 datos"), "cuenta lo malo: " + $("#import-summary").textContent);
+    catchDownloads(w);
+    const next = reloaded();
+    $("#import-ok").click();
+    await next;
+    equal([saved().clients, saved().ratioMax], [{ "2026-11-10": 120 }, 15], "solo el dato bueno y el máximo de la copia");
+  });
+
+  test("Copiar la semana anterior copia los turnos pero NO los clientes", async function () {
+    const data = crewFixture();
+    data.clients = { "2026-11-09": 70 };
+    const w = await open(data, { week: "2026-11-16" });
+    equal(w.Schedule.copyPreviousWeek(1).copied, 4, "se copian los turnos (Ana, Luis, Marta y el «libre» de Libre; quien se fue, no)");
+    equal(saved().clients, { "2026-11-09": 70 }, "los clientes siguen solo en su fecha");
+    equal(w.Schedule.clientsOf("2026-11-16"), null, "la semana nueva no los tiene");
+    equal(w.Schedule.crew("2026-11-16").total, 3, "pero los camareros sí se recuentan solos");
+  });
+
   test("Fervis manda un mensaje pequeño: sin los turnos ni el manual (los pide con herramientas) y con las fechas de hoy, la semana y el mes", async function () {
     const w = await open(fixture());
     const ctx = w.Fervis.context(new w.Date(2026, 10, 10, 12, 0));

@@ -154,6 +154,23 @@ a.button.secondary { background: transparent; color: var(--text); border: 1px so
 .schedule-table td.today { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
 .schedule-table .empty { color: var(--muted); padding: 2rem; }
 
+/* Pie del cuadrante (paso 14b): clientes previstos (se escriben), camareros (se cuentan) y clientes por camarero. Mismas
+   columnas que los días de arriba; la línea gruesa lo separa de las personas. */
+.summary-foot .summary-row:first-child > * { border-top: 3px double var(--border); }
+.summary-foot td { height: auto; padding: .35rem .25rem; vertical-align: top; }
+.summary-foot th[scope=row] { font-weight: 600; text-align: left; padding: .35rem .5rem; }
+.summary-foot th[scope=row] > span { display: block; }
+.clients-input { width: 5.5rem; max-width: 100%; min-height: 36px; padding: 2px 6px; text-align: center; font-size: .95rem;
+                 border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+.ratio-max { display: block; margin-top: .15rem; font-size: .75rem; font-weight: 500; color: var(--muted); }
+.ratio-max-input { width: 3.6rem; min-height: 28px; padding: 0 4px; text-align: center; font-size: .8rem;
+                   border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+.crew-total { display: block; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+.crew-place { display: flex; align-items: center; justify-content: center; gap: .3rem; font-size: .75rem; color: var(--muted); }
+.crew-dot { width: .6rem; height: .6rem; border-radius: 50%; background: var(--dot); flex: none;
+            border: 1px solid color-mix(in srgb, var(--dot) 60%, #000); }
+.summary-empty { color: var(--muted); }
+
 /* Casilla: un botón con uno o dos tramos, uno debajo de otro; si hay uno, ocupa toda la casilla. Vacía, un «+» */
 /* min-height: 100% = todo el alto de la fila, también cuando otra casilla de la fila tiene turno partido (antes
    quedaba un hueco debajo). «min» y no «height»: si un navegador no resuelve el 100 % en una tabla (Firefox lo
@@ -436,6 +453,10 @@ button.danger { background: var(--error); color: var(--on-error); }
   .schedule-table td, .schedule-table thead th:not(:first-child) { min-width: 0; }  /* en papel cabe la semana entera */
   .schedule-table td { height: 34px; }
   .chip[data-tint] { border-color: color-mix(in srgb, var(--tint) 45%, #3a3f45); }  /* borde de cada casilla más marcado: en blanco y negro el tono se pierde y queda el contorno */
+  .summary-foot td { height: auto; }
+  .clients-input, .ratio-max-input { border: 0; background: transparent; padding: 0; font-weight: 600; -moz-appearance: textfield; appearance: textfield; }
+  .clients-input::-webkit-inner-spin-button, .ratio-max-input::-webkit-inner-spin-button { display: none; }
+  .crew-dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .schedule-table tr { break-inside: avoid; }  /* una persona nunca partida entre dos hojas */
   .cell-empty { visibility: hidden; }  /* el «+» de las casillas vacías no va al papel */
   .schedule-table th, .chip, .cell.has-overtime { -webkit-print-color-adjust: exact; print-color-adjust: exact; }  /* que se impriman los colores */
