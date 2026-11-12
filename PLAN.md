@@ -70,6 +70,7 @@ un parpadeo del tema por defecto).
 3. **El vídeo NO se rehace** (decisión de Nando: gasto de recursos tonto). Da la idea; lo nuevo lo cubren el glosario y Fervis.
 
 ## 💡 Aparcado
+- Alojar la app con un servidor propio (idea de Nando, 12-nov): la clave de Groq como variable de entorno en el servidor (nunca en el navegador), login y base de datos para sincronizar entre aparatos. Candidatos: Railway (Hobby 5 $/mes de consumo mínimo; el crédito se reparte entre todos los servicios y bases de datos) o Netlify (solo da para esconder la clave). Antes de decidir: login y límite de preguntas por persona (con la clave en el servidor, cada uso gasta su cuota de Groq) y protección de datos de los turnos del personal. Dominio: unos 10 $/año, sin confirmar.
 - Sincronizar entre aparatos con un gist de GitHub (ver «Decisiones» en `CLAUDE.md` por qué no ahora).
 - Total de horas extra del mes por persona (sumar las marcas de las casillas).
 - Botones con los horarios más usados (p. ej. 10–18, 18–02) para poner un turno de un toque.

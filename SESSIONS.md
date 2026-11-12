@@ -1,5 +1,26 @@
 # SESSIONS — david-planner
 
+## 12-nov-2026 (tarde) — La demo se rehace cada visita y los chips contestan sin clave
+
+**Hecho**
+- `js/storage.js`: con `?demo`, `load()` no lee nada guardado y rehace los 8 de ejemplo con la semana en curso (lunes a domingo); `save()` no escribe y devuelve `true`. Al recargar, la demo vuelve a empezar. `dp_data` no se toca.
+- `js/demo-data.js`: clientes previstos de 210 a 370 por día (antes 75–135).
+- `js/fervis.js` (`demoAnswer`, `exampleChips`): en la demo y sin clave, los 4 chips de pregunta se contestan con las mismas funciones que usa la IA (`turnos_entre`, `resumen_entre`, guía): no gastan Groq. Otra pregunta → aviso de que en la demo solo contesta a los botones. Fuera de la demo, sin clave sigue abriéndose Ajustes.
+- Pruebas: **71** en verde. La del modo ejemplo ahora comprueba que no se guarda nada y que los turnos son de esta semana. Navegador (origen sin clave, `127.0.0.1`): los 4 chips contestan, otra pregunta da el aviso y no se guarda nada.
+
+**Decidido (Nando)**
+- La demo es una vitrina: gente inventada, siempre con la fecha de hoy, sin guardar y sin más uso.
+- La auth y guardar los datos en un servidor, más adelante (ver «Aparcado» de `PLAN.md`).
+
+**Aprendido**
+- Dos orígenes del mismo servidor (`localhost` y `127.0.0.1`) tienen almacenamiento separado: sirve para probar «sin clave» sin tocar la del navegador de uno.
+- La clave de Groq se llama `dp_groq_key`; borrar otro nombre «no hace nada» y parece que funcionó.
+
+**Siguiente**
+- Respuestas de los chips más trabajadas (hoy son la salida de las herramientas tal cual; «¿Quién libra…?» lista a todos).
+- Llevar el saludo y los chips a Crypto_Portafolio (dock abajo: mapear antes).
+- No pasado: `audit` y el móvil físico. Falta el control de romper `demoAnswer` a propósito.
+
 ## 12-nov-2026 — Fervis saluda al abrir la app (el robot salta y sale un bocadillo)
 
 **Hecho**
