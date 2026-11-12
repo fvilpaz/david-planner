@@ -1,6 +1,6 @@
 // Datos del cuadrante en ESTE navegador, en «dp_data»: personas, estados y turnos (forma en PLAN.md).
 // La primera vez no hay nada guardado: los estados y Camarero 1–4 (STARTER_DATA). Con «?demo» en la dirección, los
-// 8 inventados, guardados APARTE en «dp_demo_data»: jugar con el ejemplo nunca toca los datos de verdad.
+// 8 inventados, rehechos en cada visita con la semana en curso y SIN guardar nada: jugar con el ejemplo nunca toca los datos de verdad.
 // Si lo guardado no se puede leer, NO se pisa: se aparta a «…_broken» antes de seguir (nada se borra sin respaldo).
 window.Store = (function () {
   "use strict";
@@ -37,6 +37,8 @@ window.Store = (function () {
   }
 
   function load() {
+    // La demo es una vitrina: cada visita se rehace con la semana en curso (lunes a domingo) y no lee nada guardado
+    if (DEMO) { return complete(JSON.parse(JSON.stringify(window.DEMO_DATA))); }
     let raw = null;
     try { raw = localStorage.getItem(KEY); } catch (e) { /* sin almacenamiento (modo privado): los de ejemplo */ }
     if (raw !== null) {
@@ -52,6 +54,7 @@ window.Store = (function () {
 
   // Devuelve si se ha podido guardar (el navegador puede negarse: modo privado o sin espacio)
   function save(data) {
+    if (DEMO) { return true; }   // la demo no guarda nada: al recargar vuelve a empezar
     try {
       localStorage.setItem(KEY, JSON.stringify(data));
       return true;

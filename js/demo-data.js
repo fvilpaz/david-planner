@@ -66,7 +66,7 @@ window.DEMO_DATA = (function () {
 
   // Clientes previstos de las dos semanas con turnos (más a fin de semana)
   const clients = {};
-  [[-7, [75, 80, 90, 110, 130, 125, 100]], [0, [80, 85, 100, 115, 135, 120, 95]]].forEach(function (week) {
+  [[-7, [210, 225, 240, 280, 340, 360, 300]], [0, [220, 230, 250, 290, 350, 370, 310]]].forEach(function (week) {
     week[1].forEach(function (n, day) { clients[window.Dates.toIso(window.Dates.addDays(window.Dates.addDays(thisMonday, week[0]), day))] = n; });
   });
 

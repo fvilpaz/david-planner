@@ -184,8 +184,10 @@
     const demo = await reloaded();
     equal($$(".name-button").length, 8, "8 personas de ejemplo");
     demo.Schedule.update("e1|2026-11-10", null);
-    ok(localStorage.getItem("dp_demo_data") !== null, "guardó en dp_demo_data");
+    equal(localStorage.getItem("dp_demo_data"), null, "la demo no guarda nada");
     equal(localStorage.getItem("dp_data"), before, "dp_data intacto");
+    const lunes = demo.Dates.toIso(demo.Dates.weekStart(new Date()));
+    ok(demo.Schedule.getData().shifts["e1|" + lunes], "los turnos de ejemplo son de la semana en curso");
     ok(w, "la app abrió");
   });
 
