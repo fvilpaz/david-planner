@@ -90,3 +90,5 @@ un parpadeo del tema por defecto).
 - Para Crypto_Portafolio (no es de este repo): que su Fervis, sin activos o sin cartera, lo diga y ofrezca explicar cómo
   se montaría una cartera de forma segura (qué es un ETF, un bono, la estructura habitual) sin recomendar compras.
 - Para gestion-hosteleria (no es de este repo): en la ventana de la casilla, la casilla de marcar «color propio» parece un segundo selector de color roto.
+- Glosario para cambiar la app de español a inglés (Nando, 12-nov): todas sus apps lo van a necesitar; aquí, textos de pantalla, guía de Fervis y PDF.
+- Llevar el modo `?demo` (datos inventados, guardados aparte) a las otras apps que Nando enseña en CV, GitHub y freeCodeCamp (Nando, 12-nov).

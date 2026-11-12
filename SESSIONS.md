@@ -1,5 +1,27 @@
 # SESSIONS — david-planner
 
+## 12-nov-2026 — Fervis saluda al abrir la app (el robot salta y sale un bocadillo)
+
+**Hecho**
+- `js/fervis-saludo.js` (nuevo) + bocadillo en `index.html` + estilos en `css/app.css`: al abrir la app, a los 2,5 s, en pantalla ancha (900 px o más) una copia del robot cae de la barra al hueco entre «Cuadrante semanal» y «Gestión», rebota, y 1,3 s después sale el bocadillo («¡Eh, hola!» en negrita, «Tengo algo que contarte…») a su derecha; dura 9 s y, al cerrarse, el robot vuelve a la barra. Tocar la copia o el bocadillo abre el chat. En tablet y móvil: meneo del robot (el de Crypto_Portafolio, commit `09f076e`) y bocadillo debajo. Sin Groq ni clave.
+- Una vez por visita (`sessionStorage`; cambiar de semana recarga la página y habría contado cada cambio). En la 4.ª apertura (`dp_fervis_aperturas`) el bocadillo avisa de que se puede desactivar; botón «Desactivar el saludo al abrir la app» en Ajustes del chat (`dp_fervis_saludo`). Con «reducir movimiento»: sin salto ni meneo.
+- Color: el del tema (`--primary` y `--on-primary`), no el amarillo de la cartera.
+- Pruebas: **71** en verde (3 nuevas del saludo). Control: con el guardián de visita, con el salto y con el clic de la copia rotos a propósito, falla justo una cada vez. Mirado en un marco de 1280, 820 y 390 px y en dos temas (Claro y Carbón).
+
+**Decidido**
+- Salto solo desde 900 px: en tablet y móvil el robot va junto a la persona y la copia caía encima de «Gestión» (el simulacro lo mostró) y el bocadillo tapaba el selector de semana.
+- Sin «×» para cerrarlo para siempre (Nando): el aviso de la 4.ª apertura y el botón de Ajustes bastan.
+- Se cuenta por visita y no por carga: lo advirtió una nota lateral y se comprobó en `app.js` (los botones de semana son enlaces).
+
+**Aprendido**
+- `open()` de las pruebas limpia también `sessionStorage`: un «cambio de semana» en una prueba es recargar el marco sin pasar por `open()`.
+- Un simulacro con marcos (`iframe` de 390/820/1280 px) enseña dónde caería algo sin tocar el navegador del usuario; así salió el fallo de tablet y móvil antes de dárselo.
+
+**Siguiente**
+- La demo (`?demo`) con datos al día (hoy congela las fechas la primera vez en `dp_demo_data`) y chips con respuestas fijas que avisen de que solo contestan a eso.
+- Llevar el saludo a Crypto_Portafolio (su robot está en un dock abajo: no es un copiar y pegar).
+- No pasado: `audit` (nando-toolkit en WSL) ni el móvil físico.
+
 ## 11-nov-2026 (final) — Fuera los colores y el ideal: solo el número
 
 **Hecho**

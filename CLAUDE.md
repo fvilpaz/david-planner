@@ -42,6 +42,7 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | PDF | Imprimir del navegador («Guardar como PDF»), **A4 apaisado**, siempre en colores claros. Sin PNG ni jsPDF. |
 | Footer | El de Nando, como en health-tracker: «David Planner © 2026 · Fernando Vilas Paz» + GitHub, LinkedIn y CV. |
 | Fervis (pasos 12a–12c) | Asistente con la **clave gratuita de Groq de David** (Nando, 10-nov; como `Crypto_Portafolio/js/fervis.js`, más pequeño): sin servidor, el navegador habla con Groq. Clave solo en su navegador (`dp_groq_key`), **nunca** en el código ni en la copia. **Solo lee**. Al preguntar, los turnos y el personal que hagan falta **sí salen a Groq** (lo dice la ventana): única excepción a «Datos solo en el aparato». **Las funciones de la app calculan y el modelo solo las llama** (`runTool` en `js/fervis-datos.js`: `turnos_entre`, `resumen_entre` —con ranking y fines de semana completos—, `clientes_entre` y `manual_app`); el modelo no cuenta días a ojo y se le manda un mensaje pequeño. Para «cómo se hace…», **la app le pone delante los 2 temas de la guía que más coinciden** y le prohíbe decir que algo «no se puede» sin comprobarlo (`guideFor`). **La guía de la app** (`GUIDE`, `GUIDE_GROUPS`) es un **glosario** (botón «📖 Guía» y chip del saludo): tarjetas que se despliegan, sin chat, sin Groq y sin clave; si cambia algo de la app se cambia ahí, y una prueba exige que cada botón del menú Gestión y de la casilla salga. Arriba del glosario, «🖨️ Descargar guía (PDF)» (una hoja con todos los temas y el nombre del local, para entregarla tras la formación). Chips con preguntas de ejemplo; robot en la barra de arriba (blanco; centrado desde 900 px); lo de la clave vive en Ajustes (icono de tres barras), nunca en la conversación; etiqueta `groq · modelo` y «respaldo» si el primero falló; modelos pedidos a la cuenta de David (`/models`). |
+| Saludo de Fervis (12-nov) | `js/fervis-saludo.js`: al abrir la app, a los 2,5 s, en **900 px o más** una copia del robot **salta de la barra** al hueco entre «Cuadrante semanal» y «Gestión», rebota y sale el **bocadillo** a su lado («¡Eh, hola!» en negrita + «Tengo algo que contarte…», sin decir quién es; el chat ya se presenta); 9 s, y al cerrarse el robot vuelve a la barra. Tocar la copia o el bocadillo abre el chat. En tablet y móvil (el robot está junto a la persona y caería sobre «Gestión»): meneo (el de la cartera) y bocadillo debajo. **Color del tema**, sin ×. **Una vez por visita** (`sessionStorage` `dp_fervis_visita`: cambiar de semana recarga la página); en la 4.ª apertura (`dp_fervis_aperturas`) avisa de que se puede desactivar; botón en Ajustes del chat (`dp_fervis_saludo` = `off`). Sin Groq ni clave. Con «reducir movimiento», sin salto ni meneo. |
 | Librerías | Ninguna de fuera. Si alguna vez hiciera falta, copiada en el repo, nunca de un CDN. |
 
 ## Forma de trabajar
@@ -67,7 +68,7 @@ Con el servidor encendido, abrir **`http://localhost:8731/tests/`**: carga la ap
 pruebas (`tests/tests.js`, sacadas de las reglas de este archivo). Verde = todo bien; en rojo, cada fallo dice qué
 esperaba y qué salió. **Pasarlas antes de cada commit** y añadir la prueba de cada regla nueva. Guardan los datos
 `dp_*` del navegador y los devuelven al terminar; en la web publicada no se ejecutan (podrían tocar datos de David).
-Hoy: **67 pruebas**. Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
+Hoy: **71 pruebas**. Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
 **Archivo nuevo que carga la página → apuntarlo en `ESSENTIAL` de `sw.js`**: si no, con internet va bien y sin
 internet la app instalada se abre rota, sin avisar. Lo vigila la prueba «Todo lo que pide la página… está en ESSENTIAL».
 
@@ -75,6 +76,6 @@ internet la app instalada se abre rota, sin avisar. Lo vigila la prueba «Todo l
 `index.html` · `css/` (estilos y temas) · `js/` (un archivo por pieza: `app.js` cuadrante, `clientes.js` la tabla de clientes y
 camareros de debajo (app.js le pasa lo que necesita con `Clients.create`; Fervis usa sus cálculos vía `Schedule.crew`/`ratioInfo`), `cell.js` casilla,
 `swap.js` intercambiar, `staff.js`/`states.js`/`places.js` ventanas con `lists.js` común, `backup.js` copias, Fervis en tres: `fervis-datos.js`
-lo que calcula la app, `fervis-guia.js` la guía y el glosario, `fervis.js` el chat —se cargan en ese orden—,
+lo que calcula la app, `fervis-guia.js` la guía y el glosario, `fervis.js` el chat —se cargan en ese orden—, `fervis-saludo.js` el saludo al abrir la app (suelto: solo necesita el robot),
 `pwa.js` instalable…) · `manifest.webmanifest` y `sw.js` (PWA: solo atiende sus archivos y solo borra cachés
 `david-planner-`) · `icons/` (generados con Chrome sin ventana desde un HTML de diseño) · `servidor.py` (local, 8731).
