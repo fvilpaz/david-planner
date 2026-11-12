@@ -74,7 +74,8 @@ un parpadeo del tema por defecto).
 1. **`freeColor` está tres veces y no hacen lo mismo** (pregunta para Nando): Personal evita solo los colores del personal en activo; Estados, personal + estados; `Store.freeColor` (puntos de venta), todo. ¿Es a propósito o deberían evitar todos lo mismo? Unificarlas cambia qué color sale al crear algo nuevo.
 2. Quedan copias que no se tocaron por estar en otros módulos: `showError` y el cierre del diálogo en `cell.js` (carga antes que `lists.js`), el cierre en `fervis.js`, y el texto «No se ha podido guardar…» en `app.js`, `backup.js`, `swap.js` y `cell.js` (con variantes: «No se ha copiado nada»).
 3. A quien abrió la demo antes del 12-nov le queda en su navegador una copia vieja en `dp_demo_data` que ya nadie lee (no estorba). Borrarla al abrir la demo sería código nuevo: solo si Nando quiere.
-4. No pasado: el **móvil físico** con la demo y los chips.
+4. ✅ (13-nov) El **móvil físico** con la demo y los chips: funciona (Nando).
+5. `freeColor` (punto 1): Nando decidió no tocarlo (el color se puede cambiar a mano al crear). Cerrado salvo que moleste.
 
 ## 💡 Aparcado
 - Alojar la app con un servidor propio (idea de Nando, 12-nov): la clave de Groq como variable de entorno en el servidor (nunca en el navegador), login y base de datos para sincronizar entre aparatos. Candidatos: Railway (Hobby 5 $/mes de consumo mínimo; el crédito se reparte entre todos los servicios y bases de datos) o Netlify (solo da para esconder la clave). Antes de decidir: login y límite de preguntas por persona (con la clave en el servidor, cada uso gasta su cuota de Groq) y protección de datos de los turnos del personal. Dominio: unos 10 $/año, sin confirmar.
