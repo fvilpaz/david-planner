@@ -230,5 +230,43 @@ window.FervisData = (function () {
     return name === "turnos_entre" ? rangeLines(data, asked.from, asked.days, who) : summaryLines(data, asked.from, asked.days, who);
   }
 
-  return { norm: norm, context: context, runTool: runTool };
+  // Los chips de la demo (sin IA ni clave): cada uno contesta SOLO a lo que dice, con lo que calcula la app. kind: hoy | clientes | partidoSeguido
+  function demoReply(kind, now) {
+    const data = window.Schedule.getData();
+    const monday = Dates.weekStart(now);
+    const names = function (items) { return items.length ? items.join(", ") : "nadie"; };
+    const days = function (n) { return n + (n === 1 ? " día" : " días"); };
+    if (kind === "hoy") {
+      const works = [], rest = [];
+      staffOn(data, Dates.toIso(now)).forEach(function (e) {
+        const day = dayLabel(data, e, now);
+        if (day.works) { works.push("- " + e.name + ": " + data.shifts[e.id + "|" + Dates.toIso(now)].slots.map(function (s) { return slotText(data, s); }).join(" y ")); }
+        else { rest.push(e.name + " (" + day.label + ")"); }
+      });
+      return "Hoy, " + DAY.format(now) + ", trabajan:\n" + (works.join("\n") || "- nadie") + "\nNo trabajan: " + names(rest) + ".";
+    }
+    if (kind === "clientes") {
+      const iso = Dates.toIso(now);
+      const info = window.Schedule.ratioInfo(iso);
+      const crew = window.Schedule.crew(iso);
+      if (info.clients === null) { return "Hoy no hay clientes previstos puestos."; }
+      return "Hoy hay " + info.clients + " clientes previstos y trabajan " + crew.total + " camareros" +
+        (info.ratio !== null ? ": " + RATIO_FORMAT.format(info.ratio) + " clientes por camarero." : ".");
+    }
+    const split = [], straight = [];
+    staffOn(data, Dates.toIso(Dates.addDays(monday, 6))).forEach(function (e) {
+      const count = { "turno partido": 0, "turno seguido": 0 };
+      for (let i = 0; i < 7; i++) {
+        const date = Dates.addDays(monday, i);
+        if (e.leftFrom && e.leftFrom <= Dates.toIso(date)) { continue; }
+        const label = dayLabel(data, e, date).label;
+        if (label in count) { count[label]++; }
+      }
+      if (count["turno partido"]) { split.push(e.name + " (" + days(count["turno partido"]) + ")"); }
+      if (count["turno seguido"]) { straight.push(e.name + " (" + days(count["turno seguido"]) + ")"); }
+    });
+    return "Esta semana:\n- Turno partido: " + names(split) + "\n- Turno seguido: " + names(straight);
+  }
+
+  return { norm: norm, context: context, runTool: runTool, demoReply: demoReply };
 })();

@@ -1287,7 +1287,7 @@
     let w = await open(fixture());  // sin clave
     w.Fervis.open();
     equal($$(".fervis-chip").map(function (c) { return c.textContent; }),
-      ["¿Quién trabaja hoy?", "¿Quién libra este fin de semana?", "¿Quién tiene turno partido y quién seguido esta semana?", "¿Cómo copio un turno?", "Guía de la app"], "los chips: cuatro preguntas y la guía");
+      ["¿Quién trabaja hoy?", "¿Cuántos clientes hay previstos hoy?", "¿Cómo copio un turno?", "¿Quién tiene turno partido y quién seguido esta semana?", "Guía de la app"], "los chips: cuatro preguntas y la guía");
     $$(".fervis-chip")[0].click();
     ok(!$("#fervis-key-form").hidden && $("#fervis-question").value === "¿Quién trabaja hoy?" && $$(".fervis-chip").length === 5 && $$(".fervis-msg").length === 1,
       "sin clave: abre Ajustes, deja la pregunta escrita y los chips siguen");
@@ -1299,7 +1299,7 @@
       return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ choices: [{ finish_reason: "stop", message: { role: "assistant", content: "Nadie." } }] }); } });
     };
     w.Fervis.open();
-    $$(".fervis-chip")[3].click();
+    $$(".fervis-chip")[2].click();
     await wait(200);
     equal($$(".fervis-chip").length, 0, "al mandar una pregunta, los chips desaparecen");
     equal([$$(".fervis-msg").map(function (m) { return m.firstChild.textContent; }).slice(1, 3), bodies[0].messages[bodies[0].messages.length - 1].content],

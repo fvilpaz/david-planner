@@ -229,8 +229,9 @@ window.Fervis = (function () {
     messages.scrollTop = messages.scrollHeight;
   }
 
-  const QUESTIONS = [["🕒", "¿Quién trabaja hoy?"], ["🌴", "¿Quién libra este fin de semana?"],
-    ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"], ["📋", "¿Cómo copio un turno?"]];
+  // La pregunta larga va la última: si no, en pantallas estrechas deja huecos y rompe la fila de chips
+  const QUESTIONS = [["🕒", "¿Quién trabaja hoy?"], ["👥", "¿Cuántos clientes hay previstos hoy?"],
+    ["📋", "¿Cómo copio un turno?"], ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"]];
 
   function exampleChips() {
     chipRow(QUESTIONS.map(function (pair) {
@@ -248,13 +249,10 @@ window.Fervis = (function () {
   // La demo (?demo) sin clave: cada chip se contesta con lo que calcula la app (las mismas herramientas que usa la IA, así que no gasta
   // nada de Groq). Cualquier otra pregunta recibe un aviso. Fuera de la demo, sin clave sigue abriéndose Ajustes.
   function demoAnswer(text) {
-    const monday = window.Dates.weekStart(new Date());
-    const iso = function (offset) { return window.Dates.toIso(window.Dates.addDays(monday, offset)); };
-    const today = window.Dates.toIso(new Date());
     const answers = {
-      "¿Quién trabaja hoy?": function () { return window.FervisData.runTool("turnos_entre", { desde: today, hasta: today }); },
-      "¿Quién libra este fin de semana?": function () { return window.FervisData.runTool("turnos_entre", { desde: iso(5), hasta: iso(6) }); },
-      "¿Quién tiene turno partido y quién seguido esta semana?": function () { return window.FervisData.runTool("resumen_entre", { desde: iso(0), hasta: iso(6) }); },
+      "¿Quién trabaja hoy?": function () { return window.FervisData.demoReply("hoy", new Date()); },
+      "¿Cuántos clientes hay previstos hoy?": function () { return window.FervisData.demoReply("clientes", new Date()); },
+      "¿Quién tiene turno partido y quién seguido esta semana?": function () { return window.FervisData.demoReply("partidoSeguido", new Date()); },
       "¿Cómo copio un turno?": function () { return window.FervisGuide.manual("copiar_turno"); },
     };
     return answers[text] ? answers[text]() : "En esta demo solo contesto a las preguntas de los botones. Para preguntar lo que quieras hace falta una clave gratuita de Groq (Ajustes, el icono de las tres barras).";
@@ -334,7 +332,7 @@ window.Fervis = (function () {
     window.FervisGuide.showGuide(false);  // siempre se abre en el chat
     const key = readKey();
     if (!messages.children.length) { greet(); }
-    showKeyForm(!key);
+    showKeyForm(!key && !window.Store.DEMO);   // en la demo no se pide la clave de entrada: los botones ya contestan (el icono de ajustes sigue ahí)
     // En el móvil, el cursor en la casilla saca el teclado y tapa el saludo: ahí se escribe al tocarla (como en la cartera)
     if (key && window.matchMedia("(pointer: fine)").matches) { question.focus(); }
   }
