@@ -37,7 +37,7 @@ y `core/static/core/app.css`). **Se trae la lógica, no el código**: allí es D
 | Menú «Gestión» | Imprimir / PDF · Copiar la semana anterior (en 1–8 semanas) · Personal · Estados · Puntos de venta · Copia de seguridad · Colorear por · Tema. |
 | Copiar semanas | Como `gestion-hosteleria`: la semana anterior a la que se ve se repite en esta y en las siguientes (1–8), **solo en casillas vacías** y sin quien esté de baja en la semana de destino. |
 | Personal | La primera vez: **Camarero 1–4** sin turnos (se renombran tocando el nombre). Añadir, nombre, color (paleta de 20, sin rosas ni fucsias; un estado nuevo nace con uno que no lleve nadie), orden (número o arrastrar por ⠿). **Quitar**: sin ningún turno se borra del todo; con turnos, **se da de baja desde la semana que se ve** (sigue en las anteriores) y se puede volver a dar de alta. |
-| Ejemplo | Los 8 inventados solo con **`?demo`** en la dirección, guardados aparte (`dp_demo_data`): nunca tocan los datos de verdad. El título dice «· ejemplo». |
+| Ejemplo | Los 8 inventados solo con **`?demo`** en la dirección: una **vitrina** (Nando, 12-nov). Se rehacen en **cada visita con la semana en curso** (lunes a domingo, más de 200 clientes al día) y **no se guarda nada**: lo que toque el visitante se pierde al recargar. Nunca tocan los datos de verdad. Su clave aparte (`dp_demo_data`) no se escribe, pero se queda: `app.js` recarga si cambia `Store.KEY` en otra pestaña, y así lo que guarde David no rehace la demo. El título dice «· ejemplo». **Fervis en la demo, sin clave:** los 4 chips de pregunta contestan con lo que calcula la app (`demoReply` en `fervis-datos.js`; cada pregunta lleva su respuesta en `QUESTIONS` de `fervis.js`), sin Groq; otra pregunta → aviso de que en la demo solo contesta a los botones; el panel de la clave no se abre solo. La pregunta larga, la última (si no, rompe la fila de chips). |
 | Temas | **Claro, Lino, Oscuro y Carbón** (colores de `gestion-hosteleria/app/core/static/core/themes.css`). |
 | PDF | Imprimir del navegador («Guardar como PDF»), **A4 apaisado**, siempre en colores claros. Sin PNG ni jsPDF. |
 | Footer | El de Nando, como en health-tracker: «David Planner © 2026 · Fernando Vilas Paz» + GitHub, LinkedIn y CV. |
@@ -68,14 +68,18 @@ Con el servidor encendido, abrir **`http://localhost:8731/tests/`**: carga la ap
 pruebas (`tests/tests.js`, sacadas de las reglas de este archivo). Verde = todo bien; en rojo, cada fallo dice qué
 esperaba y qué salió. **Pasarlas antes de cada commit** y añadir la prueba de cada regla nueva. Guardan los datos
 `dp_*` del navegador y los devuelven al terminar; en la web publicada no se ejecutan (podrían tocar datos de David).
-Hoy: **71 pruebas**. Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
+Hoy: **75 pruebas**. Un test nuevo se da por bueno solo tras verlo **fallar** con el código roto a propósito (control).
+Lo que se mueve con animaciones se espera a que acabe (mirando cada 0,1 s), nunca a hora fija: la del salto del robot
+fallaba una de cada dos veces por medir 0,2 s antes de que terminara de rebotar (auditoría 12-nov).
 **Archivo nuevo que carga la página → apuntarlo en `ESSENTIAL` de `sw.js`**: si no, con internet va bien y sin
 internet la app instalada se abre rota, sin avisar. Lo vigila la prueba «Todo lo que pide la página… está en ESSENTIAL».
 
 ## Estructura
 `index.html` · `css/` (estilos y temas) · `js/` (un archivo por pieza: `app.js` cuadrante, `clientes.js` la tabla de clientes y
 camareros de debajo (app.js le pasa lo que necesita con `Clients.create`; Fervis usa sus cálculos vía `Schedule.crew`/`ratioInfo`), `cell.js` casilla,
-`swap.js` intercambiar, `staff.js`/`states.js`/`places.js` ventanas con `lists.js` común, `backup.js` copias, Fervis en tres: `fervis-datos.js`
+`swap.js` intercambiar, `staff.js`/`states.js`/`places.js` ventanas con `lists.js` común (lista ordenable, paleta, y desde el 12-nov
+también el aviso, el mensaje de «no se ha podido guardar», limpiar el nombre, id y puesto nuevos, guardar el orden y abrir/cerrar
+la ventana: lo propio de cada una —«en uso», baja, «cuenta como trabajo»— sigue en su archivo), `backup.js` copias, Fervis en tres: `fervis-datos.js`
 lo que calcula la app, `fervis-guia.js` la guía y el glosario, `fervis.js` el chat —se cargan en ese orden—, `fervis-saludo.js` el saludo al abrir la app (suelto: solo necesita el robot),
 `pwa.js` instalable…) · `manifest.webmanifest` y `sw.js` (PWA: solo atiende sus archivos y solo borra cachés
 `david-planner-`) · `icons/` (generados con Chrome sin ventana desde un HTML de diseño) · `servidor.py` (local, 8731).

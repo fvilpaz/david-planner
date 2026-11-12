@@ -4,7 +4,7 @@
 //   de otra app nunca debe estropear el cuadrante), se pide confirmación y ANTES se descarga una copia de lo que hay.
 // - Franja de aviso que no bloquea: si hace 7 días o más de la última descarga (la primera semana, no), con
 //   «Descargar copia» y «Más tarde» (hasta volver a abrir la app). Ni en el modo ejemplo ni sin datos guardados.
-window.Backup = (function () {
+(function () {
   "use strict";
   const APP = "david-planner";
   const VERSION = 1;
@@ -293,5 +293,4 @@ window.Backup = (function () {
 
   autoCopy(false);  // al abrir la app: la de esta semana, si toca
   refresh();
-  return { refresh: refresh };
 })();

@@ -229,9 +229,12 @@ window.Fervis = (function () {
     messages.scrollTop = messages.scrollHeight;
   }
 
-  // La pregunta larga va la última: si no, en pantallas estrechas deja huecos y rompe la fila de chips
-  const QUESTIONS = [["🕒", "¿Quién trabaja hoy?"], ["👥", "¿Cuántos clientes hay previstos hoy?"],
-    ["📋", "¿Cómo copio un turno?"], ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?"]];
+  // Cada pregunta de ejemplo con lo que contesta en la demo sin clave (lo calcula la app: ver demoAnswer). Una sola lista: cambiar
+  // una pregunta no puede dejarla sin respuesta. La larga va la última: si no, en pantallas estrechas rompe la fila de chips.
+  const demoReply = function (kind) { return function () { return window.FervisData.demoReply(kind, new Date()); }; };
+  const QUESTIONS = [["🕒", "¿Quién trabaja hoy?", demoReply("hoy")], ["👥", "¿Cuántos clientes hay previstos hoy?", demoReply("clientes")],
+    ["📋", "¿Cómo copio un turno?", function () { return window.FervisGuide.manual("copiar_turno"); }],
+    ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?", demoReply("partidoSeguido")]];
 
   function exampleChips() {
     chipRow(QUESTIONS.map(function (pair) {
@@ -249,13 +252,8 @@ window.Fervis = (function () {
   // La demo (?demo) sin clave: cada chip se contesta con lo que calcula la app (las mismas herramientas que usa la IA, así que no gasta
   // nada de Groq). Cualquier otra pregunta recibe un aviso. Fuera de la demo, sin clave sigue abriéndose Ajustes.
   function demoAnswer(text) {
-    const answers = {
-      "¿Quién trabaja hoy?": function () { return window.FervisData.demoReply("hoy", new Date()); },
-      "¿Cuántos clientes hay previstos hoy?": function () { return window.FervisData.demoReply("clientes", new Date()); },
-      "¿Quién tiene turno partido y quién seguido esta semana?": function () { return window.FervisData.demoReply("partidoSeguido", new Date()); },
-      "¿Cómo copio un turno?": function () { return window.FervisGuide.manual("copiar_turno"); },
-    };
-    return answers[text] ? answers[text]() : "En esta demo solo contesto a las preguntas de los botones. Para preguntar lo que quieras hace falta una clave gratuita de Groq (Ajustes, el icono de las tres barras).";
+    const asked = QUESTIONS.find(function (q) { return q[1] === text; });
+    return (asked && asked[2]()) || "En esta demo solo contesto a las preguntas de los botones. Para preguntar lo que quieras hace falta una clave gratuita de Groq (Ajustes, el icono de las tres barras).";
   }
 
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o

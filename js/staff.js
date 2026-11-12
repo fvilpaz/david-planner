@@ -16,6 +16,7 @@ window.Staff = (function () {
   const errorEl = document.getElementById("staff-error");
   const removeButton = document.getElementById("staff-remove");
   const dateFormat = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" });
+  const showError = window.Lists.errorShower(errorEl);
   let editing = null;      // la persona de la ficha (null = nueva)
   let color = null;        // el color elegido en la ficha
   let confirming = false;  // «Quitar» / «Dar de baja» esperan el segundo toque
@@ -23,21 +24,14 @@ window.Staff = (function () {
 
   function employees() { return window.Schedule.getData().employees; }
 
-  function sorted() { return employees().slice().sort(function (a, b) { return a.position - b.position; }); }
-
   function longDate(iso) { return dateFormat.format(window.Dates.parseIso(iso)); }
-
-  function showError(text) {
-    errorEl.textContent = text;
-    errorEl.hidden = !text;
-  }
 
   function showList() {
     title.textContent = "Personal";
     showError("");
     form.hidden = true;
     listView.hidden = false;
-    list.replaceChildren.apply(list, sorted().map(function (person, index) {
+    list.replaceChildren.apply(list, window.Lists.byPosition(employees()).map(function (person, index) {
       const item = document.createElement("li");
       item.dataset.id = person.id;
       const row = item.appendChild(document.createElement("button"));
@@ -55,16 +49,8 @@ window.Staff = (function () {
     }));
   }
 
-  // Guarda el orden de la lista tal como está ahora (de arriba abajo: 0, 1, 2…) y la vuelve a pintar con sus números
-  function saveOrder(ids) {
-    const saved = window.Schedule.saveEmployees(function (people) {
-      ids.forEach(function (id, position) { people.find(function (p) { return p.id === id; }).position = position; });
-    });
-    showList();  // con el orden guardado o, si no se pudo, con el de antes
-    if (!saved) { showError("No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada."); }
-  }
-
-  window.Lists.sortable(list, saveOrder);  // arrastrar por ⠿ o escribir el número (lists.js)
+  // Arrastrar por ⠿ o escribir el número (lists.js): se guarda el orden de arriba abajo (0, 1, 2…) y se repinta con sus números
+  window.Lists.sortable(list, window.Lists.orderSaver(function (change) { return window.Schedule.saveEmployees(change); }, showList, showError));
 
   // Un color que no lleve nadie en activo; si están todos cogidos, se repite la paleta
   function freeColor() {
@@ -116,12 +102,12 @@ window.Staff = (function () {
 
   function save(change) {
     if (window.Schedule.saveEmployees(change)) { back(); return; }
-    showError("No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.");
+    showError(window.Lists.SAVE_ERROR);
   }
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    const name = nameInput.value.trim().replace(/\s+/g, " ").slice(0, 40);
+    const name = window.Lists.cleanName(nameInput.value, 40);
     if (!name) { showError("Pon un nombre."); nameInput.focus(); return; }
     const chosen = color;
     if (editing) {
@@ -132,8 +118,8 @@ window.Staff = (function () {
         person.color = chosen;
       });
     } else {
-      const id = "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);  // único: hora + azar
-      const position = Math.max.apply(null, [-1].concat(employees().map(function (p) { return p.position; }))) + 1;
+      const id = window.Lists.newId("e");
+      const position = window.Lists.nextPosition(employees());
       save(function (people) { people.push({ id: id, name: name, color: chosen, position: position, leftFrom: null }); });
     }
   });
@@ -164,19 +150,12 @@ window.Staff = (function () {
   });
   document.getElementById("staff-add").addEventListener("click", function () { showForm(null); });
   document.getElementById("staff-back").addEventListener("click", back);
-  dialog.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
-  dialog.addEventListener("click", function (event) { if (event.target === dialog) { dialog.close(); } });
-  document.getElementById("staff-button").addEventListener("click", function () {
-    document.querySelector(".manage-menu").open = false;
-    open();
-  });
-
   // Desde «Gestión»: la lista
-  function open() {
+  window.Lists.wireDialog(dialog, document.getElementById("staff-button"), function () {
     fromGrid = false;
     dialog.showModal();
     showList();
-  }
+  });
 
   // Tocando un nombre del cuadrante: su ficha directamente
   function edit(id) {
@@ -187,5 +166,5 @@ window.Staff = (function () {
     showForm(person);
   }
 
-  return { open: open, edit: edit };
+  return { edit: edit };
 })();

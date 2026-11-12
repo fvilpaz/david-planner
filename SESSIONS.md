@@ -1,5 +1,31 @@
 # SESSIONS — david-planner
 
+## 12/13-nov-2026 (noche, Opus) — Chips sin fallos y auditoría completa: zombies, pruebas primero, refactor
+
+**Hecho**
+- **Chips de la demo** (antes de la auditoría, commit `d2e7158`): respuestas propias (`demoReply` en `fervis-datos.js`) que contestan SOLO a lo preguntado; «¿Quién libra este fin de semana?» se cambió por «¿Cuántos clientes hay previstos hoy?» (Nando: pocas preguntas y que no fallen); la larga, la última; en la demo el panel de la clave no se abre solo.
+- **Zombies** (script con control: detecta 3 metidos a propósito): exportaciones que nadie usaba fuera (`Places.open`, `States.open`, `Staff.open`, `Backup.refresh`) → fuera; la ayuda `open()` de las pruebas sembraba `dp_demo_data`, que ya no se lee → siembra `dp_data`; cada pregunta de los chips escrita dos veces → una sola lista (`QUESTIONS` lleva su respuesta); comentarios desfasados. Falsos positivos descartados: las 7 clases `move-*` (se arman con texto) y nombres genéricos repetidos que hacen cosas distintas.
+- **NO era zombie**: `KEY = DEMO ? "dp_demo_data" : …` en `storage.js`. `app.js` recarga si cambia `Store.KEY` en otra pestaña; con la clave aparte, lo que guarde David no rehace la demo. Comentado en el código para que nadie lo borre.
+- **Pruebas de caracterización ANTES del refactor** (pasaron con el código sin tocar): las tres ventanas (Personal, Estados, Puntos de venta) listan por puesto, ordenan por número, sin espacio avisan y dejan el orden de antes, limpian y cortan el nombre (40/30/30), lo nuevo va al final con id y color, «Volver» quita el aviso, se cierran con ✕ y tocando fuera; y la demo: cada chip con su respuesta exacta, el aviso, sin clave, sin Groq y sin guardar. **Control**: roto a propósito el corte del nombre, el aviso de Estados y el texto de clientes → cae justo su prueba.
+- **Refactor**: lo que repetían `staff.js`, `states.js` y `places.js` pasa a `lists.js` (`byPosition`, `errorShower`, `cleanName`, `newId`, `nextPosition`, `orderSaver`, `wireDialog`, `SAVE_ERROR`): unas 40 líneas menos en las ventanas. Lo propio de cada una (en uso, baja, «cuenta como trabajo», `freeColor`) se queda en su archivo. `renderPalette` (una línea) no se sacó: costaba más que la copia.
+- **Fallos míos de hoy encontrados al releer** (con prueba nueva y control): «partido/seguido» tomaba al personal del domingo (quien causa baja a media semana desaparecía) y contaba por etiqueta (un estado sin horario llamado «Turno partido» contaba, y `label in count` era la «llave zombie» del prototipo); un tipo desconocido caía en «partido/seguido» → ahora `null` y aviso.
+- **Prueba inestable arreglada**: «Saludo en pantalla ancha» fallaba 3 de cada 4 pasadas. Medido: a los 4,0 s el robot seguía a 80 px; a los 5,5 s, en el centro exacto. La prueba medía a hora fija con 0,2 s de margen → ahora espera a que aterrice (cada 0,1 s, máx. 3 s). Control: con el robot aterrizando 40 px más abajo, cae («a 40 px»).
+- Pruebas: **75** en verde. `audit`: sin secretos (94 commits), bandit y semgrep limpios, 0 errores; los 2 avisos de eslint que había metido yo (`count[label]`, `data[k]`) quitados.
+
+**Decidido**
+- La demo es una vitrina sin uso real; la auth y el servidor (Railway), más adelante (`PLAN.md` → «Aparcado»).
+- `freeColor` no se unifica sin Nando (cambia qué color sale): pregunta en `PLAN.md` → «Pendiente (auditoría del 12/13-nov)».
+- `cell.js` no usa `lists.js`: carga antes, y cambiar el orden de carga no compensa por 4 líneas.
+
+**Aprendido**
+- «Zombie» = código muerto, sin uso o duplicado. Antes de borrarlo, buscar quién lo usa **de otra forma** (un evento, un texto armado): la clave de la demo parecía muerta y no lo era.
+- Una prueba que mide una animación a hora fija es una herramienta que falla a ratos: hay que esperar a que termine.
+- `in` sobre un objeto normal mira también su prototipo («constructor», «toString»…): mejor comparar con lo que se espera.
+
+**Siguiente**
+- Contestar lo de `freeColor`; mirar la demo en el móvil físico.
+- Llevar el saludo y los chips a Crypto_Portafolio (dock abajo: mapear antes).
+
 ## 12-nov-2026 (tarde) — La demo se rehace cada visita y los chips contestan sin clave
 
 **Hecho**

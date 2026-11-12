@@ -5,6 +5,8 @@
 window.Store = (function () {
   "use strict";
   const DEMO = new URLSearchParams(window.location.search).has("demo");
+  // La demo no escribe en su clave, pero la necesita aparte: app.js recarga si cambia Store.KEY en otra pestaña, y así lo que
+  // David guarde en la suya no rehace la demo (ni borra lo que el visitante esté tocando). No es código muerto.
   const KEY = DEMO ? "dp_demo_data" : "dp_data";
   const BROKEN = KEY + "_broken";
   const VERSION = 1;

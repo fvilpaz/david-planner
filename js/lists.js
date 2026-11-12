@@ -1,10 +1,53 @@
-// Piezas comunes de las ventanas «Personal» y «Estados» (paso 7: sacadas de staff.js para no copiarlas):
+// Piezas comunes de las ventanas «Personal», «Estados» y «Puntos de venta» (paso 7: sacadas de staff.js para no copiarlas;
+// auditoría 12-nov: lo que las tres seguían repitiendo):
 // - decorate(): pone a una fila de la lista el asa ⠿ (a la izquierda) y la cajita con el número del puesto (a la derecha).
 // - sortable(): hace que la lista se ordene arrastrando por el asa o escribiendo el número; avisa con el orden nuevo.
 // - palette(): los círculos de colores para elegir uno.
+// - byPosition, errorShower, cleanName, newId, nextPosition, orderSaver y wireDialog: lo de cada ficha y cada ventana.
 // Cada fila de la lista es un <li data-id="…">.
 window.Lists = (function () {
   "use strict";
+  const SAVE_ERROR = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+
+  // Una copia de la lista en el orden del puesto («position»), sin tocar la guardada
+  function byPosition(items) { return items.slice().sort(function (a, b) { return a.position - b.position; }); }
+
+  // El aviso rojo de una ventana: con texto se ve; con "" se esconde
+  function errorShower(element) {
+    return function (text) {
+      element.textContent = text;
+      element.hidden = !text;
+    };
+  }
+
+  // El nombre que se escribe: sin espacios de más (dentro tampoco) y como mucho `max` letras
+  function cleanName(text, max) { return text.trim().replace(/\s+/g, " ").slice(0, max); }
+
+  function newId(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }  // único: hora + azar
+
+  function nextPosition(items) { return Math.max.apply(null, [-1].concat(items.map(function (x) { return x.position; }))) + 1; }
+
+  // Lo que recibe sortable(): guarda el orden nuevo con `saveAll` (saveEmployees, saveStatuses o savePlaces de app.js) y
+  // vuelve a pintar la lista: con el orden guardado o, si no se pudo, con el de antes, y entonces avisa
+  function orderSaver(saveAll, showList, showError) {
+    return function (ids) {
+      const saved = saveAll(function (all) {
+        ids.forEach(function (id, position) { all.find(function (x) { return x.id === id; }).position = position; });
+      });
+      showList();
+      if (!saved) { showError(SAVE_ERROR); }
+    };
+  }
+
+  // Se cierra con su botón ✕ o tocando fuera, y se abre desde su botón del menú «Gestión» (que se recoge)
+  function wireDialog(dialog, menuButton, open) {
+    dialog.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
+    dialog.addEventListener("click", function (event) { if (event.target === dialog) { dialog.close(); } });
+    menuButton.addEventListener("click", function () {
+      document.querySelector(".manage-menu").open = false;
+      open();
+    });
+  }
 
   function decorate(item, index, label) {
     const handle = document.createElement("span");
@@ -88,5 +131,6 @@ window.Lists = (function () {
     }));
   }
 
-  return { decorate: decorate, sortable: sortable, palette: palette };
+  return { SAVE_ERROR: SAVE_ERROR, decorate: decorate, sortable: sortable, palette: palette, byPosition: byPosition, errorShower: errorShower,
+    cleanName: cleanName, newId: newId, nextPosition: nextPosition, orderSaver: orderSaver, wireDialog: wireDialog };
 })();

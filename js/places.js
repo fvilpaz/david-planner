@@ -2,7 +2,7 @@
 // (lista ordenable de lists.js y ficha): nombre y color. En el cuadrante salen como texto pequeño debajo de la hora; el
 // color se ve si en Gestión → «Colorear por» eliges «Punto de venta» (paso 14a). El orden es el del desplegable «Dónde».
 // Uno en uso no se puede quitar (sus tramos se quedarían sin sitio); renombrarlo, sí.
-window.Places = (function () {
+(function () {
   "use strict";
   const dialog = document.getElementById("place-dialog");
   const title = document.getElementById("place-title");
@@ -14,19 +14,12 @@ window.Places = (function () {
   const errorEl = document.getElementById("place-error");
   const removeButton = document.getElementById("place-remove");
   const palette = document.getElementById("place-palette");
-  const SAVE_ERROR = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+  const showError = window.Lists.errorShower(errorEl);
   let editing = null;      // el punto de venta de la ficha (null = nuevo)
   let color = null;        // el color elegido en la ficha
   let confirming = false;  // «Quitar» espera el segundo toque
 
   function places() { return window.Schedule.getData().places; }
-
-  function sorted() { return places().slice().sort(function (a, b) { return a.position - b.position; }); }
-
-  function showError(text) {
-    errorEl.textContent = text;
-    errorEl.hidden = !text;
-  }
 
   function showList() {
     title.textContent = "Puntos de venta";
@@ -34,7 +27,7 @@ window.Places = (function () {
     form.hidden = true;
     listView.hidden = false;
     document.getElementById("place-empty").hidden = places().length > 0;
-    list.replaceChildren.apply(list, sorted().map(function (place, index) {
+    list.replaceChildren.apply(list, window.Lists.byPosition(places()).map(function (place, index) {
       const item = document.createElement("li");
       item.dataset.id = place.id;
       const row = item.appendChild(document.createElement("button"));
@@ -50,15 +43,7 @@ window.Places = (function () {
     }));
   }
 
-  function saveOrder(ids) {
-    const saved = window.Schedule.savePlaces(function (all) {
-      ids.forEach(function (id, position) { all.find(function (p) { return p.id === id; }).position = position; });
-    });
-    showList();  // con el orden guardado o, si no se pudo, con el de antes
-    if (!saved) { showError(SAVE_ERROR); }
-  }
-
-  window.Lists.sortable(list, saveOrder);
+  window.Lists.sortable(list, window.Lists.orderSaver(function (change) { return window.Schedule.savePlaces(change); }, showList, showError));
 
   function renderPalette() { window.Lists.palette(palette, color, function (c) { color = c; renderPalette(); }); }
 
@@ -83,12 +68,12 @@ window.Places = (function () {
 
   function save(change) {
     if (window.Schedule.savePlaces(change)) { showList(); return; }
-    showError(SAVE_ERROR);
+    showError(window.Lists.SAVE_ERROR);
   }
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    const name = nameInput.value.trim().replace(/\s+/g, " ").slice(0, 30);
+    const name = window.Lists.cleanName(nameInput.value, 30);
     if (!name) { showError("Pon un nombre."); nameInput.focus(); return; }
     const chosen = color;
     if (editing) {
@@ -99,8 +84,8 @@ window.Places = (function () {
         place.color = chosen;
       });
     } else {
-      const id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);  // único: hora + azar
-      const position = Math.max.apply(null, [-1].concat(places().map(function (p) { return p.position; }))) + 1;
+      const id = window.Lists.newId("p");
+      const position = window.Lists.nextPosition(places());
       save(function (all) { all.push({ id: id, name: name, color: chosen, position: position }); });
     }
   });
@@ -123,17 +108,8 @@ window.Places = (function () {
   });
   document.getElementById("place-add").addEventListener("click", function () { showForm(null); });
   document.getElementById("place-back").addEventListener("click", showList);
-  dialog.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
-  dialog.addEventListener("click", function (event) { if (event.target === dialog) { dialog.close(); } });
-  document.getElementById("place-button").addEventListener("click", function () {
-    document.querySelector(".manage-menu").open = false;
-    open();
-  });
-
-  function open() {
+  window.Lists.wireDialog(dialog, document.getElementById("place-button"), function () {
     dialog.showModal();
     showList();
-  }
-
-  return { open: open };
+  });
 })();

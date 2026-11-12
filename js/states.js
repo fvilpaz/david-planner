@@ -3,7 +3,7 @@
 // o «Añadir estado», su ficha: nombre, color y si cuenta como trabajo (lleva horario y horas extra).
 // Como en gestion-hosteleria, un estado EN USO no se puede quitar; y tampoco cambiar si cuenta como trabajo: si
 // «Trabajo» dejara de contar, los horarios de sus casillas dejarían de verse. El nombre y el color, siempre.
-window.States = (function () {
+(function () {
   "use strict";
   const dialog = document.getElementById("status-dialog");
   const title = document.getElementById("status-title");
@@ -16,26 +16,19 @@ window.States = (function () {
   const note = document.getElementById("status-note");
   const errorEl = document.getElementById("status-error");
   const removeButton = document.getElementById("status-remove");
-  const SAVE_ERROR = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+  const showError = window.Lists.errorShower(errorEl);
   let editing = null;      // el estado de la ficha (null = nuevo)
   let color = null;        // el color elegido en la ficha
   let confirming = false;  // «Quitar» espera el segundo toque
 
   function statuses() { return window.Schedule.getData().statuses; }
 
-  function sorted() { return statuses().slice().sort(function (a, b) { return a.position - b.position; }); }
-
-  function showError(text) {
-    errorEl.textContent = text;
-    errorEl.hidden = !text;
-  }
-
   function showList() {
     title.textContent = "Estados";
     showError("");
     form.hidden = true;
     listView.hidden = false;
-    list.replaceChildren.apply(list, sorted().map(function (status, index) {
+    list.replaceChildren.apply(list, window.Lists.byPosition(statuses()).map(function (status, index) {
       const item = document.createElement("li");
       item.dataset.id = status.id;
       const row = item.appendChild(document.createElement("button"));
@@ -52,15 +45,7 @@ window.States = (function () {
     }));
   }
 
-  function saveOrder(ids) {
-    const saved = window.Schedule.saveStatuses(function (all) {
-      ids.forEach(function (id, position) { all.find(function (s) { return s.id === id; }).position = position; });
-    });
-    showList();  // con el orden guardado o, si no se pudo, con el de antes
-    if (!saved) { showError(SAVE_ERROR); }
-  }
-
-  window.Lists.sortable(list, saveOrder);
+  window.Lists.sortable(list, window.Lists.orderSaver(function (change) { return window.Schedule.saveStatuses(change); }, showList, showError));
 
   function renderPalette() { window.Lists.palette(palette, color, function (c) { color = c; renderPalette(); }); }
 
@@ -102,12 +87,12 @@ window.States = (function () {
 
   function save(change) {
     if (window.Schedule.saveStatuses(change)) { showList(); return; }
-    showError(SAVE_ERROR);
+    showError(window.Lists.SAVE_ERROR);
   }
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    const name = nameInput.value.trim().replace(/\s+/g, " ").slice(0, 30);
+    const name = window.Lists.cleanName(nameInput.value, 30);
     if (!name) { showError("Pon un nombre."); nameInput.focus(); return; }
     const chosen = color;
     const counts = workInput.checked;
@@ -121,8 +106,8 @@ window.States = (function () {
         if (canChangeWork) { status.countsAsWork = counts; }
       });
     } else {
-      const id = "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);  // único: hora + azar
-      const position = Math.max.apply(null, [-1].concat(statuses().map(function (s) { return s.position; }))) + 1;
+      const id = window.Lists.newId("s");
+      const position = window.Lists.nextPosition(statuses());
       save(function (all) { all.push({ id: id, name: name, color: chosen, countsAsWork: counts, position: position }); });
     }
   });
@@ -145,17 +130,8 @@ window.States = (function () {
   });
   document.getElementById("status-add").addEventListener("click", function () { showForm(null); });
   document.getElementById("status-back").addEventListener("click", showList);
-  dialog.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
-  dialog.addEventListener("click", function (event) { if (event.target === dialog) { dialog.close(); } });
-  document.getElementById("status-button").addEventListener("click", function () {
-    document.querySelector(".manage-menu").open = false;
-    open();
-  });
-
-  function open() {
+  window.Lists.wireDialog(dialog, document.getElementById("status-button"), function () {
     dialog.showModal();
     showList();
-  }
-
-  return { open: open };
+  });
 })();

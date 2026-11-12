@@ -65,11 +65,12 @@
     return { statusId: "work", slots: [slot], overtime: extra || null };
   }
 
-  // Abre la app con esos datos (null = como la primera vez) en la semana `week` y espera a que arranque
+  // Abre la app con esos datos (null = como la primera vez) en la semana `week` y espera a que arranque. Con `demo`, los
+  // datos quedan como los de verdad de este navegador: la demo no lee nada guardado y no debe tocarlos.
   function open(data, options) {
     const opts = options || {};
     clearDp();
-    if (data) { localStorage.setItem(opts.demo ? "dp_demo_data" : "dp_data", JSON.stringify(data)); }
+    if (data) { localStorage.setItem("dp_data", JSON.stringify(data)); }
     (opts.extra || []).forEach(function (pair) { localStorage.setItem(pair[0], pair[1]); });
     return new Promise(function (resolve) {
       frame.onload = function () { resolve(frame.contentWindow); };
@@ -414,6 +415,83 @@
     $("#place-dialog").close();
   });
 
+  // Caracterización (auditoría 12-nov), escrita ANTES de sacar a lists.js lo que repiten staff.js, states.js y places.js:
+  // lo que hacen hoy las tres ventanas por igual. Si el refactor cambia algo de esto, cae aquí.
+  const MANAGE = [
+    { name: "Personal", prefix: "staff", key: "employees", idStart: "e", max: 40, rows: ["Ana", "Luis", "Marta"] },
+    { name: "Estados", prefix: "status", key: "statuses", idStart: "s", max: 30, rows: ["Trabajo", "Libre", "Fiesta"] },
+    { name: "Puntos de venta", prefix: "place", key: "places", idStart: "p", max: 30, rows: ["Pub", "Terraza", "Barra"] },
+  ];
+  function manageFixture() {
+    const data = fixture();
+    data.statuses.push({ id: "fest", name: "Fiesta", color: "#16a085", countsAsWork: false, position: 2 });
+    data.places[0].color = "#b7950b";
+    data.places.push({ id: "p2", name: "Terraza", color: "#d35400", position: 1 }, { id: "p3", name: "Barra", color: "#7f8c8d", position: 2 });
+    [data.employees, data.statuses, data.places].forEach(function (list) { list.reverse(); });  // guardados al revés: la lista va por «position»
+    return data;
+  }
+  function rowNames(prefix) { return $$("#" + prefix + "-list .sort-row").map(function (row) { return row.childNodes[1].textContent; }); }
+  function byPosition(list) { return list.slice().sort(function (a, b) { return a.position - b.position; }).map(function (x) { return x.name; }); }
+  const SAVE_ERROR = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+
+  test("Personal, Estados y Puntos de venta: listan por puesto, ordenan escribiendo el número y, sin espacio, avisan y dejan el orden de antes", async function () {
+    for (const m of MANAGE) {
+      const w = await open(manageFixture());
+      $("#" + m.prefix + "-button").click();
+      ok($("#" + m.prefix + "-dialog").open, m.name + ": se abre desde Gestión");
+      equal(rowNames(m.prefix), m.rows, m.name + ": por puesto");
+      equal($$("#" + m.prefix + "-list .order-number").map(function (i) { return i.value; }), ["1", "2", "3"], m.name + ": los números");
+      let third = $$("#" + m.prefix + "-list .order-number")[2];
+      third.value = "1";
+      fire(third, "change");
+      const moved = [m.rows[2], m.rows[0], m.rows[1]];
+      equal(rowNames(m.prefix), moved, m.name + ": el tercero al puesto 1");
+      equal(byPosition(saved()[m.key]), moved, m.name + ": guardado");
+      ok($("#" + m.prefix + "-error").hidden, m.name + ": sin aviso");
+      const fix = breakStorage(w, "dp_data");
+      third = $$("#" + m.prefix + "-list .order-number")[2];
+      third.value = "1";
+      fire(third, "change");
+      fix();
+      equal(rowNames(m.prefix), moved, m.name + ": sin espacio, la lista con el orden de antes");
+      equal(byPosition(saved()[m.key]), moved, m.name + ": sin espacio, lo guardado no cambia");
+      equal([$("#" + m.prefix + "-error").textContent, $("#" + m.prefix + "-error").hidden], [SAVE_ERROR, false], m.name + ": avisa");
+      $("#" + m.prefix + "-dialog").close();
+    }
+  });
+
+  test("Personal, Estados y Puntos de venta: sin nombre no se guarda; el nombre se limpia y se corta; lo nuevo va al final con id y color; «Volver» quita el aviso; se cierra con el botón y tocando fuera", async function () {
+    for (const m of MANAGE) {
+      const w = await open(manageFixture());
+      $("#" + m.prefix + "-button").click();
+      $("#" + m.prefix + "-add").click();
+      ok(!$("#" + m.prefix + "-form").hidden && $("#" + m.prefix + "-list-view").hidden, m.name + ": la ficha");
+      $("#" + m.prefix + "-name").value = "   ";
+      $("#" + m.prefix + "-form").requestSubmit();
+      equal([$("#" + m.prefix + "-error").textContent, $("#" + m.prefix + "-error").hidden], ["Pon un nombre.", false], m.name + ": sin nombre, aviso");
+      equal(saved()[m.key].length, 3, m.name + ": sin nombre, no guarda");
+      $("#" + m.prefix + "-name").value = "  Zona   de\t copas  " + "x".repeat(60);
+      $("#" + m.prefix + "-form").requestSubmit();
+      const all = saved()[m.key];
+      const added = all[all.length - 1];
+      equal(added.name, ("Zona de copas " + "x".repeat(60)).slice(0, m.max), m.name + ": limpio y cortado a " + m.max);
+      equal(added.position, 3, m.name + ": al final");
+      ok(added.id.startsWith(m.idStart) && added.id.length > 5 && all.filter(function (x) { return x.id === added.id; }).length === 1, m.name + ": id nuevo («" + added.id + "»)");
+      ok(/^#[0-9a-f]{6}$/i.test(added.color), m.name + ": con color");
+      ok($("#" + m.prefix + "-form").hidden && !$("#" + m.prefix + "-list-view").hidden && rowNames(m.prefix).length === 4, m.name + ": vuelve a la lista, con 4");
+      $("#" + m.prefix + "-add").click();
+      $("#" + m.prefix + "-form").requestSubmit();
+      ok(!$("#" + m.prefix + "-error").hidden, m.name + ": aviso puesto");
+      $("#" + m.prefix + "-back").click();
+      ok($("#" + m.prefix + "-error").hidden && !$("#" + m.prefix + "-list-view").hidden, m.name + ": «Volver» va a la lista y quita el aviso");
+      $("#" + m.prefix + "-dialog [data-close]").click();
+      ok(!$("#" + m.prefix + "-dialog").open, m.name + ": se cierra con el botón");
+      $("#" + m.prefix + "-button").click();
+      $("#" + m.prefix + "-dialog").dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+      ok(!$("#" + m.prefix + "-dialog").open, m.name + ": se cierra tocando fuera");
+    }
+  });
+
   // =================================================================================================================
   // Copia de seguridad (backup.js)
   test("Descargar copia: un archivo con app, versión, datos y la barra", async function () {
@@ -628,9 +706,16 @@
       ok($("#fervis-button").classList.contains("ausente") && $(".fervis-ghost") && $("#fervis-hello").hidden, "salta una copia, el de la barra se oculta y aún no hay bocadillo");
       await wait(1100);   // la caída con rebotes dura 1,3 s
       ok(!$("#fervis-hello").hidden && $("#fervis-hello").classList.contains("lateral"), "al aterrizar sale el bocadillo, a su lado");
-      const g = $(".fervis-ghost").getBoundingClientRect();
-      const r = $(".section-header").getBoundingClientRect();
-      ok(Math.abs((g.top + g.height / 2) - (r.top + r.height / 2)) < 3, "aterriza en medio de la fila de «Cuadrante semanal»");
+      // Se espera a que acabe de rebotar (como mucho 3 s más): medir a hora fija fallaba cuando el navegador iba algo lento
+      // (auditoría 12-nov: a los 4,0 s seguía a 80 px; a los 5,5 s, en el centro exacto)
+      let gap = Infinity;
+      for (let i = 0; i < 30 && gap >= 3; i++) {
+        const g = $(".fervis-ghost").getBoundingClientRect();
+        const r = $(".section-header").getBoundingClientRect();
+        gap = Math.abs((g.top + g.height / 2) - (r.top + r.height / 2));
+        if (gap >= 3) { await wait(100); }
+      }
+      ok(gap < 3, "aterriza en medio de la fila de «Cuadrante semanal» (a " + Math.round(gap) + " px)");
       $("body").click();   // cualquier toque lo cierra
       await wait(900);
       ok(!$(".fervis-ghost") && !$("#fervis-button").classList.contains("ausente") && $("#fervis-hello").hidden, "la copia se va y el robot de la barra vuelve a verse");
@@ -1306,6 +1391,50 @@
       [["¿Cómo copio un turno?", "Nadie."], "¿Cómo copio un turno?"], "la pregunta del chip se manda tal cual");
     $("#fervis-clear").click();
     equal($$(".fervis-chip").length, 5, "la papelera devuelve los chips");
+  });
+
+  test("La demo sin clave: los chips contestan con los turnos de ejemplo de esta semana (sin Groq), otra pregunta avisa, no se pide la clave y no se guarda nada", async function () {
+    const w = await open(null, { demo: true });
+    const calls = [];
+    w.fetch = function (url) { calls.push(url); return Promise.reject(new Error("sin red")); };
+    w.Fervis.open();
+    ok($("#fervis-key-form").hidden, "no se abre el panel de la clave");
+    ok($$(".fervis-msg")[0].textContent.includes("Esto es una demo"), "el saludo lo dice");
+    const last = function () { const all = $$(".fervis-msg"); return all[all.length - 1].textContent; };
+    const ask = function (text) { $$(".fervis-chip").find(function (c) { return c.textContent === text; }).click(); return last(); };
+    const today = w.Dates.toIso(new w.Date());
+    const hoy = ask("¿Quién trabaja hoy?");
+    ok(hoy.startsWith("Hoy, ") && hoy.includes(", trabajan:\n") && hoy.includes("\nNo trabajan: "), "hoy: «" + hoy + "»");
+    w.Schedule.getData().employees.forEach(function (e) { equal(hoy.split(e.name).length - 1, 1, "hoy: " + e.name + " sale una vez"); });
+    const info = w.Schedule.ratioInfo(today);
+    ok(info.clients > 200, "más de 200 clientes hoy");
+    equal(ask("¿Cuántos clientes hay previstos hoy?"), "Hoy hay " + info.clients + " clientes previstos y trabajan " + w.Schedule.crew(today).total +
+      " camareros: " + new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(info.ratio) + " clientes por camarero.", "clientes de hoy");
+    equal(ask("¿Cómo copio un turno?"), w.FervisGuide.manual("copiar_turno"), "cómo copio: la guía");
+    equal(ask("¿Quién tiene turno partido y quién seguido esta semana?"), "Esta semana:\n- Turno partido: Ana Castro (5 días), Sara Lema (4 días), Carmen Souto (4 días)\n" +
+      "- Turno seguido: Lucía Ferreiro (5 días), Marcos Otero (3 días), Diego Barreiro (5 días), Sara Lema (1 día), Carmen Souto (1 día), Iván Pena (4 días)", "partido y seguido");
+    $("#fervis-question").value = "¿Qué tiempo hará?";
+    $("#fervis-form").requestSubmit();
+    equal(last(), "En esta demo solo contesto a las preguntas de los botones. Para preguntar lo que quieras hace falta una clave gratuita de Groq (Ajustes, el icono de las tres barras).", "otra pregunta: aviso");
+    equal($$(".fervis-chip").length, 5, "los chips siguen");
+    ok($("#fervis-key-form").hidden, "sin pedir la clave");
+    equal(calls, [], "ni una llamada a Groq");
+    equal([localStorage.getItem("dp_data"), localStorage.getItem("dp_demo_data")], [null, null], "nada guardado");
+  });
+
+  test("Respuestas de la demo: quien causa baja a media semana cuenta los días que trabajó antes; un tipo que no existe da null", async function () {
+    const data = fixture();
+    data.employees[0].leftFrom = "2026-11-11";  // Ana, de baja desde el miércoles
+    data.shifts["e1|2026-11-09"] = work("10:00", "18:00");
+    data.shifts["e1|2026-11-10"] = { statusId: "work", slots: [{ start: "10:00", end: "14:00" }, { start: "18:00", end: "22:00" }], overtime: null };
+    data.shifts["e2|2026-11-12"] = work("12:00", "20:00");
+    data.statuses.push({ id: "tp", name: "Turno partido", color: "#16a085", countsAsWork: false, position: 2 });  // un estado SIN horario con ese nombre
+    data.shifts["e3|2026-11-09"] = { statusId: "tp", slots: [], overtime: null };
+    const w = await open(data);
+    const thursday = new w.Date(2026, 10, 12, 12, 0);
+    equal(w.FervisData.demoReply("partidoSeguido", thursday), "Esta semana:\n- Turno partido: Ana (1 día)\n- Turno seguido: Ana (1 día), Luis (1 día)",
+      "Ana cuenta lunes y martes; Marta, con un estado sin horario llamado «Turno partido», no cuenta");
+    equal(w.FervisData.demoReply("zzz", thursday), null, "tipo que no existe");
   });
 
   test("Fervis: la papelera borra la conversación (también lo que recuerda) y deja la clave; con una respuesta en marcha no hace nada", async function () {

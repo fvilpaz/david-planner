@@ -230,7 +230,8 @@ window.FervisData = (function () {
     return name === "turnos_entre" ? rangeLines(data, asked.from, asked.days, who) : summaryLines(data, asked.from, asked.days, who);
   }
 
-  // Los chips de la demo (sin IA ni clave): cada uno contesta SOLO a lo que dice, con lo que calcula la app. kind: hoy | clientes | partidoSeguido
+  // Los chips de la demo (sin IA ni clave): cada uno contesta SOLO a lo que dice, con lo que calcula la app.
+  // kind: hoy | clientes | partidoSeguido; otro → null (quien llama da el aviso de que eso no lo sé)
   function demoReply(kind, now) {
     const data = window.Schedule.getData();
     const monday = Dates.weekStart(now);
@@ -253,17 +254,20 @@ window.FervisData = (function () {
       return "Hoy hay " + info.clients + " clientes previstos y trabajan " + crew.total + " camareros" +
         (info.ratio !== null ? ": " + RATIO_FORMAT.format(info.ratio) + " clientes por camarero." : ".");
     }
+    if (kind !== "partidoSeguido") { return null; }
     const split = [], straight = [];
-    staffOn(data, Dates.toIso(Dates.addDays(monday, 6))).forEach(function (e) {
-      const count = { "turno partido": 0, "turno seguido": 0 };
+    // Quien está el lunes: si causa baja a media semana, cuentan los días que trabajó antes (el bucle se salta los de después)
+    staffOn(data, Dates.toIso(monday)).forEach(function (e) {
+      // Solo días de trabajo: un estado sin horario que se llame «Turno partido» no cuenta (su etiqueta es su nombre)
+      let splitDays = 0, straightDays = 0;
       for (let i = 0; i < 7; i++) {
         const date = Dates.addDays(monday, i);
         if (e.leftFrom && e.leftFrom <= Dates.toIso(date)) { continue; }
-        const label = dayLabel(data, e, date).label;
-        if (label in count) { count[label]++; }
+        const day = dayLabel(data, e, date);
+        if (day.works && day.label === "turno partido") { splitDays++; } else if (day.works) { straightDays++; }
       }
-      if (count["turno partido"]) { split.push(e.name + " (" + days(count["turno partido"]) + ")"); }
-      if (count["turno seguido"]) { straight.push(e.name + " (" + days(count["turno seguido"]) + ")"); }
+      if (splitDays) { split.push(e.name + " (" + days(splitDays) + ")"); }
+      if (straightDays) { straight.push(e.name + " (" + days(straightDays) + ")"); }
     });
     return "Esta semana:\n- Turno partido: " + names(split) + "\n- Turno seguido: " + names(straight);
   }

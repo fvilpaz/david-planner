@@ -1,5 +1,5 @@
-// Datos de ejemplo INVENTADOS (ninguna persona real): solo se ven abriendo la app con «?demo» (storage.js los guarda
-// aparte, en «dp_demo_data»). Abajo, PALETTE y STARTER_DATA: lo que ve David la primera vez.
+// Datos de ejemplo INVENTADOS (ninguna persona real): solo se ven abriendo la app con «?demo» (storage.js los rehace en
+// cada visita y no guarda nada). Abajo, PALETTE y STARTER_DATA: lo que ve David la primera vez.
 // Forma de los datos: la propuesta de PLAN.md. Los turnos se generan para esta semana y la anterior a partir de un
 // patrón semanal por persona (de lunes a domingo): «10-18» = un tramo, «10-14,18-22» = turno partido,
 // «18-02» = acaba al día siguiente, y si no es un horario, el id de un estado (off, vacation, sick). El 3.er dato es el
