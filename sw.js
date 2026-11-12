@@ -13,7 +13,7 @@ const CACHE = PREFIX + "v1";
 const ESSENTIAL = [
   "./", "index.html", "manifest.webmanifest", "css/themes.css", "css/app.css",
   "js/theme.js", "js/dates.js", "js/demo-data.js", "js/storage.js", "js/brand.js", "js/clientes.js", "js/app.js", "js/cell.js",
-  "js/swap.js", "js/lists.js", "js/staff.js", "js/states.js", "js/places.js", "js/backup.js", "js/fervis-datos.js", "js/fervis-guia.js", "js/fervis.js",
+  "js/swap.js", "js/lists.js", "js/staff.js", "js/states.js", "js/places.js", "js/backup.js", "js/fervis-datos.js", "js/fervis-guia.js", "js/fervis.js", "js/fervis-saludo.js",
   "js/pwa.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png",
 ];

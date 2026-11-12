@@ -47,6 +47,10 @@
       stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
       focusable="false"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V5"/><circle cx="12" cy="3.6"
       r="1.1"/><path d="M9 14h.01M15 14h.01"/><path d="M2 13v3M22 13v3"/></svg></span></button>
+    <!-- Saludo al abrir la app (fervis-saludo.js): un gancho sin nombre; el chat ya se presenta al abrirlo -->
+    <div class="fervis-hello no-print" id="fervis-hello" role="status" hidden><b>¡Eh, hola!</b> Tengo algo que contarte…
+      <small id="fervis-hello-hint" hidden>Si no quieres que vuelva a salir, desactívame en Ajustes (las tres barras del chat).</small>
+    </div>
     <div class="person editor">
       <button type="button" class="person-button" data-open data-view aria-label="Cambiar tu nombre">
         <span class="person-name" id="person-name"></span>
@@ -352,6 +356,7 @@
         </div>
         <p class="help" id="fervis-key-state" role="status"></p>
         <button type="button" class="danger" id="fervis-key-remove" hidden>Quitar la clave</button>
+        <button type="button" class="secondary" id="fervis-hello-toggle"></button>
       </form>
       <ul class="fervis-messages" id="fervis-messages" role="log" aria-live="polite"></ul>
       <!-- Glosario de la app (botón 📖): grupos y temas que se despliegan; lo rellena fervis.js; no es el chat -->
@@ -396,6 +401,7 @@
   <script src="js/fervis-datos.js"></script>
   <script src="js/fervis-guia.js"></script>
   <script src="js/fervis.js"></script>
+  <script src="js/fervis-saludo.js"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>

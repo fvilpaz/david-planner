@@ -583,6 +583,65 @@
     equal(localStorage.getItem("dp_groq_key"), null, "«Quitar la clave» la borra");
   });
 
+  test("Saludo de Fervis al abrir: sale contando aperturas, avisa en la 4.ª, tocarlo abre el chat y el botón de Ajustes lo apaga y lo enciende", async function () {
+    // open() limpia también sessionStorage: cada open() es una visita nueva. Un cambio de semana es una recarga SIN limpiar.
+    const SALUDA = 3700;  // el robot se menea a los 2,5 s y el bocadillo sale 1 s después
+    frame.style.width = "600px";   // pantalla estrecha: el salto es solo desde 900 px (otra prueba, abajo)
+    try {
+    await open(fixture());
+    ok($("#fervis-hello").hidden && !$("#fervis-button").classList.contains("saludando"), "al abrir, aún nada: primero la gente mira la pantalla");
+    await wait(2800);
+    ok($("#fervis-button").classList.contains("saludando") && $("#fervis-hello").hidden, "primero se menea el robot, sin bocadillo todavía");
+    await wait(SALUDA - 2800);
+    ok(!$("#fervis-hello").hidden && $("#fervis-hello").textContent.includes("Tengo algo que contarte") && $("#fervis-hello b"), "después sale el bocadillo, con el título en negrita");
+    ok($("#fervis-hello-hint").hidden && localStorage.getItem("dp_fervis_aperturas") === "1", "la 1.ª, sin aviso y contada");
+    const again = reloaded();
+    frame.src = "../?week=2026-11-16&t=" + Date.now();
+    await again;
+    await wait(SALUDA);
+    ok($("#fervis-hello").hidden && localStorage.getItem("dp_fervis_aperturas") === "1", "cambiar de semana (recarga) no vuelve a saludar ni a contar");
+    await open(fixture(), { extra: [["dp_fervis_aperturas", "3"]] });
+    await wait(SALUDA);
+    ok(!$("#fervis-hello-hint").hidden && $("#fervis-hello-hint").textContent.includes("Ajustes"), "la 4.ª avisa de que se puede desactivar");
+    $("#fervis-hello").click();
+    ok($("#fervis-hello").hidden && !$("#fervis-dialog").open, "tocarlo lo esconde y el robot se mueve antes de abrir");
+    await wait(1100);
+    ok($("#fervis-dialog").open, "tocar el bocadillo abre el chat");
+    equal($("#fervis-hello-toggle").textContent, "Desactivar el saludo al abrir la app", "el botón de Ajustes ofrece desactivar");
+    $("#fervis-hello-toggle").click();
+    equal([localStorage.getItem("dp_fervis_saludo"), $("#fervis-hello-toggle").textContent], ["off", "Activar el saludo al abrir la app"], "desactivado y recordado");
+    await open(fixture(), { extra: [["dp_fervis_saludo", "off"]] });
+    await wait(SALUDA);
+    ok($("#fervis-hello").hidden && !$("#fervis-button").classList.contains("saludando"), "con el saludo apagado no sale al abrir");
+    $("#fervis-hello-toggle").click();
+    equal(localStorage.getItem("dp_fervis_saludo"), null, "«Activar» lo vuelve a encender");
+    } finally { frame.style.width = ""; }
+  });
+
+  test("Saludo de Fervis en pantalla ancha: el robot salta de la barra al hueco de «Cuadrante semanal», el bocadillo sale a su lado y al cerrarse vuelve a la barra", async function () {
+    frame.style.width = "1200px";
+    try {
+      await open(fixture());
+      await wait(2900);   // el salto empieza a los 2,5 s
+      ok($("#fervis-button").classList.contains("ausente") && $(".fervis-ghost") && $("#fervis-hello").hidden, "salta una copia, el de la barra se oculta y aún no hay bocadillo");
+      await wait(1100);   // la caída con rebotes dura 1,3 s
+      ok(!$("#fervis-hello").hidden && $("#fervis-hello").classList.contains("lateral"), "al aterrizar sale el bocadillo, a su lado");
+      const g = $(".fervis-ghost").getBoundingClientRect();
+      const r = $(".section-header").getBoundingClientRect();
+      ok(Math.abs((g.top + g.height / 2) - (r.top + r.height / 2)) < 3, "aterriza en medio de la fila de «Cuadrante semanal»");
+      $("body").click();   // cualquier toque lo cierra
+      await wait(900);
+      ok(!$(".fervis-ghost") && !$("#fervis-button").classList.contains("ausente") && $("#fervis-hello").hidden, "la copia se va y el robot de la barra vuelve a verse");
+      // Tocar al robot cuando está en medio abre el chat directamente (sin tener que volver a la barra)
+      await open(fixture());
+      await wait(4000);
+      $(".fervis-ghost").click();
+      await wait(1500);   // el movimiento del robot (hasta 1 s) y se abre
+      ok($("#fervis-dialog").open, "tocar al robot que ha saltado abre el chat");
+      ok(!$(".fervis-ghost") && !$("#fervis-button").classList.contains("ausente"), "y el robot vuelve a la barra");
+    } finally { frame.style.width = ""; }
+  });
+
   test("La clave de Groq no sale en la copia descargada ni en las copias automáticas", async function () {
     const w = await open(fixture(), { extra: [["dp_groq_key", FAKE_KEY]] });
     const files = catchDownloads(w);
