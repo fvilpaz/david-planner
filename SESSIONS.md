@@ -1,5 +1,34 @@
 # SESSIONS — david-planner
 
+## 13-nov-2026 (Haiku y Sonnet) — Español e inglés en TODA la app
+
+**Hecho**
+- Etiquetas **Open Graph** (`og:title`, `description`, `url`, `type`, `locale` y `locale:alternate` = `en_GB`) escritas por Nando a mano; yo las revisé.
+- **Selector ES | EN** en Gestión: una cápsula con el idioma activo en el color del tema, que reutiliza la regla `button[aria-pressed=true]` que ya había + una clase `solid` (una sola regla nueva). Se recuerda en `dp_lang`.
+- **Motor** `js/i18n.js` (SRP: solo elige idioma, busca textos y los aplica): `t`, `tn` (singular/plural), `formatter` (fechas y números por idioma), `displayName`/`displayStatus`/`displayPlace` (lo de fábrica se traduce al mostrarlo) y `apply()` (`data-i18n`, `-html`, `-aria`, `-placeholder`, `-title`). **Textos** en `js/lang-es.js` y `js/lang-en.js` (≈280 claves cada uno); la guía en `js/guide-es.js` y `js/guide-en.js`. Lo repetido entre ventanas, una vez en `common.*`.
+- **Todo traducido y en vivo (sin recargar)**: menú, cuadrante, tabla de clientes, Personal/Estados/Puntos de venta, la casilla (con sus errores), copia de seguridad, intercambiar/copiar, temas, y Fervis (chat, ajustes, saludo, errores, chips, guía, PDF de la guía, y lo que calcula la app para la IA y para la demo). `fervis-datos.js` comparaba etiquetas de texto en su lógica (`"turno partido"`): ahora compara con la del idioma actual, desde un solo sitio.
+- **Fallo mío cazado** (lo vio la prueba de `ESSENTIAL`): `sw.js` no listaba `js/i18n.js`, y sin conexión la app se habría roto.
+- **Fallo mío cazado** (lo vi yo): en la demo, « · ejemplo» se añadía al título con `+=` y se perdía al cambiar de idioma → `markDemo()`.
+- **Pruebas**: 7 nuevas de «Idioma» (82 en total). Control: cuatro roturas a propósito (falta una clave, fechas en español, estados sin traducir, orden de idioma a la IA) y cada una la ve fallar su prueba; la cuarta, probada sola. Además, **barrido del texto de la demo en inglés** en un navegador real (ventanas abiertas una a una): solo salieron nombres con tilde y «Café».
+
+**Decidido (Nando)**
+- Un solo sitio con selector (no dos páginas); inglés **británico**; `Outlets`, `Status`, `Staff`, `Waiters`.
+- El ratio «clientes por camarero» se queda para camareros: si llega otro puesto, se adapta (no se añade ahora un interruptor).
+- «Camarero N» y los estados de fábrica se traducen **al mostrarlos** (no se migran datos): el nombre guardado no cambia, y si el usuario lo renombra, se ve el suyo.
+- Se rechazó guardar solo «1, 2, 3, 4» como nombre (obligaba a migrar datos y se confunde con un nombre real).
+
+**Aprendido**
+- Una prueba que nunca ha fallado no demuestra nada: se rompe a propósito y se ve caer (y si se rompen varias a la vez, una puede quedar sin comprobar: la cuarta cayó antes por las otras).
+- `textContent` borra a los hijos: un `<label>` con un `<input>` dentro necesita el texto en su propio `<span>`.
+- Los mismos nombres de botón aparecen en el menú, en la guía y en los avisos: por eso una clave compartida, y por eso la guía en inglés cita los nombres que muestra la interfaz en inglés.
+- Un test con un margen de 200 ms (el saludo de Fervis: sale a los 3,5 s y la prueba espera 3,7 s) puede fallar según cómo vaya el navegador, sin que haya error.
+
+**Siguiente**
+- Revisar el inglés con un hablante nativo.
+- `manifest`, `<meta description>` y Open Graph siguen fijos en castellano (ver «Aparcado» en `PLAN.md`).
+- El botón del saludo como interruptor (verde/rojo, y con texto o ✓/✗ además).
+- Auditoría de cierre (`audit`) y los commits (los haces tú).
+
 ## 12/13-nov-2026 (noche, Opus) — Chips sin fallos y auditoría completa: zombies, pruebas primero, refactor
 
 **Hecho**

@@ -12,8 +12,8 @@ const CACHE = PREFIX + "v1";
 // Lo necesario para abrir la app sin conexión desde la primera visita
 const ESSENTIAL = [
   "./", "index.html", "manifest.webmanifest", "css/themes.css", "css/app.css",
-  "js/theme.js", "js/dates.js", "js/demo-data.js", "js/storage.js", "js/brand.js", "js/clientes.js", "js/app.js", "js/cell.js",
-  "js/swap.js", "js/lists.js", "js/staff.js", "js/states.js", "js/places.js", "js/backup.js", "js/fervis-datos.js", "js/fervis-guia.js", "js/fervis.js", "js/fervis-saludo.js",
+  "js/theme.js", "js/lang-es.js", "js/lang-en.js", "js/i18n.js", "js/dates.js", "js/demo-data.js", "js/storage.js", "js/brand.js", "js/clientes.js", "js/app.js", "js/cell.js",
+  "js/swap.js", "js/lists.js", "js/staff.js", "js/states.js", "js/places.js", "js/backup.js", "js/fervis-datos.js", "js/guide-es.js", "js/guide-en.js", "js/fervis-guia.js", "js/fervis.js", "js/fervis-saludo.js",
   "js/pwa.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png",
 ];

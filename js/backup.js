@@ -19,7 +19,8 @@
   const HEX = /^#[0-9a-fA-F]{6}$/;
   const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
   const ID = /^[\w-]{1,40}$/;
-  const dateFormat = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" });
+  const t = window.I18n.t;   // los textos y los formatos de fecha siguen al idioma elegido (js/i18n.js)
+  const dateFormat = window.I18n.formatter(Intl.DateTimeFormat, { day: "numeric", month: "short", year: "numeric" });
   const bar = document.getElementById("backup-bar");
   const result = document.getElementById("backup-result");
   const fileInput = document.getElementById("backup-file");
@@ -60,7 +61,7 @@
     download("david-planner-copia-");
     if (!window.Store.DEMO) { set(LAST, new Date().toISOString()); }
     refresh();
-    result.textContent = "Copia descargada ✓ Está en Descargas: guárdala también fuera del móvil.";
+    result.textContent = t("backup.downloaded");
   }
 
   // ---------- Revisar un archivo ----------
@@ -68,8 +69,8 @@
 
   // Devuelve { data, settings, dropped, exportedAt } o lanza un Error con un mensaje en castellano
   function clean(copy) {
-    if (!copy || copy.app !== APP) { throw new Error("Este archivo no es una copia de David Planner."); }
-    if (copy.version !== VERSION) { throw new Error("Esta copia es de otra versión de la app y no se puede cargar."); }
+    if (!copy || copy.app !== APP) { throw new Error(t("backup.errNotBackup")); }
+    if (copy.version !== VERSION) { throw new Error(t("backup.errVersion")); }
     const source = copy.data || {};
     let dropped = 0;
     function keep(list, ok) {
@@ -86,7 +87,7 @@
     const statuses = keep(source.statuses, function (s) {
       return ID.test(s.id) && text(s.name, 30) && HEX.test(s.color) && typeof s.countsAsWork === "boolean" && Number.isFinite(s.position);
     }).map(function (s) { return { id: s.id, name: s.name, color: s.color, countsAsWork: s.countsAsWork, position: s.position }; });
-    if (!statuses.length) { throw new Error("La copia no tiene estados: parece incompleta."); }
+    if (!statuses.length) { throw new Error(t("backup.errNoStatuses")); }
     const places = keep(source.places, function (p) {
       return ID.test(p.id) && text(p.name, 30) && Number.isFinite(p.position);
     }).map(function (p) {
@@ -146,20 +147,21 @@
   // ---------- Cargar ----------
   function read(file) {
     result.textContent = "";
-    if (file.size > MAX_FILE) { result.textContent = "Ese archivo es demasiado grande para ser una copia de David Planner."; return; }
+    if (file.size > MAX_FILE) { result.textContent = t("backup.errTooBig"); return; }
     file.text().then(function (content) {
       let copy;
       try { copy = clean(JSON.parse(content)); } catch (error) {
-        result.textContent = error instanceof SyntaxError ? "Ese archivo no se puede leer (no es una copia válida)." : error.message;
+        result.textContent = error instanceof SyntaxError ? t("backup.errUnreadable") : error.message;
         return;
       }
       pending = copy;
       const when = Date.parse(copy.exportedAt || "");
-      document.getElementById("import-summary").textContent =
-        "Copia " + (Number.isFinite(when) ? "del " + dateFormat.format(new Date(when)) : "sin fecha") + " · " +
-        copy.data.employees.length + (copy.data.employees.length === 1 ? " persona" : " personas") + " · " +
-        Object.keys(copy.data.shifts).length + " turnos" +
-        (copy.dropped ? " · se descartan " + copy.dropped + " datos que no se podían leer" : "") + ".";
+      document.getElementById("import-summary").textContent = t("backup.summary", {
+        when: Number.isFinite(when) ? t("backup.whenDated", { date: dateFormat.format(new Date(when)) }) : t("backup.whenUndated"),
+        people: window.I18n.tn("common.people", copy.data.employees.length),
+        shifts: window.I18n.tn("common.shifts", Object.keys(copy.data.shifts).length),
+        dropped: copy.dropped ? t("backup.dropped", { n: copy.dropped }) : ""
+      });
       importDialog.showModal();
     });
   }
@@ -173,7 +175,7 @@
     if (!autoCopy(true) && !window.Store.DEMO && get(window.Store.KEY) !== null) { download("david-planner-antes-de-cargar-"); }
     if (!window.Store.save(copy.data)) {
       importDialog.close();
-      result.textContent = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+      result.textContent = t("common.saveFailed") + " " + t("common.nothingChanged");
       return;
     }
     SETTINGS.forEach(function (key) { set(key, key in copy.settings ? copy.settings[key] : null); });
@@ -183,7 +185,7 @@
   // ---------- Copias automáticas (paso 9b, como health-tracker) ----------
   // Dentro del navegador, junto a los datos: sirven si algo sale mal (un turno borrado, una carga equivocada), pero
   // si se borran los datos del navegador se van con ellas. Para eso está «Descargar copia».
-  const whenFormat = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const whenFormat = window.I18n.formatter(Intl.DateTimeFormat, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
   function autoCopies() {
     try {
@@ -209,7 +211,7 @@
     if (!list.length) {
       const empty = document.createElement("li");
       empty.className = "help";
-      empty.textContent = "Aún no hay ninguna: se hace sola al abrir la app, una por semana.";
+      empty.textContent = t("backup.noCopies");
       box.replaceChildren(empty);
       return;
     }
@@ -217,13 +219,13 @@
       const item = document.createElement("li");
       const people = Array.isArray(copy.data.employees) ? copy.data.employees.length : 0;
       const shifts = copy.data.shifts ? Object.keys(copy.data.shifts).length : 0;
-      item.append(whenFormat.format(new Date(copy.at)) + " · " + people + (people === 1 ? " persona, " : " personas, ") +
-        shifts + (shifts === 1 ? " turno" : " turnos"));
+      item.append(whenFormat.format(new Date(copy.at)) + " · " + window.I18n.tn("common.people", people) + ", " +
+        window.I18n.tn("common.shifts", shifts));
       const button = item.appendChild(document.createElement("button"));
       button.type = "button";
       button.className = "secondary";
       button.dataset.at = copy.at;
-      button.textContent = "Recuperar";
+      button.textContent = t("backup.recover");
       return item;
     }));
   }
@@ -235,12 +237,12 @@
     if (!copy) { return; }
     let cleaned;
     try { cleaned = clean({ app: APP, version: VERSION, data: copy.data }); } catch (error) {
-      result.textContent = "Esa copia no se puede leer: " + error.message;
+      result.textContent = t("backup.copyUnreadable", { message: error.message });
       return;
     }
     autoCopy(true);
     if (!window.Store.save(cleaned.data)) {
-      result.textContent = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+      result.textContent = t("common.saveFailed") + " " + t("common.nothingChanged");
       return;
     }
     window.location.reload();
@@ -251,7 +253,7 @@
     if (!button) { return; }
     if (!button.dataset.confirm) {
       button.dataset.confirm = "1";
-      button.textContent = "¿Seguro? Toca otra vez";
+      button.textContent = t("backup.sure");
       return;
     }
     recover(button.dataset.at);
@@ -261,15 +263,14 @@
   function refresh() {
     const last = get(LAST);
     const days = daysSince(last);
-    document.getElementById("backup-last").textContent = !last ? "Todavía no has descargado ninguna copia." :
-      days === 0 ? "Última copia: hoy." : "Última copia: hace " + days + (days === 1 ? " día." : " días.");
+    document.getElementById("backup-last").textContent = !last ? t("backup.lastNone") :
+      days === 0 ? t("backup.lastToday") : window.I18n.tn("backup.lastDays", days);
     if (!get(SINCE)) { set(SINCE, new Date().toISOString()); }
     let later = false;
     try { later = sessionStorage.getItem(SNOOZE) === "1"; } catch (e) { /* sin almacenamiento: se avisa */ }
     const age = daysSince(last || get(SINCE));
     bar.hidden = window.Store.DEMO || later || get(window.Store.KEY) === null || age === null || age < EVERY_DAYS;
-    document.getElementById("backup-bar-text").textContent = last ?
-      "Hace " + days + " días que no guardas una copia de seguridad." : "Todavía no has guardado ninguna copia de seguridad.";
+    document.getElementById("backup-bar-text").textContent = last ? t("backup.barDays", { n: days }) : t("backup.barNever");
   }
 
   document.getElementById("backup-download").addEventListener("click", exportNow);
@@ -293,4 +294,6 @@
 
   autoCopy(false);  // al abrir la app: la de esta semana, si toca
   refresh();
+  // Al cambiar de idioma se vuelven a escribir los textos que pone este archivo (los fijos ya los cambia i18n.js)
+  document.addEventListener("i18n-change", function () { refresh(); renderAutoCopies(); });
 })();

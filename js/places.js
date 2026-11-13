@@ -15,6 +15,7 @@
   const removeButton = document.getElementById("place-remove");
   const palette = document.getElementById("place-palette");
   const showError = window.Lists.errorShower(errorEl);
+  const t = window.I18n.t;   // los textos siguen al idioma elegido (js/i18n.js)
   let editing = null;      // el punto de venta de la ficha (null = nuevo)
   let color = null;        // el color elegido en la ficha
   let confirming = false;  // «Quitar» espera el segundo toque
@@ -22,7 +23,7 @@
   function places() { return window.Schedule.getData().places; }
 
   function showList() {
-    title.textContent = "Puntos de venta";
+    title.textContent = t("menu.outlet");
     showError("");
     form.hidden = true;
     listView.hidden = false;
@@ -37,8 +38,9 @@
       const dot = row.appendChild(document.createElement("span"));
       dot.className = "swatch";
       dot.style.setProperty("--swatch", place.color);
-      row.append(place.name);  // texto, nunca HTML
-      window.Lists.decorate(item, index, place.name);
+      const shown = window.I18n.displayPlace(place);   // los de fábrica, en el idioma elegido
+      row.append(shown);  // texto, nunca HTML
+      window.Lists.decorate(item, index, shown);
       return item;
     }));
   }
@@ -52,13 +54,12 @@
     editing = place;
     confirming = false;
     color = place && place.color ? place.color : window.Store.freeColor(window.Schedule.getData());
-    title.textContent = place ? "Editar «" + place.name + "»" : "Nuevo punto de venta";
+    title.textContent = place ? t("common.editNamed", { name: window.I18n.displayPlace(place) }) : t("places.new");
     nameInput.value = place ? place.name : "";
     removeButton.hidden = !place || uses > 0;  // nuevo: nada que quitar; en uso: no se puede
-    removeButton.textContent = "Quitar";
+    removeButton.textContent = t("common.remove");
     note.hidden = !uses;
-    note.textContent = "Se usa en " + uses + (uses === 1 ? " tramo" : " tramos") + ": no se puede quitar " +
-      "(se quedarían sin sitio). El nombre y el color, sí.";
+    note.textContent = window.I18n.tn("places.inUse", uses);
     showError("");
     renderPalette();
     listView.hidden = true;
@@ -74,7 +75,7 @@
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     const name = window.Lists.cleanName(nameInput.value, 30);
-    if (!name) { showError("Pon un nombre."); nameInput.focus(); return; }
+    if (!name) { showError(t("common.nameRequired")); nameInput.focus(); return; }
     const chosen = color;
     if (editing) {
       const id = editing.id;
@@ -96,7 +97,7 @@
     if (window.Schedule.placeUses(id)) { showForm(editing); return; }  // se empezó a usar mientras tanto
     if (!confirming) {
       confirming = true;
-      removeButton.textContent = "Sí, quitar «" + editing.name + "»";
+      removeButton.textContent = t("common.confirmRemove", { name: window.I18n.displayPlace(editing) });
       return;
     }
     save(function (all) { all.splice(all.findIndex(function (p) { return p.id === id; }), 1); });

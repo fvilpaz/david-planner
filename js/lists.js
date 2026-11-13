@@ -7,7 +7,8 @@
 // Cada fila de la lista es un <li data-id="…">.
 window.Lists = (function () {
   "use strict";
-  const SAVE_ERROR = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.";
+  // El aviso de «no se ha podido guardar», en el idioma de ahora (se compone con dos piezas comunes de js/lang-*.js)
+  function saveError() { return window.I18n.t("common.saveFailed") + " " + window.I18n.t("common.nothingChanged"); }
 
   // Una copia de la lista en el orden del puesto («position»), sin tocar la guardada
   function byPosition(items) { return items.slice().sort(function (a, b) { return a.position - b.position; }); }
@@ -35,7 +36,7 @@ window.Lists = (function () {
         ids.forEach(function (id, position) { all.find(function (x) { return x.id === id; }).position = position; });
       });
       showList();
-      if (!saved) { showError(SAVE_ERROR); }
+      if (!saved) { showError(saveError()); }
     };
   }
 
@@ -60,7 +61,7 @@ window.Lists = (function () {
     number.inputMode = "numeric";
     number.maxLength = 2;
     number.value = String(index + 1);
-    number.setAttribute("aria-label", "Puesto de " + label);
+    number.setAttribute("aria-label", window.I18n.t("common.position", { name: label }));
   }
 
   // onOrder(ids): recibe los ids de arriba abajo en el orden nuevo (lo guarda quien usa la lista)
@@ -124,13 +125,13 @@ window.Lists = (function () {
       const swatch = document.createElement("button");
       swatch.type = "button";
       swatch.style.setProperty("--swatch", c);
-      swatch.setAttribute("aria-label", "Color " + (i + 1));
+      swatch.setAttribute("aria-label", window.I18n.t("common.colorN", { n: i + 1 }));
       swatch.setAttribute("aria-pressed", String(c === current));
       swatch.addEventListener("click", function () { onPick(c); });
       return swatch;
     }));
   }
 
-  return { SAVE_ERROR: SAVE_ERROR, decorate: decorate, sortable: sortable, palette: palette, byPosition: byPosition, errorShower: errorShower,
+  return { get SAVE_ERROR() { return saveError(); }, decorate: decorate, sortable: sortable, palette: palette, byPosition: byPosition, errorShower: errorShower,
     cleanName: cleanName, newId: newId, nextPosition: nextPosition, orderSaver: orderSaver, wireDialog: wireDialog };
 })();

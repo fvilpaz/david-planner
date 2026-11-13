@@ -25,12 +25,13 @@
   function isOff() { return read(KEY_OFF) === "off"; }
 
   // El botón de Ajustes (dentro del panel del chat): desactiva o vuelve a activar
-  function paintToggle() { toggle.textContent = isOff() ? "Activar el saludo al abrir la app" : "Desactivar el saludo al abrir la app"; }
+  function paintToggle() { toggle.textContent = window.I18n.t(isOff() ? "fervis.helloOn" : "fervis.helloOff"); }
   toggle.addEventListener("click", function () {
     if (isOff()) { try { localStorage.removeItem(KEY_OFF); } catch (error) { /* nada que quitar */ } } else { write(KEY_OFF, "off"); }
     paintToggle();
   });
   paintToggle();
+  document.addEventListener("i18n-change", paintToggle);   // al cambiar de idioma, el botón se vuelve a escribir
 
   if (isOff()) { return; }
   // Cambiar de semana recarga la página: el saludo sale y cuenta UNA vez por visita (sessionStorage se borra al cerrar la pestaña o la app)

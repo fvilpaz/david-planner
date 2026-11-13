@@ -7,6 +7,7 @@
 window.Fervis = (function () {
   "use strict";
   const KEY = "dp_groq_key";
+  const t = window.I18n.t;   // los textos siguen al idioma elegido (js/i18n.js)
   const dialog = document.getElementById("fervis-dialog");
   const keyForm = document.getElementById("fervis-key-form");
   const keyInput = document.getElementById("fervis-key");
@@ -50,7 +51,7 @@ window.Fervis = (function () {
     // Lo que va por delante: si la app ha encontrado en la guía lo que toca, el modelo explica SOLO con eso
     const help = found ? "\n\nGUÍA DE LA APP RELEVANTE PARA ESTA PREGUNTA (explica con esto; no digas que algo no se puede si no lo has visto aquí o en manual_app):\n" + found : "";
     return "Eres Fervis, el asistente personal de quien usa «David Planner», la app de turnos de este local de hostelería. " +
-      "Contesta en castellano, breve y claro, en texto normal: sin markdown (ni asteriscos ni almohadillas); para listas, " +
+      "Contesta en " + t("fervis.replyLanguage") + ", breve y claro, en texto normal: sin markdown (ni asteriscos ni almohadillas); para listas, " +
       "una línea por punto empezando con «- ». Puedes charlar de cualquier tema general (por ejemplo, qué es un contrato " +
       "fijo o fijo discontinuo, descansos u horas extra): da información general y, para un caso concreto, recomienda mirar " +
       "el convenio o preguntar a la gestoría. Para CUALQUIER dato de los turnos llama a las herramientas, nunca lo " +
@@ -104,13 +105,13 @@ window.Fervis = (function () {
     try {
       response = await fetch(GROQ, { method: "POST", body: JSON.stringify(body), signal: AbortSignal.timeout(30000),
         headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" } });
-    } catch (error) { throw failure("No he podido conectar con Groq (¿sin internet?).", false); }
-    if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en Ajustes (el icono de las tres barras) que esté entera.", false); }
+    } catch (error) { throw failure(t("fervis.errConnect"), false); }
+    if (response.status === 401) { throw failure(t("fervis.errKey"), false); }
     if (!response.ok) {
       let detail = "";
       try { if (typeof response.text === "function") { detail = (await response.text()).slice(0, 300); } } catch (error) { /* sin detalle */ }
       console.warn("Fervis: Groq " + response.status + " → " + detail);  // el motivo, para quien mire la consola (no sale al chat)
-      throw failure("Groq ha fallado (código " + response.status + ").", true, response.status === 429);
+      throw failure(t("fervis.errCode", { code: response.status }), true, response.status === 429);
     }
     return response.json();
   }
@@ -125,11 +126,11 @@ window.Fervis = (function () {
       if (model.startsWith("openai/gpt-oss")) { request.reasoning_effort = "low"; }
       const reply = await post(key, request);
       const message = reply && reply.choices && reply.choices[0] && reply.choices[0].message;
-      if (!message) { throw failure("Groq ha contestado algo vacío.", true); }
+      if (!message) { throw failure(t("fervis.errEmpty"), true); }
       if (!message.tool_calls || !message.tool_calls.length) {
         const text = String(message.content || "").trim();
         // Una respuesta vacía no se enseña: se prueba con el siguiente modelo (nunca «(sin respuesta)»)
-        if (!text) { throw failure("El modelo no ha escrito respuesta (se quedó pensando).", true); }
+        if (!text) { throw failure(t("fervis.errNoText"), true); }
         return text;
       }
       turn.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
@@ -140,7 +141,7 @@ window.Fervis = (function () {
           content: window.FervisData.runTool(call.function.name, args) });
       });
     }
-    throw failure("Demasiadas consultas para una sola pregunta.", true);
+    throw failure(t("fervis.errTooMany"), true);
   }
 
   // Los modelos de MODELS que de verdad tiene la cuenta de David, en orden (como en la cartera): si Groq retira uno, no se
@@ -151,11 +152,11 @@ window.Fervis = (function () {
     let ids = [];
     try {
       const response = await fetch(GROQ_MODELS, { headers: { Authorization: "Bearer " + key }, signal: AbortSignal.timeout(15000) });
-      if (response.status === 401) { throw failure("Groq no acepta tu clave: mira en Ajustes (el icono de las tres barras) que esté entera.", false); }
+      if (response.status === 401) { throw failure(t("fervis.errKey"), false); }
       if (response.ok) { ids = ((await response.json()).data || []).map(function (m) { return m.id; }); }
     } catch (error) { if (error.tryNext === false) { throw error; } }  // sin red o sin lista: se prueban todos
     const mine = MODELS.filter(function (id) { return ids.includes(id); });
-    if (ids.length && !mine.length) { throw failure("Tu cuenta de Groq no tiene ninguno de los modelos que uso.", false); }
+    if (ids.length && !mine.length) { throw failure(t("fervis.errNoModels"), false); }
     if (mine.length) { ladder = mine; }
     return mine.length ? mine : MODELS;
   }
@@ -170,8 +171,7 @@ window.Fervis = (function () {
         limited = limited || error.limit;
       }
     }
-    throw failure(limited ? "Los modelos gratuitos de Groq están al límite ahora mismo. Prueba otra vez en un minuto."
-      : "Ningún modelo de Groq ha podido contestar. Prueba a preguntarlo de otra forma.", false);
+    throw failure(t(limited ? "fervis.errLimit" : "fervis.errNone"), false);
   }
 
   function showKeyForm(show) {
@@ -179,7 +179,7 @@ window.Fervis = (function () {
     keyForm.hidden = !show;
     keyToggle.setAttribute("aria-expanded", String(show));
     // Lo de la clave vive aquí, en el panel (como los Ajustes de la cartera), no en la conversación
-    keyState.textContent = key ? "Clave guardada: " + mask(key) : "Sin clave todavía: Fervis la necesita para contestarte.";
+    keyState.textContent = key ? t("fervis.keySaved", { mask: mask(key) }) : t("fervis.keyNone");
     keyRemove.hidden = !key;
     if (show) { keyInput.focus(); }
   }
@@ -187,17 +187,16 @@ window.Fervis = (function () {
   keyForm.addEventListener("submit", function (event) {
     event.preventDefault();
     const key = cleanKey(keyInput.value);
-    if (!key) { keyState.textContent = "Pega primero la clave en el campo."; return; }
+    if (!key) { keyState.textContent = t("fervis.keyPaste"); return; }
     if (!looksValid(key)) {
-      keyState.textContent = "Eso no parece una clave: tiene espacios o no mide entre 20 y 300 letras. No se ha guardado.";
+      keyState.textContent = t("fervis.keyInvalid");
       return;
     }
-    if (!writeKey(key)) { keyState.textContent = "No se ha podido guardar: el navegador no lo deja (¿modo privado?)."; return; }
+    if (!writeKey(key)) { keyState.textContent = t("fervis.keyNoSave"); return; }
     keyInput.value = "";  // la clave no se queda escrita en la página
     ladder = null;        // con otra clave, otra cuenta: los modelos se vuelven a preguntar
     showKeyForm(false);
-    say("fervis", "Clave guardada (" + mask(key) + ")." +
-      (key.startsWith("gsk_") ? "" : " Ojo: las de Groq empiezan por gsk_; si no funciona, mira que esté entera."));
+    say("fervis", t("fervis.keySavedMsg", { mask: mask(key) }) + (key.startsWith("gsk_") ? "" : t("fervis.keyOdd")));
     question.focus();
   });
 
@@ -205,7 +204,7 @@ window.Fervis = (function () {
     writeKey("");
     ladder = null;
     showKeyForm(true);
-    say("fervis", "Clave quitada de este navegador.");
+    say("fervis", t("fervis.keyRemoved"));
   });
 
   keyToggle.addEventListener("click", function () { showKeyForm(keyForm.hidden); });
@@ -232,19 +231,21 @@ window.Fervis = (function () {
   // Cada pregunta de ejemplo con lo que contesta en la demo sin clave (lo calcula la app: ver demoAnswer). Una sola lista: cambiar
   // una pregunta no puede dejarla sin respuesta. La larga va la última: si no, en pantallas estrechas rompe la fila de chips.
   const demoReply = function (kind) { return function () { return window.FervisData.demoReply(kind, new Date()); }; };
-  const QUESTIONS = [["🕒", "¿Quién trabaja hoy?", demoReply("hoy")], ["👥", "¿Cuántos clientes hay previstos hoy?", demoReply("clientes")],
-    ["📋", "¿Cómo copio un turno?", function () { return window.FervisGuide.manual("copiar_turno"); }],
-    ["✂️", "¿Quién tiene turno partido y quién seguido esta semana?", demoReply("partidoSeguido")]];
+  // Es una función (y no una lista fija) para que las preguntas salgan en el idioma de ese momento
+  function questions() {
+    return [["🕒", t("fervis.qToday"), demoReply("hoy")], ["👥", t("fervis.qClients"), demoReply("clientes")],
+      ["📋", t("fervis.qCopy"), function () { return window.FervisGuide.manual("copiar_turno"); }],
+      ["✂️", t("fervis.qSplit"), demoReply("partidoSeguido")]];
+  }
 
   function exampleChips() {
-    chipRow(QUESTIONS.map(function (pair) {
+    chipRow(questions().map(function (pair) {
       return [pair[0], pair[1], function () { question.value = pair[1]; chat.requestSubmit(); }];  // sin clave, abre Ajustes y deja la pregunta escrita
-    }).concat([["📖", "Guía de la app", function () { window.FervisGuide.showGuide(true); }]]));
+    }).concat([["📖", t("fervis.guideChip"), function () { window.FervisGuide.showGuide(true); }]]));
   }
 
   function greet() {
-    say("fervis", "¡Hola! Soy Fervis, tu asistente personal. Estoy aquí para ayudarte. Puedes escribirme tu consulta directamente aquí abajo o, si no sabes por dónde empezar, pulsar el botón «📖 Guía» de arriba." +
-      (window.Store.DEMO && !readKey() ? " Esto es una demo: contesto a las preguntas de los botones de abajo, con los turnos de ejemplo de esta semana." : ""));
+    say("fervis", t("fervis.greet") + (window.Store.DEMO && !readKey() ? t("fervis.greetDemo") : ""));
     exampleChips();
     messages.scrollTop = 0;  // el saludo se lee desde su primera línea (los chips lo bajarían al final)
   }
@@ -252,8 +253,8 @@ window.Fervis = (function () {
   // La demo (?demo) sin clave: cada chip se contesta con lo que calcula la app (las mismas herramientas que usa la IA, así que no gasta
   // nada de Groq). Cualquier otra pregunta recibe un aviso. Fuera de la demo, sin clave sigue abriéndose Ajustes.
   function demoAnswer(text) {
-    const asked = QUESTIONS.find(function (q) { return q[1] === text; });
-    return (asked && asked[2]()) || "En esta demo solo contesto a las preguntas de los botones. Para preguntar lo que quieras hace falta una clave gratuita de Groq (Ajustes, el icono de las tres barras).";
+    const asked = questions().find(function (q) { return q[1] === text; });
+    return (asked && asked[2]()) || t("fervis.demoOnly");
   }
 
   // La papelera: conversación nueva (Fervis olvida lo hablado; la clave no se toca). Con una respuesta a medias no, o
@@ -287,7 +288,7 @@ window.Fervis = (function () {
     clearChips();
     say("david", text);
     busy = true;
-    const reply = say("fervis", "Pensando…");
+    const reply = say("fervis", t("fervis.thinking"));
     history.push({ role: "user", content: text });
     try {
       const result = await answer(key, history.slice(-9));  // las últimas preguntas y respuestas, empezando por una pregunta
@@ -295,7 +296,7 @@ window.Fervis = (function () {
       // Debajo, quién ha contestado (como en la cartera); «respaldo» si el primero estaba saturado
       const label = reply.appendChild(document.createElement("small"));
       label.className = "fervis-model" + (result.backup ? " backup" : "");
-      label.textContent = "groq · " + result.model + (result.backup ? " (respaldo)" : "");
+      label.textContent = "groq · " + result.model + (result.backup ? " " + t("fervis.backup") : "");
       history.push({ role: "assistant", content: result.text });
     } catch (error) {
       reply.textContent = error.message;
@@ -334,6 +335,9 @@ window.Fervis = (function () {
     // En el móvil, el cursor en la casilla saca el teclado y tapa el saludo: ahí se escribe al tocarla (como en la cartera)
     if (key && window.matchMedia("(pointer: fine)").matches) { question.focus(); }
   }
+
+  // Al cambiar de idioma, los chips de ejemplo (si están a la vista) se vuelven a escribir; lo ya hablado se queda como está
+  document.addEventListener("i18n-change", function () { if (messages.querySelector(".fervis-chips")) { exampleChips(); } });
 
   // Lo que usan las pruebas (context con una hora fija, las herramientas y la guía relevante)
   return { open: open, context: window.FervisData.context, tool: window.FervisData.runTool, guideFor: window.FervisGuide.guideFor };

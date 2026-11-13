@@ -103,8 +103,8 @@ window.Clients = (function () {
       cell.replaceChildren(el("span", "crew-total", String(info.total)));
       const chips = cell.appendChild(el("div", "crew-chips"));
       function label(text, color) { chips.appendChild(chip(text, color)).classList.add("crew-place"); }
-      info.byPlace.forEach(function (place) { label(place.n + " " + place.name, place.color); });
-      if (info.noPlace && info.byPlace.length) { label(info.noPlace + " sin sitio", NO_PLACE_COLOR); }
+      info.byPlace.forEach(function (place) { label(place.n + " " + window.I18n.displayPlace(place), place.color); });
+      if (info.noPlace && info.byPlace.length) { label(window.I18n.t("clients.noPlace", { n: info.noPlace }), NO_PLACE_COLOR); }
     }
 
     // Solo el número («20»: la fila ya dice «Clientes por camarero»); «sin camareros» si hay clientes y nadie trabaja; «—» si no hay
@@ -112,31 +112,32 @@ window.Clients = (function () {
     function paintRatio(cell, iso) {
       const info = ratioInfo(iso);
       if (info.ratio !== null) { cell.replaceChildren(chip(ratioFormat.format(info.ratio), RATIO_COLOR)); return; }
-      if (info.clients) { cell.replaceChildren(chip("sin camareros", RATIO_COLOR)); return; }
+      if (info.clients) { cell.replaceChildren(chip(window.I18n.t("clients.noWaiters"), RATIO_COLOR)); return; }
       cell.replaceChildren(el("span", "summary-empty", "—"));
     }
 
     function table(days) {
       const summary = el("table", "schedule-table summary-table");
       const clientsRow = summary.appendChild(el("thead")).appendChild(el("tr", "summary-head"));
-      clientsRow.appendChild(el("th", "", "Clientes previstos"));
+      clientsRow.appendChild(el("th", "", window.I18n.t("summary.clients"))).dataset.i18n = "summary.clients";
       const body = summary.appendChild(el("tbody"));
       const today = Dates.toIso(new Date());
-      function addRow(className, label) {
+      function addRow(className, key) {
         const tr = body.appendChild(el("tr", className));
-        const th = tr.appendChild(el("th", "", label));
+        const th = tr.appendChild(el("th", "", window.I18n.t(key)));
+        th.dataset.i18n = key;   // apply() la vuelve a escribir al cambiar de idioma
         th.scope = "row";
         return tr;
       }
-      const crewRow = addRow("summary-row", "Camareros");
-      const ratioRow = addRow("summary-row", "Clientes por camarero");
+      const crewRow = addRow("summary-row", "summary.crew");
+      const ratioRow = addRow("summary-row", "summary.ratio");
 
       days.forEach(function (day) {
         const iso = Dates.toIso(day);
         const mark = iso === today ? "today" : "";
         const input = clientsRow.appendChild(el("th", mark)).appendChild(el("input", "clients-input"));
         input.placeholder = "—";
-        input.setAttribute("aria-label", "Clientes previstos el " + dayName.format(day));
+        input.setAttribute("aria-label", window.I18n.t("clients.aria", { day: dayName.format(day) }));
         paintCrew(crewRow.appendChild(el("td", mark)), iso);
         const ratioCell = ratioRow.appendChild(el("td", mark));
         paintRatio(ratioCell, iso);

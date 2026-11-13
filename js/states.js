@@ -17,6 +17,7 @@
   const errorEl = document.getElementById("status-error");
   const removeButton = document.getElementById("status-remove");
   const showError = window.Lists.errorShower(errorEl);
+  const t = window.I18n.t;   // los textos siguen al idioma elegido (js/i18n.js)
   let editing = null;      // el estado de la ficha (null = nuevo)
   let color = null;        // el color elegido en la ficha
   let confirming = false;  // «Quitar» espera el segundo toque
@@ -24,7 +25,7 @@
   function statuses() { return window.Schedule.getData().statuses; }
 
   function showList() {
-    title.textContent = "Estados";
+    title.textContent = t("menu.states");
     showError("");
     form.hidden = true;
     listView.hidden = false;
@@ -38,9 +39,10 @@
       const dot = row.appendChild(document.createElement("span"));
       dot.className = "swatch";
       dot.style.setProperty("--swatch", status.color);
-      row.append(status.name);  // texto, nunca HTML
-      row.appendChild(document.createElement("small")).textContent = status.countsAsWork ? "con horario" : "sin horario";
-      window.Lists.decorate(item, index, status.name);
+      const shown = window.I18n.displayStatus(status);   // Trabajo, Libre… de fábrica se ven en el idioma elegido
+      row.append(shown);  // texto, nunca HTML
+      row.appendChild(document.createElement("small")).textContent = t(status.countsAsWork ? "states.withHours" : "states.noHours");
+      window.Lists.decorate(item, index, shown);
       return item;
     }));
   }
@@ -68,15 +70,14 @@
     editing = status;
     confirming = false;
     color = status ? status.color : freeColor();
-    title.textContent = status ? "Editar «" + status.name + "»" : "Nuevo estado";
+    title.textContent = status ? t("common.editNamed", { name: window.I18n.displayStatus(status) }) : t("states.new");
     nameInput.value = status ? status.name : "";
     workInput.checked = status ? status.countsAsWork : false;
     workInput.disabled = uses > 0;
     removeButton.hidden = !status || uses > 0;  // nuevo: nada que quitar; en uso: no se puede
-    removeButton.textContent = "Quitar";
+    removeButton.textContent = t("common.remove");
     note.hidden = !uses;
-    note.textContent = "Se usa en " + uses + (uses === 1 ? " casilla" : " casillas") + ": no se puede quitar ni " +
-      "cambiar si cuenta como trabajo (sus horarios dejarían de verse). El nombre y el color, sí.";
+    note.textContent = window.I18n.tn("states.inUse", uses);
     showError("");
     renderPalette();
     syncColor();
@@ -93,7 +94,7 @@
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     const name = window.Lists.cleanName(nameInput.value, 30);
-    if (!name) { showError("Pon un nombre."); nameInput.focus(); return; }
+    if (!name) { showError(t("common.nameRequired")); nameInput.focus(); return; }
     const chosen = color;
     const counts = workInput.checked;
     if (editing) {
@@ -118,7 +119,7 @@
     if (window.Schedule.statusUses(id)) { showForm(editing); return; }  // se empezó a usar mientras tanto
     if (!confirming) {
       confirming = true;
-      removeButton.textContent = "Sí, quitar «" + editing.name + "»";
+      removeButton.textContent = t("common.confirmRemove", { name: window.I18n.displayStatus(editing) });
       return;
     }
     save(function (all) { all.splice(all.findIndex(function (s) { return s.id === id; }), 1); });

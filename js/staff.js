@@ -15,7 +15,8 @@ window.Staff = (function () {
   const note = document.getElementById("staff-note");
   const errorEl = document.getElementById("staff-error");
   const removeButton = document.getElementById("staff-remove");
-  const dateFormat = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" });
+  const dateFormat = window.I18n.formatter(Intl.DateTimeFormat, { day: "numeric", month: "short", year: "numeric" });
+  const t = window.I18n.t;   // los textos siguen al idioma elegido (js/i18n.js)
   const showError = window.Lists.errorShower(errorEl);
   let editing = null;      // la persona de la ficha (null = nueva)
   let color = null;        // el color elegido en la ficha
@@ -27,7 +28,7 @@ window.Staff = (function () {
   function longDate(iso) { return dateFormat.format(window.Dates.parseIso(iso)); }
 
   function showList() {
-    title.textContent = "Personal";
+    title.textContent = t("menu.staff");
     showError("");
     form.hidden = true;
     listView.hidden = false;
@@ -41,10 +42,11 @@ window.Staff = (function () {
       const dot = row.appendChild(document.createElement("span"));
       dot.className = "swatch";
       dot.style.setProperty("--swatch", person.color);
-      row.append(person.name);  // texto, nunca HTML
-      if (person.leftFrom) { row.appendChild(document.createElement("small")).textContent = "de baja desde el " + longDate(person.leftFrom); }
+      const shown = window.I18n.displayName(person.name);   // «Camarero 1» se ve «Waiter 1» en inglés
+      row.append(shown);  // texto, nunca HTML
+      if (person.leftFrom) { row.appendChild(document.createElement("small")).textContent = t("staff.leftSince", { date: longDate(person.leftFrom) }); }
       // Orden (paso 6b): el asa ⠿ y el número del puesto (lists.js), como «Ordenar» de gestion-hosteleria
-      window.Lists.decorate(item, index, person.name);
+      window.Lists.decorate(item, index, shown);
       return item;
     }));
   }
@@ -70,23 +72,22 @@ window.Staff = (function () {
     removeButton.className = "danger";
     if (editing.leftFrom) {
       removeButton.className = "secondary";
-      removeButton.textContent = "Volver a dar de alta";
-      note.textContent = "De baja desde el " + longDate(editing.leftFrom) + ": no sale en el cuadrante de esa semana en adelante.";
+      removeButton.textContent = t("staff.reactivate");
+      note.textContent = t("staff.leftNote", { date: longDate(editing.leftFrom) });
       note.hidden = false;
     } else if (window.Schedule.hasShifts(editing.id)) {
-      removeButton.textContent = "Dar de baja desde el " + longDate(window.Dates.toIso(window.Schedule.shownMonday()));
-      note.textContent = "Tiene turnos: al darle de baja deja de salir desde esa semana, pero sigue en las anteriores. " +
-        "No se borra nada y se puede volver a dar de alta.";
+      removeButton.textContent = t("staff.deactivate", { date: longDate(window.Dates.toIso(window.Schedule.shownMonday())) });
+      note.textContent = t("staff.hasShiftsNote");
       note.hidden = false;
     } else {
-      removeButton.textContent = "Quitar";
+      removeButton.textContent = t("common.remove");
     }
   }
 
   function showForm(person) {
     editing = person;
     color = person ? person.color : freeColor();
-    title.textContent = person ? "Editar a " + person.name : "Nueva persona";
+    title.textContent = person ? t("staff.edit", { name: window.I18n.displayName(person.name) }) : t("staff.new");
     nameInput.value = person ? person.name : "";
     showError("");
     renderPalette();
@@ -108,7 +109,7 @@ window.Staff = (function () {
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     const name = window.Lists.cleanName(nameInput.value, 40);
-    if (!name) { showError("Pon un nombre."); nameInput.focus(); return; }
+    if (!name) { showError(t("common.nameRequired")); nameInput.focus(); return; }
     const chosen = color;
     if (editing) {
       const id = editing.id;
@@ -133,7 +134,7 @@ window.Staff = (function () {
     const withShifts = window.Schedule.hasShifts(id);
     if (!confirming) {
       confirming = true;
-      removeButton.textContent = (withShifts ? "Sí, dar de baja a " : "Sí, quitar a ") + editing.name;
+      removeButton.textContent = t(withShifts ? "staff.confirmDeactivate" : "staff.confirmRemove", { name: window.I18n.displayName(editing.name) });
       return;
     }
     if (withShifts) {

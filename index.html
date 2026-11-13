@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Cuadrante de turnos semanal">
+  <meta property="og:title" content="David Planner">
+  <meta property="og:description" content="Cuadrante de turnos semanal para tu equipo">
+  <meta property="og:url" content="https://fvilpaz.github.io/david-planner/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_GB">
   <title>David Planner</title>
   <!-- App instalable (paso 10): manifiesto, color de la barra del móvil e iconos (también el de iPhone) -->
   <link rel="manifest" href="manifest.webmanifest">
@@ -21,7 +27,7 @@
   <header class="topbar">
     <div class="brand editor">
       <!-- Todo el bloque se toca para cambiar local y ciudad; el lápiz pequeño de la esquina lo indica -->
-      <button type="button" class="brand-button" data-open data-view aria-label="Cambiar el nombre del local y la ciudad">
+      <button type="button" class="brand-button" data-open data-view data-i18n-aria="brand.aria">
         <span class="avatar-wrap">
           <span class="brand-avatar" id="brand-avatar" aria-hidden="true">DP</span>
           <span class="pencil-badge" aria-hidden="true"><svg class="pencil" viewBox="0 0 24 24" focusable="false"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4zM13.5 6.5l4 4"/></svg></span>
@@ -33,26 +39,26 @@
       </button>
       <form class="edit-form" hidden>
         <span class="edit-fields">
-          <input data-key="dp_name" maxlength="40" placeholder="David Planner" autocomplete="off" aria-label="Nombre del local">
-          <input data-key="dp_city" maxlength="40" placeholder="Ciudad" autocomplete="off" aria-label="Ciudad">
+          <input data-key="dp_name" maxlength="40" placeholder="David Planner" autocomplete="off" data-i18n-aria="brand.nameAria">
+          <input data-key="dp_city" maxlength="40" data-i18n-placeholder="brand.city" autocomplete="off" data-i18n-aria="brand.city">
         </span>
-        <button type="submit" aria-label="Guardar">✓</button>
+        <button type="submit" data-i18n-aria="common.save">✓</button>
       </form>
     </div>
     <div class="topbar-right">
     <!-- Fervis (Nando, 10-nov): el robot de Crypto_Portafolio, siempre a mano en la barra, al lado de la persona; al
          tocarlo hace un movimiento y abre el chat -->
-    <button type="button" class="fervis-button no-print" id="fervis-button" title="Hablar con Fervis"
-            aria-label="Abrir el chat con Fervis"><span class="fervis-face"><svg viewBox="0 0 24 24" fill="none"
+    <button type="button" class="fervis-button no-print" id="fervis-button" data-i18n-title="fervis.robotTitle"
+            data-i18n-aria="fervis.robotAria"><span class="fervis-face"><svg viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
       focusable="false"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V5"/><circle cx="12" cy="3.6"
       r="1.1"/><path d="M9 14h.01M15 14h.01"/><path d="M2 13v3M22 13v3"/></svg></span></button>
     <!-- Saludo al abrir la app (fervis-saludo.js): un gancho sin nombre; el chat ya se presenta al abrirlo -->
-    <div class="fervis-hello no-print" id="fervis-hello" role="status" hidden><b>¡Eh, hola!</b> Tengo algo que contarte…
-      <small id="fervis-hello-hint" hidden>Si no quieres que vuelva a salir, desactívame en Ajustes (las tres barras del chat).</small>
+    <div class="fervis-hello no-print" id="fervis-hello" role="status" hidden><b data-i18n="fervis.helloTitle">¡Eh, hola!</b> <span data-i18n="fervis.helloText">Tengo algo que contarte…</span>
+      <small id="fervis-hello-hint" data-i18n="fervis.helloHint" hidden>Si no quieres que vuelva a salir, desactívame en Ajustes (las tres barras del chat).</small>
     </div>
     <div class="person editor">
-      <button type="button" class="person-button" data-open data-view aria-label="Cambiar tu nombre">
+      <button type="button" class="person-button" data-open data-view data-i18n-aria="person.aria">
         <span class="person-name" id="person-name"></span>
         <span class="avatar-wrap">
           <span class="person-avatar" id="person-avatar" aria-hidden="true">👤</span>
@@ -61,9 +67,9 @@
       </button>
       <form class="edit-form" hidden>
         <span class="edit-fields">
-          <input data-key="dp_person" maxlength="30" placeholder="Tu nombre" autocomplete="off" aria-label="Tu nombre">
+          <input data-key="dp_person" maxlength="30" data-i18n-placeholder="person.name" autocomplete="off" data-i18n-aria="person.name">
         </span>
-        <button type="submit" aria-label="Guardar">✓</button>
+        <button type="submit" data-i18n-aria="common.save">✓</button>
       </form>
     </div>
     </div>
@@ -72,86 +78,91 @@
   <main class="page">
     <!-- Franja de aviso de copia de seguridad (backup.js): no bloquea; «Más tarde» la oculta hasta volver a abrir -->
     <div class="backup-bar no-print" id="backup-bar" role="status" hidden>
-      <span class="backup-bar-text">⚠️ <span id="backup-bar-text"></span> Tus turnos solo están en este navegador.</span>
-      <button type="button" id="backup-bar-download">Descargar copia</button>
-      <button type="button" class="secondary" id="backup-bar-later">Más tarde</button>
+      <span class="backup-bar-text">⚠️ <span id="backup-bar-text"></span> <span data-i18n="backup.barOnly">Tus turnos solo están en este navegador.</span></span>
+      <button type="button" id="backup-bar-download" data-i18n="backup.download">Descargar copia</button>
+      <button type="button" class="secondary" id="backup-bar-later" data-i18n="backup.later">Más tarde</button>
     </div>
     <div class="section-header">
-      <span class="section-header-title">Cuadrante semanal</span>
+      <span class="section-header-title" data-i18n="grid.title">Cuadrante semanal</span>
       <!-- «Gestión», como en gestion-hosteleria: todo lo que no es el cuadrante. Se cierra al tocar fuera o con Escape -->
       <details class="menu manage-menu no-print">
-        <summary>Gestión</summary>
+        <summary data-i18n="menu.manage">Gestión</summary>
         <div class="menu-list">
-          <button type="button" class="secondary" id="print-button">🖨️ Imprimir / PDF</button>
+          <!-- Idioma (js/i18n.js): ES | EN; se recuerda en dp_lang -->
+          <div class="theme-list">
+            <button type="button" class="secondary solid" data-lang-choice="es">ES</button>
+            <button type="button" class="secondary solid" data-lang-choice="en">EN</button>
+          </div>
+          <button type="button" class="secondary" id="print-button">🖨️ <span data-i18n="menu.print">Imprimir / PDF</span></button>
           <!-- Paso 8: plegado como Tema; el texto y el resultado los pone app.js -->
           <details class="menu-group" id="copy-group">
-            <summary>📋 Copiar la semana anterior</summary>
+            <summary>📋 <span data-i18n="menu.copy">Copiar la semana anterior</span></summary>
             <form class="copy-form" id="copy-form">
               <p class="help" id="copy-source"></p>
               <div class="copy-row">
-                <label class="copy-weeks">En <input id="copy-weeks" inputmode="numeric" maxlength="1" value="1"
-                  aria-label="Número de semanas, de 1 a 8"> semana(s)</label>
-                <button type="submit">Copiar</button>
+                <label class="copy-weeks"><span data-i18n="copy.in">En</span> <input id="copy-weeks" inputmode="numeric" maxlength="1" value="1"
+                data-i18n-aria="copy.aria"> <span data-i18n="copy.weeks">semana(s)</span></label>
+              <button type="submit" data-i18n="copy.button">Copiar</button>
               </div>
               <p class="help" id="copy-result" role="status"></p>
             </form>
           </details>
-          <button type="button" class="secondary" id="staff-button">👥 Personal</button>
-          <button type="button" class="secondary" id="status-button">🏷️ Estados</button>
-          <button type="button" class="secondary" id="place-button">📍 Puntos de venta</button>
+          <button type="button" class="secondary" id="staff-button">👥 <span data-i18n="menu.staff">Personal</span></button>
+          <button type="button" class="secondary" id="status-button">🏷️ <span data-i18n="menu.states">Estados</span></button>
+          <button type="button" class="secondary" id="place-button">📍 <span data-i18n="menu.outlet">Puntos de venta</span></button>
           <!-- Paso 9a: descargar y cargar la copia (backup.js) -->
           <details class="menu-group" id="backup-group">
-            <summary>💾 Copia de seguridad</summary>
+            <summary>💾 <span data-i18n="menu.backup">Copia de seguridad</span></summary>
             <div class="copy-form">
               <p class="help" id="backup-last"></p>
-              <button type="button" id="backup-download">Descargar copia</button>
-              <button type="button" class="secondary" id="backup-load">Cargar una copia…</button>
+              <button type="button" id="backup-download" data-i18n="backup.download">Descargar copia</button>
+              <button type="button" class="secondary" id="backup-load" data-i18n="backup.load">Cargar una copia…</button>
               <input type="file" id="backup-file" accept=".json,application/json" hidden>
-              <p class="help">El archivo va a Descargas: guárdalo también fuera del móvil (Drive, correo, el PC).</p>
+              <p class="help" data-i18n="backup.helpDownloads">El archivo va a Descargas: guárdalo también fuera del móvil (Drive, correo, el PC).</p>
               <p class="help" id="backup-result" role="status"></p>
               <!-- Paso 9b: copias automáticas dentro del navegador (backup.js) -->
-              <p class="help"><strong>Copias automáticas</strong>: una por semana, en este navegador. Sirven si algo
+              <p class="help" data-i18n-html="backup.auto"><strong>Copias automáticas</strong>: una por semana, en este navegador. Sirven si algo
                 sale mal, pero si se borran los datos del navegador se van con ellas.</p>
               <ul class="auto-copies" id="auto-copies"></ul>
             </div>
           </details>
           <!-- Colorear por (paso 14a): por persona, como siempre, o por punto de venta; solo sale si hay puntos de venta -->
           <details class="menu-group" id="colorby-group" hidden>
-            <summary>🖍️ Colorear por</summary>
+            <summary>🖍️ <span data-i18n="colorby.title">Colorear por</span></summary>
             <div class="theme-list">
-              <button type="button" class="secondary" data-colorby="persona">👥 Persona</button>
-              <button type="button" class="secondary" data-colorby="sitio">📍 Punto de venta</button>
+              <button type="button" class="secondary" data-colorby="persona">👥 <span data-i18n="colorby.person">Persona</span></button>
+              <button type="button" class="secondary" data-colorby="sitio">📍 <span data-i18n="colorby.outlet">Punto de venta</span></button>
             </div>
           </details>
           <!-- Plegado: con las fichas siempre a la vista, un toque que iba a otro sitio caía en un tema -->
           <details class="menu-group">
-            <summary>🎨 Tema</summary>
+            <summary>🎨 <span data-i18n="menu.theme">Tema</span></summary>
             <div class="theme-list">
-              <button type="button" class="secondary" data-theme-choice="claro">☀️ Claro</button>
-              <button type="button" class="secondary" data-theme-choice="lino">Lino</button>
-              <button type="button" class="secondary" data-theme-choice="oscuro">🌙 Oscuro</button>
-              <button type="button" class="secondary" data-theme-choice="carbon">Carbón</button>
+              <button type="button" class="secondary" data-theme-choice="claro">☀️ <span data-i18n="theme.light">Claro</span></button>
+              <button type="button" class="secondary" data-theme-choice="lino" data-i18n="theme.linen">Lino</button>
+              <button type="button" class="secondary" data-theme-choice="oscuro">🌙 <span data-i18n="theme.dark">Oscuro</span></button>
+              <button type="button" class="secondary" data-theme-choice="carbon" data-i18n="theme.charcoal">Carbón</button>
             </div>
-            <label class="intensity" for="tint-intensity">Color de las etiquetas</label>
+            <label class="intensity" for="tint-intensity" data-i18n="theme.tint">Color de las etiquetas</label>
             <input type="range" id="tint-intensity" class="intensity-range" min="0" max="100" step="1" value="0">
-            <div class="intensity-scale" aria-hidden="true"><span>Suave</span><span>Vivo</span></div>
+            <div class="intensity-scale" aria-hidden="true"><span data-i18n="theme.soft">Suave</span><span data-i18n="theme.vivid">Vivo</span></div>
           </details>
         </div>
       </details>
     </div>
-    <h1 class="print-only">Turnos · <span id="print-name"></span> · <span id="print-week"></span></h1>
+    <h1 class="print-only"><span data-i18n="print.title">Turnos</span> · <span id="print-name"></span> · <span id="print-week"></span></h1>
     <!-- La semana entre dos flechas. El título es el botón que abre el calendario (el campo de fecha está, pero no se
          ve); «Hoy» solo aparece si no estás en esta semana -->
-    <nav class="section-nav no-print" aria-label="Semana">
-      <a class="button secondary" id="prev-week" aria-label="Semana anterior">‹</a>
+    <nav class="section-nav no-print" data-i18n-aria="nav.week">
+      <a class="button secondary" id="prev-week" data-i18n-aria="nav.prev">‹</a>
       <div class="section-nav-center">
-        <button type="button" class="week-title" id="week-title-button" aria-label="Elegir semana en el calendario">
+        <button type="button" class="week-title" id="week-title-button" data-i18n-aria="nav.pick">
           <span id="week-title"></span> <span aria-hidden="true">📅</span>
         </button>
         <input type="date" id="week-picker" class="week-picker" tabindex="-1" aria-hidden="true">
-        <a class="button secondary today-link" id="today-link" href="./" hidden>Hoy</a>
+        <a class="button secondary today-link" id="today-link" href="./" data-i18n="nav.today" hidden>Hoy</a>
       </div>
-      <a class="button secondary" id="next-week" aria-label="Semana siguiente">›</a>
+      <a class="button secondary" id="next-week" data-i18n-aria="nav.next">›</a>
     </nav>
     <div id="schedule-grid" class="schedule-scroll"></div>
     <div id="summary-grid" class="schedule-scroll summary-scroll"></div>
@@ -162,48 +173,48 @@
     <form id="cell-form" class="dialog-form" novalidate>
       <div class="dialog-head">
         <h2 id="cell-title"></h2>
-        <button type="button" class="secondary" data-close>Cerrar</button>
+        <button type="button" class="secondary" data-close data-i18n="common.close">Cerrar</button>
       </div>
-      <label class="field">Estado
+      <label class="field"><span data-i18n="cell.status">Estado</span>
         <select id="cell-status" autofocus></select>
       </label>
       <!-- Solo si el estado cuenta como trabajo: se oculta al momento al elegir Libre, Vacaciones… -->
       <fieldset class="slots" id="cell-hours">
-        <legend>Horario</legend>
+        <legend data-i18n="cell.hours">Horario</legend>
         <!-- «Dónde» (paso 7b): el punto de venta de cada tramo; solo aparece si hay puntos de venta creados -->
         <div class="slot" data-slot="1">
-          <input type="time" aria-label="Inicio"> <span aria-hidden="true">–</span> <input type="time" aria-label="Fin">
-          <select class="slot-place" aria-label="Dónde (primer tramo)"></select>
+          <input type="time" data-i18n-aria="cell.aria.start"> <span aria-hidden="true">–</span> <input type="time" data-i18n-aria="cell.aria.end">
+          <select class="slot-place" data-i18n-aria="cell.aria.place1"></select>
         </div>
         <div class="slot" data-slot="2" id="slot-2" hidden>
-          <input type="time" aria-label="Inicio del segundo tramo"> <span aria-hidden="true">–</span>
-          <input type="time" aria-label="Fin del segundo tramo">
-          <button type="button" class="secondary" id="remove-slot" aria-label="Quitar el segundo tramo">✕</button>
-          <select class="slot-place" aria-label="Dónde (segundo tramo)"></select>
+          <input type="time" data-i18n-aria="cell.aria.start2"> <span aria-hidden="true">–</span>
+          <input type="time" data-i18n-aria="cell.aria.end2">
+          <button type="button" class="secondary" id="remove-slot" data-i18n-aria="cell.aria.remove2">✕</button>
+          <select class="slot-place" data-i18n-aria="cell.aria.place2"></select>
         </div>
-        <button type="button" class="secondary" id="add-slot">+ Segundo tramo (turno partido)</button>
-        <small class="help">Si el fin es anterior al inicio, termina al día siguiente (22:00–02:00).</small>
+        <button type="button" class="secondary" id="add-slot" data-i18n="cell.second">+ Segundo tramo (turno partido)</button>
+        <small class="help" data-i18n="cell.help.nextday">Si el fin es anterior al inicio, termina al día siguiente (22:00–02:00).</small>
         <!-- Solo mientras no haya puntos de venta: «Dónde» no sale hasta crear el primero y no se descubría solo -->
-        <small class="help" id="cell-places-hint" hidden>¿Trabaja en un sitio concreto? Crea los puntos de venta en
+        <small class="help" id="cell-places-hint" data-i18n="cell.help.places" hidden>¿Trabaja en un sitio concreto? Crea los puntos de venta en
           Gestión → Puntos de venta y aquí aparecerá «Dónde».</small>
       </fieldset>
       <!-- También solo si el estado cuenta como trabajo. Texto con teclado numérico (no type=number): así vale «1,5» -->
       <fieldset class="slots" id="cell-overtime">
-        <legend>Horas extra</legend>
+        <legend data-i18n="cell.overtime">Horas extra</legend>
         <div class="slot">
           <input type="text" id="overtime-hours" class="overtime-hours" inputmode="decimal" maxlength="5" placeholder="0"
-                 autocomplete="off" aria-label="Horas extra">
-          <input type="text" id="overtime-reason" maxlength="80" placeholder="Motivo (opcional)" autocomplete="off"
-                 aria-label="Motivo de las horas extra">
+                 autocomplete="off" data-i18n-aria="cell.overtime">
+          <input type="text" id="overtime-reason" maxlength="80" data-i18n-placeholder="cell.reason" autocomplete="off"
+                 data-i18n-aria="cell.aria.reason">
         </div>
-        <small class="help">Se redondean a medias horas. Vacío = sin horas extra.</small>
+        <small class="help" data-i18n="cell.help.overtime">Se redondean a medias horas. Vacío = sin horas extra.</small>
       </fieldset>
       <p class="error" id="cell-error" role="alert" hidden></p>
       <div class="form-actions">
-        <button type="submit">Guardar</button>
-        <button type="button" class="secondary" id="cell-swap">⇄ Intercambiar con…</button>
-        <button type="button" class="secondary" id="cell-copy" title="Copia el estado, el horario y el sitio a casillas libres (sin horas extra)">📋 Copiar a…</button>
-        <button type="button" class="danger" id="cell-clear">Vaciar</button>
+        <button type="submit" data-i18n="common.save">Guardar</button>
+        <button type="button" class="secondary" id="cell-swap">⇄ <span data-i18n="cell.swap">Intercambiar con…</span></button>
+        <button type="button" class="secondary" id="cell-copy" data-i18n-title="cell.copy.title">📋 <span data-i18n="cell.copy">Copiar a…</span></button>
+        <button type="button" class="danger" id="cell-clear" data-i18n="cell.clear">Vaciar</button>
       </div>
     </form>
   </dialog>
@@ -212,26 +223,26 @@
   <dialog id="staff-dialog" class="dialog" aria-labelledby="staff-title">
     <div class="dialog-form">
       <div class="dialog-head">
-        <h2 id="staff-title">Personal</h2>
-        <button type="button" class="secondary" data-close>Cerrar</button>
+        <h2 id="staff-title" data-i18n="menu.staff">Personal</h2>
+        <button type="button" class="secondary" data-close data-i18n="common.close">Cerrar</button>
       </div>
       <div id="staff-list-view" class="dialog-view">
         <ul class="sort-list" id="staff-list"></ul>
-        <button type="button" id="staff-add">+ Añadir persona</button>
+        <button type="button" id="staff-add" data-i18n="staff.add">+ Añadir persona</button>
       </div>
       <form id="staff-form" class="dialog-view" hidden novalidate>
-        <label class="field">Nombre
+        <label class="field"><span data-i18n="common.name">Nombre</span>
           <input id="staff-name" maxlength="40" autocomplete="off" required>
         </label>
         <fieldset class="slots">
-          <legend>Color en el cuadrante</legend>
+          <legend data-i18n="common.colorGrid">Color en el cuadrante</legend>
           <div class="palette" id="staff-palette"></div>
         </fieldset>
         <p class="help" id="staff-note" hidden></p>
         <div class="form-actions">
-          <button type="submit">Guardar</button>
-          <button type="button" class="secondary" id="staff-back">‹ Volver</button>
-          <button type="button" class="danger" id="staff-remove">Quitar</button>
+          <button type="submit" data-i18n="common.save">Guardar</button>
+          <button type="button" class="secondary" id="staff-back" data-i18n="common.back">‹ Volver</button>
+          <button type="button" class="danger" id="staff-remove" data-i18n="common.remove">Quitar</button>
         </div>
       </form>
       <!-- Fuera de la ficha: los avisos valen también para la lista (al guardar el orden) -->
@@ -243,33 +254,33 @@
   <dialog id="status-dialog" class="dialog" aria-labelledby="status-title">
     <div class="dialog-form">
       <div class="dialog-head">
-        <h2 id="status-title">Estados</h2>
-        <button type="button" class="secondary" data-close>Cerrar</button>
+        <h2 id="status-title" data-i18n="menu.states">Estados</h2>
+        <button type="button" class="secondary" data-close data-i18n="common.close">Cerrar</button>
       </div>
       <div id="status-list-view" class="dialog-view">
         <ul class="sort-list" id="status-list"></ul>
-        <small class="help">El primero es el que sale al abrir una casilla vacía (lo normal: Trabajo).</small>
-        <button type="button" id="status-add">+ Añadir estado</button>
+        <small class="help" data-i18n="states.helpFirst">El primero es el que sale al abrir una casilla vacía (lo normal: Trabajo).</small>
+        <button type="button" id="status-add" data-i18n="states.add">+ Añadir estado</button>
       </div>
       <form id="status-form" class="dialog-view" hidden novalidate>
-        <label class="field">Nombre
+        <label class="field"><span data-i18n="common.name">Nombre</span>
           <input id="status-name" maxlength="30" autocomplete="off" required>
         </label>
         <!-- Solo para los que no cuentan como trabajo: los que sí, llevan el color de cada persona -->
         <fieldset class="slots" id="status-color">
-          <legend>Color en el cuadrante</legend>
+          <legend data-i18n="common.colorGrid">Color en el cuadrante</legend>
           <div class="palette" id="status-palette"></div>
         </fieldset>
         <label class="check">
           <input type="checkbox" id="status-work">
-          <span>Cuenta como trabajo <small class="help">(lleva horario y horas extra)</small></span>
+          <span><span data-i18n="states.counts">Cuenta como trabajo</span> <small class="help" data-i18n="states.countsHelp">(lleva horario y horas extra)</small></span>
         </label>
-        <p class="help" id="status-color-note">Con horario, cada casilla lleva el color de su persona.</p>
+        <p class="help" id="status-color-note" data-i18n="states.colorNote">Con horario, cada casilla lleva el color de su persona.</p>
         <p class="help" id="status-note" hidden></p>
         <div class="form-actions">
-          <button type="submit">Guardar</button>
-          <button type="button" class="secondary" id="status-back">‹ Volver</button>
-          <button type="button" class="danger" id="status-remove">Quitar</button>
+          <button type="submit" data-i18n="common.save">Guardar</button>
+          <button type="button" class="secondary" id="status-back" data-i18n="common.back">‹ Volver</button>
+          <button type="button" class="danger" id="status-remove" data-i18n="common.remove">Quitar</button>
         </div>
       </form>
       <p class="error" id="status-error" role="alert" hidden></p>
@@ -280,27 +291,27 @@
   <dialog id="place-dialog" class="dialog" aria-labelledby="place-title">
     <div class="dialog-form">
       <div class="dialog-head">
-        <h2 id="place-title">Puntos de venta</h2>
-        <button type="button" class="secondary" data-close>Cerrar</button>
+        <h2 id="place-title" data-i18n="menu.outlet">Puntos de venta</h2>
+        <button type="button" class="secondary" data-close data-i18n="common.close">Cerrar</button>
       </div>
       <div id="place-list-view" class="dialog-view">
         <ul class="sort-list" id="place-list"></ul>
-        <small class="help" id="place-empty">Si no creas ninguno, en las casillas no sale «Dónde».</small>
-        <button type="button" id="place-add">+ Añadir punto de venta</button>
+        <small class="help" id="place-empty" data-i18n="places.empty">Si no creas ninguno, en las casillas no sale «Dónde».</small>
+        <button type="button" id="place-add" data-i18n="places.add">+ Añadir punto de venta</button>
       </div>
       <form id="place-form" class="dialog-view" hidden novalidate>
-        <label class="field">Nombre
+        <label class="field"><span data-i18n="common.name">Nombre</span>
           <input id="place-name" maxlength="30" autocomplete="off" required>
         </label>
         <fieldset class="slots" id="place-color">
-          <legend>Color en el cuadrante (si coloreas por punto de venta)</legend>
+          <legend data-i18n="places.colorLegend">Color en el cuadrante (si coloreas por punto de venta)</legend>
           <div class="palette" id="place-palette"></div>
         </fieldset>
         <p class="help" id="place-note" hidden></p>
         <div class="form-actions">
-          <button type="submit">Guardar</button>
-          <button type="button" class="secondary" id="place-back">‹ Volver</button>
-          <button type="button" class="danger" id="place-remove">Quitar</button>
+          <button type="submit" data-i18n="common.save">Guardar</button>
+          <button type="button" class="secondary" id="place-back" data-i18n="common.back">‹ Volver</button>
+          <button type="button" class="danger" id="place-remove" data-i18n="common.remove">Quitar</button>
         </div>
       </form>
       <p class="error" id="place-error" role="alert" hidden></p>
@@ -310,13 +321,13 @@
   <!-- Confirmar antes de cargar una copia (backup.js): sustituye todo -->
   <dialog id="import-dialog" class="dialog" aria-labelledby="import-title">
     <div class="dialog-form">
-      <h2 id="import-title">¿Cargar esta copia?</h2>
+      <h2 id="import-title" data-i18n="backup.importTitle">¿Cargar esta copia?</h2>
       <p id="import-summary"></p>
-      <p class="help">Se sustituye <strong>todo</strong> lo que hay ahora en este navegador. Antes se guardará una copia
+      <p class="help" data-i18n-html="backup.importHelp">Se sustituye <strong>todo</strong> lo que hay ahora en este navegador. Antes se guardará una copia
         de lo de ahora en «Copias automáticas» (dentro de «Copia de seguridad»), por si te arrepientes.</p>
       <div class="form-actions">
-        <button type="button" id="import-ok">Sí, cargar la copia</button>
-        <button type="button" class="secondary" id="import-cancel">Cancelar</button>
+        <button type="button" id="import-ok" data-i18n="backup.importOk">Sí, cargar la copia</button>
+        <button type="button" class="secondary" id="import-cancel" data-i18n="common.cancel">Cancelar</button>
       </div>
     </div>
   </dialog>
@@ -328,52 +339,52 @@
         <h2 id="fervis-title">💬 Fervis</h2>
         <span class="fervis-actions">
           <!-- Guía (Nando): el libro abre la guía de la app, por temas, con chips; la responde la app, sin clave -->
-          <button type="button" class="secondary fervis-icon fervis-guide-button" id="fervis-guide" aria-label="Guía de la app (glosario)" aria-expanded="false" title="Guía de la app"><svg
+          <button type="button" class="secondary fervis-icon fervis-guide-button" id="fervis-guide" data-i18n-aria="fervis.guideAria" aria-expanded="false" data-i18n-title="fervis.guideTitle"><svg
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            aria-hidden="true" focusable="false"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17zM4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg><span>Guía</span></button>
+            aria-hidden="true" focusable="false"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17zM4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg><span data-i18n="fervis.guideLabel">Guía</span></button>
           <!-- Ajustes (como en la cartera): el icono de las tres barras abre y cierra el panel de la clave -->
           <button type="button" class="secondary fervis-icon" id="fervis-key-toggle" aria-expanded="false"
-                  aria-controls="fervis-key-form" aria-label="Ajustes: clave de Groq" title="Ajustes"><svg viewBox="0 0 24 24"
+                  aria-controls="fervis-key-form" data-i18n-aria="fervis.settingsAria" data-i18n-title="fervis.settings"><svg viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"
             focusable="false"><path d="M6 4v5M6 13v7M12 4v9M12 17v3M18 4v3M18 11v9M4 11h4M10 15h4M16 9h4"/></svg></button>
           <!-- Papelera (como en la cartera): empieza una conversación nueva -->
-          <button type="button" class="secondary fervis-icon" id="fervis-clear" aria-label="Borrar la conversación"
-                  title="Borrar la conversación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <button type="button" class="secondary fervis-icon" id="fervis-clear" data-i18n-aria="fervis.clear"
+                  data-i18n-title="fervis.clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
             focusable="false"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
-          <button type="button" class="secondary" data-close>Cerrar</button>
+          <button type="button" class="secondary" data-close data-i18n="common.close">Cerrar</button>
         </span>
       </div>
       <form id="fervis-key-form" class="fervis-key" hidden novalidate>
-        <p class="help">Pega tu clave gratuita de Groq (se crea en
+        <p class="help" data-i18n-html="fervis.keyHelp">Pega tu clave gratuita de Groq (se crea en
           <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com</a>).
           Se guarda solo en este navegador y no va en la copia de seguridad. Al preguntar, a Groq se envían tu pregunta,
           los turnos y el personal que hagan falta para contestarte, y el nombre del local y el tuyo.</p>
         <div class="fervis-row">
           <input id="fervis-key" class="fervis-key-input" maxlength="300" placeholder="gsk_…" autocomplete="off"
-                 autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore aria-label="Clave de Groq">
-          <button type="submit">Guardar</button>
+                 autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-i18n-aria="fervis.keyAria">
+          <button type="submit" data-i18n="common.save">Guardar</button>
         </div>
         <p class="help" id="fervis-key-state" role="status"></p>
-        <button type="button" class="danger" id="fervis-key-remove" hidden>Quitar la clave</button>
+        <button type="button" class="danger" id="fervis-key-remove" data-i18n="fervis.keyRemove" hidden>Quitar la clave</button>
         <button type="button" class="secondary" id="fervis-hello-toggle"></button>
       </form>
       <ul class="fervis-messages" id="fervis-messages" role="log" aria-live="polite"></ul>
       <!-- Glosario de la app (botón 📖): grupos y temas que se despliegan; lo rellena fervis.js; no es el chat -->
       <div class="fervis-guide" id="fervis-guide-view" hidden></div>
       <form id="fervis-form" class="fervis-row" autocomplete="off">
-        <input id="fervis-question" maxlength="300" placeholder="Pregunta por los turnos…" aria-label="Tu pregunta">
-        <button type="submit" aria-label="Enviar">➤</button>
+        <input id="fervis-question" maxlength="300" data-i18n-placeholder="fervis.askPlaceholder" data-i18n-aria="fervis.askAria">
+        <button type="submit" data-i18n-aria="fervis.send">➤</button>
       </form>
-      <small class="help">Fervis solo lee los turnos: no cambia nada. Lo laboral (contratos, descansos) es orientativo: confirma con la gestoría.</small>
+      <small class="help" data-i18n="fervis.note">Fervis solo lee los turnos: no cambia nada. Lo laboral (contratos, descansos) es orientativo: confirma con la gestoría.</small>
     </div>
   </dialog>
 
   <!-- Aviso de «Intercambiar con…» (swap.js): abajo, al alcance del pulgar en el móvil -->
   <div id="swap-bar" class="swap-bar no-print" role="status" hidden>
     <span id="swap-text"></span>
-    <button type="button" class="secondary" id="swap-undo" hidden>Deshacer</button>
-    <button type="button" class="secondary" id="swap-cancel">Cancelar</button>
+    <button type="button" class="secondary" id="swap-undo" data-i18n="swap.undo" hidden>Deshacer</button>
+    <button type="button" class="secondary" id="swap-cancel" data-i18n="common.cancel">Cancelar</button>
   </div>
 
   <footer class="app-footer no-print">
@@ -390,6 +401,9 @@
   <script src="js/storage.js"></script>
   <script src="js/brand.js"></script>
   <script src="js/clientes.js"></script>
+  <script src="js/lang-es.js"></script>
+  <script src="js/lang-en.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
   <script src="js/cell.js"></script>
   <script src="js/swap.js"></script>
@@ -399,6 +413,8 @@
   <script src="js/places.js"></script>
   <script src="js/backup.js"></script>
   <script src="js/fervis-datos.js"></script>
+  <script src="js/guide-es.js"></script>
+  <script src="js/guide-en.js"></script>
   <script src="js/fervis-guia.js"></script>
   <script src="js/fervis.js"></script>
   <script src="js/fervis-saludo.js"></script>

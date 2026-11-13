@@ -10,10 +10,11 @@ window.Schedule = (function () {
   const summaryGrid = document.getElementById("summary-grid");   // la tabla de clientes y camareros (paso 14b)
   const title = document.getElementById("week-title");
   const picker = document.getElementById("week-picker");
-  const dayName = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric" });
-  const hoursFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 });  // 1.5 → «1,5»
+  // Los formatos de fecha y número siguen al idioma elegido (js/i18n.js)
+  const dayName = window.I18n.formatter(Intl.DateTimeFormat, { weekday: "long", day: "numeric" });
+  const hoursFormat = window.I18n.formatter(Intl.NumberFormat, { maximumFractionDigits: 1 });  // 1.5 → «1,5» en español, «1.5» en inglés
   // formatRange junta lo que se repite: «9–15 nov 2026», «30 nov – 6 dic 2026», «29 dic 2026 – 4 ene 2027»
-  const weekRange = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" });
+  const weekRange = window.I18n.formatter(Intl.DateTimeFormat, { day: "numeric", month: "short", year: "numeric" });
 
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -70,13 +71,15 @@ window.Schedule = (function () {
       shift.slots.forEach(function (slot) {
         const text = slot.start + "–" + slot.end;
         const place = slot.placeId && placeOf(slot.placeId);
-        texts.push(text + (place ? " en " + place.name : ""));
+        const placeName = place && window.I18n.displayPlace(place);   // los de fábrica, en el idioma elegido
+        texts.push(place ? window.I18n.t("grid.slotAt", { time: text, place: placeName }) : text);
         const tint = colorMode === "sitio" && place && place.color ? place.color : employee.color;  // sin sitio: el de la persona
-        slotsBox.append(chip(text, tint, place && place.name));
+        slotsBox.append(chip(text, tint, placeName));
       });
     } else if (status) {
-      texts.push(status.name);
-      slotsBox.append(chip(status.name, status.color));
+      const statusName = window.I18n.displayStatus(status);   // Trabajo, Libre… de fábrica se ven en el idioma elegido
+      texts.push(statusName);
+      slotsBox.append(chip(statusName, status.color));
       slotsBox.lastChild.classList.add("chip-status");   // Libre, Vacaciones…: algo más de color en los temas claros (themes.css)
     } else {
       slotsBox.append(el("span", "cell-empty", "+"));
@@ -90,7 +93,8 @@ window.Schedule = (function () {
       texts.push(extra + (shift.overtime.reason ? " (" + shift.overtime.reason + ")" : ""));
       if (shift.overtime.reason) { box.title = shift.overtime.reason; }
     }
-    box.setAttribute("aria-label", employee.name + ", " + dayName.format(day) + ": " + (texts.join(", ") || "vacía"));
+    box.setAttribute("aria-label", window.I18n.displayName(employee.name) + ", " + dayName.format(day) + ": " +
+      (texts.join(", ") || window.I18n.t("grid.empty")));
     if (window.Swap && window.Swap.sourceKey() === key) { box.classList.add("swap-source"); }  // origen de «Intercambiar con…»
     return box;
   }
@@ -134,7 +138,9 @@ window.Schedule = (function () {
 
     const table = el("table", "schedule-table");
     const headRow = el("tr");
-    headRow.append(el("th", "", "Empleado"));
+    const staffHead = el("th", "", window.I18n.t("grid.staff"));
+    staffHead.dataset.i18n = "grid.staff";   // apply() la reescribe al cambiar de idioma
+    headRow.append(staffHead);
     days.forEach(function (day) {
       const th = el("th", Dates.toIso(day) === today ? "today" : "", dayName.format(day));
       th.scope = "col";
@@ -151,16 +157,16 @@ window.Schedule = (function () {
       const name = row.appendChild(el("th"));
       name.scope = "row";
       // El nombre se toca para editar a la persona (staff.js)
-      const nameButton = name.appendChild(el("button", "name-button", employee.name));
+      const nameButton = name.appendChild(el("button", "name-button", window.I18n.displayName(employee.name)));
       nameButton.type = "button";
       nameButton.dataset.employee = employee.id;
-      nameButton.setAttribute("aria-label", "Editar a " + employee.name);
+      nameButton.setAttribute("aria-label", window.I18n.t("staff.edit", { name: window.I18n.displayName(employee.name) }));
       days.forEach(function (day) {
         row.appendChild(el("td", Dates.toIso(day) === today ? "today" : "")).append(cell(employee, day));
       });
     });
     if (!employees.length) {
-      const empty = body.appendChild(el("tr")).appendChild(el("td", "empty", "Todavía no hay personal."));
+      const empty = body.appendChild(el("tr")).appendChild(el("td", "empty", window.I18n.t("grid.nostaff")));
       empty.colSpan = 8;
     }
     grid.replaceChildren(table);
@@ -329,10 +335,17 @@ window.Schedule = (function () {
     if (day) { window.location.search = weekLink(Dates.weekStart(day)); }
   });
 
-  // En modo ejemplo («?demo») el título lo dice, para no confundirlo con los datos de verdad
-  if (window.Store.DEMO) { document.querySelector(".section-header-title").textContent += " · ejemplo"; }
+  // En modo ejemplo («?demo») el título lo dice, para no confundirlo con los datos de verdad. Es una función porque
+  // cambiar de idioma reescribe el título y hay que volver a ponerlo.
+  function markDemo() {
+    if (!window.Store.DEMO) { return; }
+    document.querySelector(".section-header-title").textContent = window.I18n.t("grid.title") + " · " + window.I18n.t("demo.suffix");
+  }
+  markDemo();
 
   render();
+  // Al cambiar de idioma se repinta todo (días, fechas, cabeceras) y se vuelve a marcar la demo
+  document.addEventListener("i18n-change", function () { render(); markDemo(); });
   return {
     shiftKey: shiftKey,
     shownMonday: shownMonday,
@@ -387,14 +400,21 @@ window.Schedule = (function () {
   // «Copiar la semana anterior»: al abrir el apartado se dice qué semana se copia; el resultado sale ahí mismo
   const copyGroup = document.getElementById("copy-group");
   const copyResult = document.getElementById("copy-result");
+  let copyMonday = null;   // el lunes de la semana que se muestra al abrir el apartado
+  function fillCopySource() {
+    if (!copyMonday) { return; }
+    document.getElementById("copy-source").textContent = window.I18n.t("copy.source", {
+      from: window.Schedule.weekLabel(window.Dates.addDays(copyMonday, -7)),
+      to: window.Schedule.weekLabel(copyMonday)
+    });
+  }
   copyGroup.addEventListener("toggle", function () {
     if (!copyGroup.open) { return; }
-    const monday = window.Schedule.shownMonday();
-    document.getElementById("copy-source").textContent = "Copia la semana del " +
-      window.Schedule.weekLabel(window.Dates.addDays(monday, -7)) + " en la del " + window.Schedule.weekLabel(monday) +
-      " y, si quieres, en las siguientes. Solo en casillas vacías y sin horas extra.";
+    copyMonday = window.Schedule.shownMonday();
+    fillCopySource();
     copyResult.textContent = "";
   });
+  document.addEventListener("i18n-change", fillCopySource);   // al cambiar de idioma, se reescribe
   // Al tocar el número de semanas se selecciona entero (con 1 cifra como máximo, si no, no dejaría escribir otra)
   const copyWeeks = document.getElementById("copy-weeks");
   copyWeeks.addEventListener("click", function () { copyWeeks.select(); });
@@ -404,15 +424,16 @@ window.Schedule = (function () {
     const weeks = Math.min(Math.max(parseInt(document.getElementById("copy-weeks").value, 10) || 1, 1), 8);
     document.getElementById("copy-weeks").value = String(weeks);
     const result = window.Schedule.copyPreviousWeek(weeks);
-    const inWeeks = weeks === 1 ? "esta semana" : weeks + " semanas";
+    const t = window.I18n.t;
+    const inWeeks = window.I18n.tn("copy.where", weeks);   // «esta semana» / «3 semanas»
     if (result.copied < 0) {
-      copyResult.textContent = "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha copiado nada.";
+      copyResult.textContent = t("common.saveFailed") + " " + t("copy.nothingCopied");
     } else if (result.sourceEmpty) {
-      copyResult.textContent = "La semana anterior está vacía: no hay nada que copiar.";
+      copyResult.textContent = t("copy.sourceEmpty");
     } else if (!result.copied) {
-      copyResult.textContent = "No había casillas vacías en " + inWeeks + ": no se ha cambiado nada.";
+      copyResult.textContent = t("copy.noneFree", { where: inWeeks });
     } else {
-      copyResult.textContent = "Copiados " + result.copied + (result.copied === 1 ? " turno" : " turnos") + " en " + inWeeks + ".";
+      copyResult.textContent = window.I18n.tn("copy.done", result.copied, { where: inWeeks });
     }
   });
 

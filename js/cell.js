@@ -15,8 +15,9 @@ window.CellDialog = (function () {
   const clear = document.getElementById("cell-clear");
   const copy = document.getElementById("cell-copy");
   const errorEl = document.getElementById("cell-error");
-  const longDay = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
-  const shortDay = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" });
+  const t = window.I18n.t;   // los textos y los formatos de fecha siguen al idioma elegido (js/i18n.js)
+  const longDay = window.I18n.formatter(Intl.DateTimeFormat, { weekday: "long", day: "numeric", month: "long" });
+  const shortDay = window.I18n.formatter(Intl.DateTimeFormat, { weekday: "short", day: "numeric", month: "short" });
   const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;  // «HH:MM» de 00:00 a 23:59
   let current = null;  // la casilla abierta: { key, shift }
 
@@ -44,8 +45,8 @@ window.CellDialog = (function () {
     const places = window.Schedule.getData().places.slice().sort(function (a, b) { return a.position - b.position; });
     [1, 2].forEach(function (n) {
       const select = placeSelect(n);
-      select.replaceChildren.apply(select, [new Option("Dónde: —", "")].concat(places.map(function (p) {
-        return new Option(p.name, p.id);
+      select.replaceChildren.apply(select, [new Option(t("cell.where"), "")].concat(places.map(function (p) {
+        return new Option(window.I18n.displayPlace(p), p.id);
       })));
       select.value = (slots[n - 1] && slots[n - 1].placeId) || "";
       select.hidden = !places.length;
@@ -65,7 +66,7 @@ window.CellDialog = (function () {
     const text = overtimeHours.value.trim().replace(",", ".");
     if (!text) { return { overtime: null }; }
     const hoursNumber = /^\d{1,2}(\.\d{1,2})?$/.test(text) ? Math.round(Number(text) * 2) / 2 : NaN;
-    if (!(hoursNumber > 0 && hoursNumber <= 16)) { return { error: "Las horas extra van de 0,5 a 16 (por ejemplo, 2 o 1,5)." }; }
+    if (!(hoursNumber > 0 && hoursNumber <= 16)) { return { error: t("cell.err.hours") }; }
     return { overtime: { hours: hoursNumber, reason: overtimeReason.value.trim().slice(0, 80) } };
   }
 
@@ -74,9 +75,10 @@ window.CellDialog = (function () {
     const key = window.Schedule.shiftKey(employee.id, isoDay);
     const shift = window.Schedule.getData().shifts[key];
     // label: cómo se nombra la casilla en el aviso de «Intercambiar con…» («Ana Castro · mar, 10 nov»)
-    current = { key: key, shift: shift, label: employee.name + " · " + shortDay.format(window.Dates.parseIso(isoDay)) };
-    document.getElementById("cell-title").textContent = employee.name + " · " + longDay.format(window.Dates.parseIso(isoDay));
-    statusSelect.replaceChildren.apply(statusSelect, statuses.map(function (s) { return new Option(s.name, s.id); }));
+    const who = window.I18n.displayName(employee.name);   // «Camarero 1» se ve «Waiter 1» en inglés; lo que escribió el usuario, igual
+    current = { key: key, shift: shift, label: who + " · " + shortDay.format(window.Dates.parseIso(isoDay)) };
+    document.getElementById("cell-title").textContent = who + " · " + longDay.format(window.Dates.parseIso(isoDay));
+    statusSelect.replaceChildren.apply(statusSelect, statuses.map(function (s) { return new Option(window.I18n.displayStatus(s), s.id); }));
     statusSelect.value = shift && window.Schedule.statusOf(shift.statusId) ? shift.statusId : (statuses[0] || {}).id || "";
     const slots = shift ? shift.slots : [];
     [1, 2].forEach(function (n) {
@@ -87,11 +89,12 @@ window.CellDialog = (function () {
     showSecond(slots.length > 1);
     fillPlaces(slots);
     const extra = shift && shift.overtime;
-    overtimeHours.value = extra ? String(extra.hours).replace(".", ",") : "";
+    // En el campo, la coma decimal en español y el punto en inglés (al leerlo se aceptan las dos)
+    overtimeHours.value = extra ? String(extra.hours).replace(".", window.I18n.current() === "es" ? "," : ".") : "";
     overtimeReason.value = extra ? extra.reason : "";
     clear.hidden = !shift;  // Vaciar solo si hay algo que vaciar
     copy.hidden = !shift;   // y Copiar a…, solo si hay algo que copiar
-    showError(statuses.length ? "" : "No hay estados: créalos antes en «Gestión».");
+    showError(statuses.length ? "" : t("cell.err.nostatus"));
     syncHours();
     dialog.showModal();
   }
@@ -103,9 +106,9 @@ window.CellDialog = (function () {
     const end = inputs[1].value;
     if (n === 2 && !start && !end) { return { slot: null }; }
     if (!TIME.test(start) || !TIME.test(end)) {
-      return { error: n === 1 ? "Pon la hora de inicio y la de fin." : "Pon el inicio y el fin del segundo tramo, o quítalo." };
+      return { error: n === 1 ? t("cell.err.time1") : t("cell.err.time2") };
     }
-    if (start === end) { return { error: "El fin no puede ser igual al inicio." }; }
+    if (start === end) { return { error: t("cell.err.same") }; }
     const slot = { start: start, end: end };
     if (placeSelect(n).value) { slot.placeId = placeSelect(n).value; }  // sin «Dónde», el tramo no lo lleva
     return { slot: slot };
@@ -115,14 +118,14 @@ window.CellDialog = (function () {
     if (window.Schedule.update(current.key, shift)) {
       dialog.close();
     } else {
-      showError("No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.");
+      showError(t("common.saveFailed") + " " + t("common.nothingChanged"));
     }
   }
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     const status = window.Schedule.statusOf(statusSelect.value);
-    if (!status) { showError("Elige un estado."); return; }
+    if (!status) { showError(t("cell.err.pick")); return; }
     const slots = [];
     let extra = null;  // sin trabajo no hay horas extra
     if (status.countsAsWork) {

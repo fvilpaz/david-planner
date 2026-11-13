@@ -8,6 +8,7 @@
 window.Swap = (function () {
   "use strict";
   const KEY = "dp_swap";
+  const t = window.I18n.t;   // los textos siguen al idioma elegido (js/i18n.js)
   const bar = document.getElementById("swap-bar");
   const text = document.getElementById("swap-text");
   const undo = document.getElementById("swap-undo");
@@ -31,7 +32,7 @@ window.Swap = (function () {
     clearTimeout(hideTimer);
     text.textContent = message;
     undo.hidden = !canUndo;
-    cancel.textContent = cancelLabel || (canUndo ? "Cerrar" : "Cancelar");
+    cancel.textContent = cancelLabel || t(canUndo ? "common.close" : "common.cancel");
     bar.hidden = false;
     if (canUndo && !sticky) { hideTimer = setTimeout(function () { bar.hidden = true; }, 8000); }
   }
@@ -39,16 +40,16 @@ window.Swap = (function () {
   // El aviso de «estás eligiendo casilla»; en «Copiar a…» no se oculta (hasta «Hecho») y puede deshacer lo copiado
   function showSource(note) {
     const copying = source.mode === "copy";
-    const ask = copying ? "Toca las casillas libres donde copiar «" + source.label + "»"
-      : "Toca la casilla con la que cambiar «" + source.label + "»";
-    show((note ? note + " · " : "") + ask, copying && pasted.length > 0, copying ? "Hecho" : null, true);
+    const ask = t(copying ? "swap.askCopy" : "swap.askSwap", { label: source.label });
+    show((note ? note + " · " : "") + ask, copying && pasted.length > 0, copying ? t("swap.done") : null, true);
   }
 
-  const PASTE_MESSAGES = {
-    occupied: "Esa casilla ya tiene algo: solo se copia a casillas libres",
-    empty: "Ya no hay nada que copiar",
-    error: "No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha copiado",
-  };
+  // Es una función (y no un objeto fijo) para que el texto salga en el idioma de ese momento
+  function pasteMessage(kind) {
+    if (kind === "occupied") { return t("swap.occupied"); }
+    if (kind === "empty") { return t("swap.empty"); }
+    return t("common.saveFailed") + " " + t("swap.notCopied");   // «error»
+  }
 
   function stop() {
     source = null;
@@ -71,7 +72,7 @@ window.Swap = (function () {
     if (key === source.key) { stop(); return true; }  // la misma casilla: cancelar
     if (source.mode === "copy") {
       const result = window.Schedule.copyShift(source.key, key);
-      if (result === "ok") { pasted.push(key); showSource("Copiado ✓ (" + pasted.length + ")"); } else { showSource(PASTE_MESSAGES[result]); }
+      if (result === "ok") { pasted.push(key); showSource(t("swap.copied", { n: pasted.length })); } else { showSource(pasteMessage(result)); }
       return true;
     }
     const from = source.key;
@@ -79,9 +80,9 @@ window.Swap = (function () {
     remember(null);
     if (window.Schedule.swap(from, key)) {
       last = [from, key];
-      show("Cambiado ✓", true);
+      show(t("swap.swapped"), true);
     } else {
-      show("No se ha podido guardar en este navegador (¿modo privado o sin espacio?). No se ha cambiado nada.", false);
+      show(t("common.saveFailed") + " " + t("common.nothingChanged"), false);
     }
     return true;
   }
@@ -89,16 +90,16 @@ window.Swap = (function () {
   undo.addEventListener("click", function () {
     if (source && source.mode === "copy") {  // quita la última copia
       const key = pasted[pasted.length - 1];
-      if (key && window.Schedule.update(key, null)) { pasted.pop(); showSource("Quitado ✓"); } else { showSource(PASTE_MESSAGES.error); }
+      if (key && window.Schedule.update(key, null)) { pasted.pop(); showSource(t("swap.removed")); } else { showSource(pasteMessage("error")); }
       return;
     }
     if (!last) { return; }
     if (window.Schedule.swap(last[0], last[1])) {
       last = null;
-      show("Deshecho ✓", false);
+      show(t("swap.undone"), false);
       hideTimer = setTimeout(function () { bar.hidden = true; }, 3000);
     } else {
-      show("No se ha podido deshacer: el navegador no deja guardar.", false);
+      show(t("swap.undoFailed"), false);
     }
   });
   cancel.addEventListener("click", stop);
@@ -108,6 +109,8 @@ window.Swap = (function () {
 
   // Venimos de otra semana con un intercambio a medias: el aviso sigue y la casilla de origen se marca si está a la vista
   if (source) { showSource(); window.Schedule.render(); }
+  // Si se cambia de idioma con el aviso a la vista, se vuelve a escribir (el cuadrante ya se repinta solo)
+  document.addEventListener("i18n-change", function () { if (source) { showSource(); } });
 
   return { start: start, pick: pick, sourceKey: function () { return source ? source.key : null; } };
 })();

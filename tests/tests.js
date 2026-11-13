@@ -1529,6 +1529,115 @@
   });
 
   // =================================================================================================================
+  // Idioma (i18n.js, lang-es.js, lang-en.js, guide-es.js, guide-en.js). open() limpia «dp_lang»: cada prueba arranca en español.
+  // Para abrir en inglés: open(datos, { extra: [["dp_lang", "en"]] }).
+  test("Idioma: español e inglés tienen las mismas claves y las mismas {variables} (un texto sin traducir se vería a medias)", async function () {
+    const w = await open(null);
+    const es = w.I18nTexts.es;
+    const en = w.I18nTexts.en;
+    const vars = function (text) { return (text.match(/\{\w+\}/g) || []).sort().join(","); };
+    ok(Object.keys(es).length > 100, "el diccionario no se ha cargado");
+    equal(Object.keys(es).filter(function (key) { return !(key in en); }), [], "claves solo en español");
+    equal(Object.keys(en).filter(function (key) { return !(key in es); }), [], "claves solo en inglés");
+    equal(Object.keys(es).filter(function (key) { return key in en && vars(es[key]) !== vars(en[key]); }), [], "claves con {variables} distintas");
+    equal(Object.keys(en).filter(function (key) { return !String(en[key]).trim(); }), [], "textos vacíos en inglés");
+  });
+
+  test("Idioma: toda clave que pide el código (data-i18n, t(), tn()…) existe en los dos idiomas", async function () {
+    const w = await open(null);
+    const scripts = $$("script[src]").map(function (s) { return s.getAttribute("src"); }).filter(function (src) { return !/lang-|guide-/.test(src); });
+    let source = "";
+    for (const file of ["index.html"].concat(scripts)) { source += await (await fetch("../" + file + "?t=" + Date.now())).text(); }
+    const found = /(?:data-i18n(?:-aria|-placeholder|-title|-html)?="|\bt\(\s*"|I18n\.t\(\s*"|tn\(\s*"|addRow\([^,]+,\s*")([a-z0-9.]+)/gi;
+    const used = new Set();
+    let match;
+    while ((match = found.exec(source))) { used.add(match[1]); }
+    used.delete("clave");  // el ejemplo de un comentario de i18n.js
+    const defined = new Set(Object.keys(w.I18nTexts.es).map(function (key) { return key.replace(/\.(one|other)$/, ""); }));
+    ok(used.size > 100, "no se encontraron las claves del código: " + used.size);
+    equal(Array.from(used).filter(function (key) { return !defined.has(key); }), [], "claves que se piden y no existen");
+  });
+
+  test("Idioma: las dos guías tienen los mismos temas, en el mismo orden, con los mismos pasos y grupos", async function () {
+    const w = await open(null);
+    const es = w.GuideTexts.es;
+    const en = w.GuideTexts.en;
+    equal(en.topics.map(function (topic) { return topic[0]; }), es.topics.map(function (topic) { return topic[0]; }), "temas");
+    equal(en.topics.map(function (topic) { return topic[3].length; }), es.topics.map(function (topic) { return topic[3].length; }), "pasos por tema");
+    equal(en.groups.map(function (group) { return [group[0], group[3]]; }), es.groups.map(function (group) { return [group[0], group[3]]; }), "grupos");
+    ok(en.topics.every(function (topic) { return topic[2] && topic[3].every(Boolean); }), "títulos o pasos vacíos en inglés");
+  });
+
+  test("Idioma: en inglés se ve todo en inglés (menú, cuadrante, tabla) y al volver al español queda igual que antes; se recuerda y el selector marca el activo", async function () {
+    const w = await open(fixture());
+    const read = function () {
+      return [$("#print-button").textContent, $(".section-header-title").textContent, $("#schedule-grid th").textContent,
+        $$("#summary-grid th")[0].textContent, $("#backup-download").textContent, $("#staff-add").textContent, $("#today-link").textContent];
+    };
+    const spanish = read();
+    equal(spanish[0], "🖨️ Imprimir / PDF", "español por defecto");
+    equal($$("[data-lang-choice]").map(function (b) { return b.getAttribute("aria-pressed"); }), ["true", "false"], "el selector marca ES");
+    w.I18n.setLang("en");
+    await wait(50);
+    equal(read(), ["🖨️ Print / PDF", "Weekly schedule", "Staff", "Expected clients", "Download backup", "+ Add person", "Today"], "en inglés");
+    equal([w.document.documentElement.lang, localStorage.getItem("dp_lang")], ["en", "en"], "lang del documento y recordado");
+    equal($$("[data-lang-choice]").map(function (b) { return b.getAttribute("aria-pressed"); }), ["false", "true"], "el selector marca EN");
+    w.I18n.setLang("es");
+    await wait(50);
+    equal(read(), spanish, "de vuelta en español, igual que antes");
+  });
+
+  test("Idioma: las fechas y los números siguen el idioma (lunes 9 / Monday 9, «+1,5 h» / «+1.5 h», el título de la semana)", async function () {
+    const data = fixture();
+    data.shifts["e1|2026-11-09"] = work("10:00", "18:00", { hours: 1.5, reason: "" });
+    const w = await open(data);
+    const blank = function (text) { return text.replace(/[\s  ]+/g, " "); };  // el inglés usa espacios finos en el rango
+    const read = function () { return [$$("#schedule-grid thead th")[1].textContent, blank($("#week-title").textContent), $(".overtime-tag span").textContent]; };
+    equal(read(), ["lunes 9", "9–15 nov 2026", "+1,5 h"], "español");
+    w.I18n.setLang("en");
+    await wait(50);
+    equal(read(), ["Monday 9", "9 – 15 Nov 2026", "+1.5 h"], "inglés");
+  });
+
+  test("Idioma: los nombres de fábrica (Camarero 1…, Trabajo, Libre…) se traducen al MOSTRARLOS; lo que escribió el usuario no, y lo guardado no cambia", async function () {
+    const w = await open(null, { extra: [["dp_lang", "en"]] });  // como la primera vez, en inglés
+    equal($$(".name-button").map(function (b) { return b.textContent; }), ["Waiter 1", "Waiter 2", "Waiter 3", "Waiter 4"], "nombres de fábrica en inglés");
+    equal(w.Schedule.getData().employees.map(function (e) { return e.name; }), ["Camarero 1", "Camarero 2", "Camarero 3", "Camarero 4"], "lo guardado sigue igual");
+    $$("#schedule-grid [data-key]")[0].click();
+    equal($$("#cell-status option").map(function (o) { return o.textContent; }), ["Work", "Off", "Holiday", "Sick leave"], "estados de fábrica en inglés");
+    $("#cell-dialog").close();
+    equal([w.I18n.displayName("Camarero 5"), w.I18n.displayName("Pedro"), w.I18n.displayName("Camarero extra")], ["Waiter 5", "Pedro", "Camarero extra"], "solo el patrón exacto");
+    equal([w.I18n.displayStatus({ id: "work", name: "Jornada" }), w.I18n.displayStatus({ id: "s9", name: "Trabajo" }), w.I18n.displayPlace({ id: "p1", name: "Terraza" }), w.I18n.displayPlace({ id: "p1", name: "Chiringuito" })],
+      ["Jornada", "Trabajo", "Terraza", "Beach bar"], "renombrado o creado por el usuario, tal cual; de fábrica sin tocar, traducido");
+  });
+
+  test("Idioma: Fervis en inglés: las herramientas y la demo dan texto en inglés, la guía se busca con preguntas en inglés y la IA recibe la orden de contestar en inglés", async function () {
+    const data = fixture();
+    data.shifts["e1|2026-11-10"] = work("10:00", "18:00", null, "p1");
+    const w = await open(data, { extra: [["dp_lang", "en"], ["dp_groq_key", FAKE_KEY]] });
+    ok(w.Fervis.tool("manual_app").startsWith("Guide topics"), "el índice de la guía, en inglés");
+    ok(w.Fervis.guideFor("how do I copy a shift?").startsWith("Copying a shift to other cells:"), "la guía en inglés se encuentra con una pregunta en inglés");
+    equal(w.Fervis.guideFor("who is working today?"), "", "una pregunta de datos no lleva guía");
+    const day = w.Fervis.tool("turnos_entre", { desde: "2026-11-10", hasta: "2026-11-10" });
+    ok(day.includes("Tuesday 10 November") && day.includes("Ana: Work 10:00–18:00 at Pub") && day.includes("Luis: nothing set"), "turnos en inglés: " + day);
+    ok(w.Fervis.tool("clientes_entre", { desde: "2026-11-12", hasta: "2026-11-09" }).startsWith("Invalid dates"), "los errores de las herramientas, en inglés");
+    ok(w.FervisData.demoReply("hoy", new w.Date(2026, 10, 10, 12, 0)).startsWith("Today, Tuesday 10 November, working:"), "la demo, en inglés");
+    const sent = [];
+    w.fetch = function (url, options) {
+      if (url.endsWith("/models")) { return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ data: MODEL_IDS.map(function (id) { return { id: id }; }) }); } }); }
+      sent.push(JSON.parse(options.body));
+      return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ choices: [{ finish_reason: "stop", message: { role: "assistant", content: "Ana." } }] }); } });
+    };
+    w.Fervis.open();
+    $("#fervis-question").value = "who is working today?";
+    $("#fervis-form").requestSubmit();
+    await wait(300);
+    const system = sent[0].messages[0].content;
+    ok(system.includes("Contesta en inglés británico (British English)"), "la orden de idioma para la IA");
+    ok(system.includes("Staff (3): Ana, Luis, Marta."), "y los datos van en inglés");
+  });
+
+  // =================================================================================================================
   async function run() {
     if (!["localhost", "127.0.0.1"].includes(location.hostname)) {
       summary.textContent = "Las pruebas solo se lanzan en local (http://localhost:8731/tests/): aquí podrían tocar datos de verdad.";
