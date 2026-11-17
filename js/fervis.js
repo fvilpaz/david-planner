@@ -73,7 +73,10 @@ window.Fervis = (function () {
   // ---------- Groq, con la clave de David. Si un modelo está saturado o falla, se prueba el siguiente ----------
   const GROQ = "https://api.groq.com/openai/v1/chat/completions";
   const GROQ_MODELS = "https://api.groq.com/openai/v1/models";
-  const MODELS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"];
+  // Groq retiró llama-3.3-70b-versatile y llama-3.1-8b-instant el 16-ago-2026 (hoy solo por contacto con ventas): fuera de la
+  // lista. Quedan los dos gpt-oss de producción, cada uno con su propia cuota. qwen3.8-27b está en Preview (puede retirarse
+  // sin aviso) y es de pago: no se usa aquí.
+  const MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
   const DATE_PARAMS = { desde: { type: "string", description: "AAAA-MM-DD" }, hasta: { type: "string", description: "AAAA-MM-DD" },
     persona: { type: "string", description: "opcional: nombre (o parte) de una persona; si no, todo el personal" } };
   const TOOLS = [

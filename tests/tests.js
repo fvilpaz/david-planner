@@ -635,7 +635,7 @@
   // =================================================================================================================
   // Fervis (fervis.js). La clave de las pruebas es inventada: no es de nadie ni vale en Groq.
   const FAKE_KEY = "gsk_inventada_para_pruebas_1234";
-  const MODEL_IDS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"];
+  const MODEL_IDS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
 
   test("Fervis sin clave: el chat no habla de la clave (eso va en Ajustes); lo que no parece una clave no se guarda; pegada de un .env, se limpia", async function () {
     await open(fixture());
@@ -1336,7 +1336,7 @@
     ];
     const asked = [];  // las veces que se pidió la lista de modelos de la cuenta
     w.fetch = function (url, options) {
-      if (url.endsWith("/models")) {  // la lista de modelos de la cuenta: los cuatro
+      if (url.endsWith("/models")) {  // la lista de modelos de la cuenta: los dos
         asked.push(options.headers.Authorization);
         return Promise.resolve({ ok: true, status: 200, json: function () {
           return Promise.resolve({ data: MODEL_IDS.map(function (id) { return { id: id }; }) }); } });
@@ -1351,8 +1351,8 @@
     await wait(300);
     const last = $$(".fervis-msg").pop();
     equal([last.firstChild.textContent, last.querySelector(".fervis-model").textContent],
-      ["Ana trabaja de 09:00 a 17:00.", "groq · openai/gpt-oss-120b (respaldo)"], "respuesta y etiqueta");
-    equal(sent.map(function (s) { return s.body.model; }), ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-120b"], "modelos");
+      ["Ana trabaja de 09:00 a 17:00.", "groq · openai/gpt-oss-20b (respaldo)"], "respuesta y etiqueta");
+    equal(sent.map(function (s) { return s.body.model; }), ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "openai/gpt-oss-20b"], "modelos");
     ok(sent.every(function (s) { return s.auth === "Bearer " + FAKE_KEY && s.url.startsWith("https://api.groq.com/"); }), "clave y dirección");
     ok(sent[1].body.messages[0].content.includes("Personal (3): Ana, Luis, Marta."), "los datos van en el mensaje de sistema");
     ok(sent[1].body.messages[0].content.includes("glosario (botón 📖 de arriba)"), "el modelo sabe remitir al glosario");
@@ -1483,10 +1483,10 @@
     $("#fervis-form").requestSubmit();
     await wait(300);
     const last = $$(".fervis-msg").pop();
-    equal([last.firstChild.textContent, last.querySelector(".fervis-model").textContent], ["Ana tiene turno partido.", "groq · openai/gpt-oss-120b (respaldo)"], "contesta el siguiente");
+    equal([last.firstChild.textContent, last.querySelector(".fervis-model").textContent], ["Ana tiene turno partido.", "groq · openai/gpt-oss-20b (respaldo)"], "contesta el siguiente");
     ok(!$$(".fervis-msg").some(function (m) { return m.textContent.includes("(sin respuesta)"); }), "ni rastro de «(sin respuesta)»");
-    equal([bodies[0].model, bodies[0].reasoning_effort, bodies[1].model, bodies[1].reasoning_effort], ["llama-3.3-70b-versatile", undefined, "openai/gpt-oss-120b", "low"],
-      "esfuerzo bajo solo en gpt-oss");
+    equal([bodies[0].model, bodies[0].reasoning_effort, bodies[1].model, bodies[1].reasoning_effort], ["openai/gpt-oss-120b", "low", "openai/gpt-oss-20b", "low"],
+      "esfuerzo bajo en gpt-oss");
     ok(bodies.every(function (b) { return b.max_tokens >= 1500; }), "con margen de palabras: " + bodies.map(function (b) { return b.max_tokens; }));
   });
 

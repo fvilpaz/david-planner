@@ -1,5 +1,17 @@
 # SESSIONS — david-planner
 
+## 17-nov-2026 (Sonnet) — Fervis: fuera los llama retirados de Groq
+
+**Hecho**
+- `js/fervis.js`: `MODELS` pasa a `["openai/gpt-oss-120b", "openai/gpt-oss-20b"]`. Groq retiró `llama-3.3-70b-versatile` y `llama-3.1-8b-instant` el 2026-08-16 (hoy solo por contacto con ventas). La app ya los ignoraba porque filtra con la lista de modelos de la cuenta (`accountModels`), pero seguían en la lista y, si no se podía pedir la lista a Groq, se habrían probado.
+- `tests/tests.js`: `MODEL_IDS` y tres pruebas de Fervis esperaban el `llama` como primero; ahora el primer fallo cae al `gpt-oss-20b` («respaldo»). **Las 82 pasan** (vistas en un navegador, `http://localhost:8731/tests/`).
+- No se añadió `qwen/qwen3.8-27b`: es Preview (puede retirarse sin aviso) y de pago. Cerebras, Gemini gratis y NVIDIA NIM se revisaron y se descartaron (ver `MasterMind/ROADMAP.md`, 2026-11-17).
+
+**Ojo**
+- Se pierde la comprobación de «esfuerzo bajo solo en gpt-oss» (`reasoning_effort` undefined en un modelo que no es gpt-oss): ya no queda ningún modelo que no lo sea. La rama de `fervis.js` sigue ahí, sin prueba.
+- La clave de Groq es la de David, no la de Nando: su plan (gratis o de pago) no se ha podido ver.
+- Aclarado con Nando: las horas extra **no se calculan**, se escriben a mano en la casilla («Horas extra» + motivo). A Nando le vale así. Idea sin hacer: botones «+1 h / +2 h / +3 h».
+
 ## 13-nov-2026 (Haiku y Sonnet) — Español e inglés en TODA la app
 
 **Hecho**
