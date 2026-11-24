@@ -4,6 +4,17 @@ window.I18nTexts = window.I18nTexts || {};
 window.I18nTexts.en = {
   // Shared by every window
   "common.close": "Close",
+  // Coffee (voluntary support)
+  "cafe.btn": "Buy me a coffee",
+  "cafe.title": "☕ Buy me a coffee",
+  "cafe.intro": "David Planner is free. If it has been useful and you want to support it, you can send me a coffee. No account, no sign-up.",
+  "cafe.pp": "From any country",
+  "cafe.go": "PayPal",
+  "cafe.fee1": "Minimal fees",
+  "cafe.fee2": "Almost zero fees",
+  "cafe.copy": "Copy address",
+  "cafe.copied": "Copied!",
+  "cafe.copyFail": "Could not copy",
   "common.back": "‹ Back",
   "common.save": "Save",
   // The "could not save" notice is built from this sentence + what did not happen ("Nothing has been changed."…)

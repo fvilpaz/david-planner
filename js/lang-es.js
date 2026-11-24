@@ -5,6 +5,17 @@ window.I18nTexts = window.I18nTexts || {};
 window.I18nTexts.es = {
   // Compartidos por todas las ventanas
   "common.close": "Cerrar",
+  // Café (apoyo voluntario)
+  "cafe.btn": "Invítame a un café",
+  "cafe.title": "☕ Invítame a un café",
+  "cafe.intro": "David Planner es gratis. Si te ha sido útil y quieres apoyarlo, puedes mandarme un café. Sin cuenta y sin registro.",
+  "cafe.pp": "Desde cualquier país",
+  "cafe.go": "PayPal",
+  "cafe.fee1": "Fees mínimas",
+  "cafe.fee2": "Fees casi 0",
+  "cafe.copy": "Copiar dirección",
+  "cafe.copied": "¡Copiado!",
+  "cafe.copyFail": "No se pudo copiar",
   "common.back": "‹ Volver",
   "common.save": "Guardar",
   // El aviso de «no se ha podido guardar» se compone: esta frase + lo que no ha pasado («No se ha cambiado nada.»…)

@@ -320,7 +320,15 @@ button.danger { background: var(--error); color: var(--on-error); }
 .app-footer strong { color: var(--text); font-weight: 700; }
 .footer-links { display: flex; justify-content: center; gap: 16px; margin-top: 2px; }
 .footer-links a { font-weight: 600; }
+.footer-btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--primary-text); cursor: pointer;
+              min-height: 0; }  /* sin el alto de 48 px de los botones: así el texto queda a la altura de los enlaces */
+@media (max-width: 600px) { .cafe-label { display: none; } }  /* en el móvil, solo la taza (alineada con los enlaces) */
 
+/* Café: tarjetas de la ventana de apoyo */
+.cafe-card { display: grid; gap: .5rem; padding: .85rem; border: 1px solid var(--border); border-radius: 12px; }
+.cafe-top { display: flex; justify-content: space-between; gap: .5rem; font-size: .9rem; }
+.cafe-top small { color: var(--muted); }
+.cafe-addr { font-size: .8rem; word-break: break-all; color: var(--muted); }
 /* Fervis (paso 12, fervis.js): el chat de los turnos, con la clave de Groq de David */
 /* El robot (de Crypto_Portafolio): en el acento del tema; al tocarlo, un movimiento al azar (fervis.js; las
    duraciones van a juego con MOVES). Con «reducir movimiento» en el sistema, quieto */

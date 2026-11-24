@@ -393,8 +393,35 @@
       <a href="https://github.com/fvilpaz" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.linkedin.com/in/fernando-vilas-paz-1626901a9" target="_blank" rel="noopener">LinkedIn</a>
       <a href="https://fvilpaz.github.io/cv/" target="_blank" rel="noopener">CV</a>
+      <button type="button" class="footer-btn" id="cafe-open" data-i18n-aria="cafe.btn" data-i18n-title="cafe.btn"><span aria-hidden="true">☕</span> <span class="cafe-label" data-i18n="cafe.btn">Invítame a un café</span></button>
     </div>
   </footer>
+
+  <!-- Café (cafe.js): apoyo voluntario, sin cuenta ni registro. Mismos datos que Nextren, MasterMind y la landing de MyCryptoFolio -->
+  <dialog id="cafe-dialog" class="dialog" aria-labelledby="cafe-title">
+    <div class="dialog-form">
+      <div class="dialog-head">
+        <h2 id="cafe-title" data-i18n="cafe.title">☕ Invítame a un café</h2>
+        <button type="button" class="secondary" data-close data-i18n="common.close">Cerrar</button>
+      </div>
+      <p class="help" data-i18n="cafe.intro">David Planner es gratis. Si te ha sido útil y quieres apoyarlo, puedes mandarme un café. Sin cuenta y sin registro.</p>
+      <div class="cafe-card">
+        <div class="cafe-top"><strong>PayPal</strong><small data-i18n="cafe.pp">Desde cualquier país</small></div>
+        <code class="cafe-addr">paypal.me/fvilpaz</code>
+        <a class="button" href="https://paypal.me/fvilpaz" target="_blank" rel="noopener" data-i18n="cafe.go">PayPal</a>
+      </div>
+      <div class="cafe-card">
+        <div class="cafe-top"><strong>USDC · Polygon / Base</strong><small data-i18n="cafe.fee1">Fees mínimas</small></div>
+        <code class="cafe-addr">0x5fCa77427985555668eE254eb9f87504F176947D</code>
+        <button type="button" class="cafe-copy" data-addr="0x5fCa77427985555668eE254eb9f87504F176947D" data-i18n="cafe.copy">Copiar dirección</button>
+      </div>
+      <div class="cafe-card">
+        <div class="cafe-top"><strong>USDC · Solana</strong><small data-i18n="cafe.fee2">Fees casi 0</small></div>
+        <code class="cafe-addr">GWcKUeGzYft7rHhJDEBcrzf3YwCtsBgaVC5u54ohxAfT</code>
+        <button type="button" class="cafe-copy" data-addr="GWcKUeGzYft7rHhJDEBcrzf3YwCtsBgaVC5u54ohxAfT" data-i18n="cafe.copy">Copiar dirección</button>
+      </div>
+    </div>
+  </dialog>
 
   <script src="js/dates.js"></script>
   <script src="js/demo-data.js"></script>
@@ -418,6 +445,7 @@
   <script src="js/fervis-guia.js"></script>
   <script src="js/fervis.js"></script>
   <script src="js/fervis-saludo.js"></script>
+  <script src="js/cafe.js"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>
