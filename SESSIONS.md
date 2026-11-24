@@ -1,5 +1,25 @@
 # SESSIONS — david-planner
 
+## 24-nov-2026 (Sonnet y Opus) — Café con PayPal y USDC
+
+**Hecho**
+- ☕ en el pie junto a GitHub, LinkedIn y CV; en el móvil solo la taza. Ventana nueva `cafe-dialog` (`js/cafe.js`, en `ESSENTIAL` de `sw.js`) con PayPal (botón «PayPal» con la clase `a.button` que ya existía) y USDC Polygon/Base y Solana. Textos `cafe.*` en `lang-es.js` y `lang-en.js`.
+- Visto en el navegador: en el PC, el texto de la taza a la misma altura que los enlaces (medido: 719 px los dos); a 390 px, solo la taza.
+- Prueba del salto del robot (`tests.js`): dos esperas a hora fija (2,9 s y 4 s) pasan a mirar cada 0,1 s. **Control**: con `START_AT = 9000` la prueba falla (y vuelve a 2500, idéntico a GitHub).
+- Subida también una línea de `PLAN.md` de Nando que estaba sin subir desde el 13-nov (icono junto a ES | EN, en «Aparcado»).
+
+**Decidido (Nando)**
+- Sin Bizum en ninguna app (el número quedaba publicado en repos públicos): PayPal + USDC.
+- El botón dice solo «PayPal». «Invitar ☕» y «Abrir PayPal» los inventé yo y no valían: los textos de la interfaz los elige Nando.
+- Nada pendiente al acabar: commit y push de todo, sin stash.
+
+**Aprendido**
+- Un fallo de prueba no es de tu cambio hasta que lo compruebas: aquí fallaba igual **sin** el cambio (control) → la prueba era frágil, no la app.
+- `button { min-height: 48px }` centra el texto en vertical; un enlace al lado lo pone arriba. Por eso la taza quedaba más baja.
+
+**Siguiente**
+- Filtro para lanzar una sola prueba (en «Aparcado»).
+
 ## 17-nov-2026 (Sonnet) — Fervis: fuera los llama retirados de Groq
 
 **Hecho**

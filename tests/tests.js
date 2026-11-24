@@ -702,9 +702,11 @@
     frame.style.width = "1200px";
     try {
       await open(fixture());
-      await wait(2900);   // el salto empieza a los 2,5 s
+      // El salto empieza a los 2,5 s. Se espera mirando cada 0,1 s (como mucho 5 s), nunca a hora fija: con 2,9 s fijos
+      // fallaba cuando el navegador iba lento (24-nov: 2 de 4 pasadas, también sin cambios en la app)
+      for (let i = 0; i < 50 && !$(".fervis-ghost"); i++) { await wait(100); }
       ok($("#fervis-button").classList.contains("ausente") && $(".fervis-ghost") && $("#fervis-hello").hidden, "salta una copia, el de la barra se oculta y aún no hay bocadillo");
-      await wait(1100);   // la caída con rebotes dura 1,3 s
+      for (let i = 0; i < 30 && $("#fervis-hello").hidden; i++) { await wait(100); }   // la caída con rebotes dura 1,3 s
       ok(!$("#fervis-hello").hidden && $("#fervis-hello").classList.contains("lateral"), "al aterrizar sale el bocadillo, a su lado");
       // Se espera a que acabe de rebotar (como mucho 3 s más): medir a hora fija fallaba cuando el navegador iba algo lento
       // (auditoría 12-nov: a los 4,0 s seguía a 80 px; a los 5,5 s, en el centro exacto)
@@ -721,8 +723,11 @@
       ok(!$(".fervis-ghost") && !$("#fervis-button").classList.contains("ausente") && $("#fervis-hello").hidden, "la copia se va y el robot de la barra vuelve a verse");
       // Tocar al robot cuando está en medio abre el chat directamente (sin tener que volver a la barra)
       await open(fixture());
-      await wait(4000);
-      $(".fervis-ghost").click();
+      // Hasta que ha aterrizado (sale el bocadillo), mirando cada 0,1 s y como mucho 8 s: con 4 s fijos, si el navegador
+      // iba lento aún no había copia y la prueba reventaba con «null» en vez de decir qué pasaba (24-nov)
+      for (let i = 0; i < 80 && ($("#fervis-hello").hidden || !$(".fervis-ghost")); i++) { await wait(100); }
+      ok($(".fervis-ghost"), "el robot vuelve a saltar en la segunda apertura");
+      if ($(".fervis-ghost")) { $(".fervis-ghost").click(); }
       await wait(1500);   // el movimiento del robot (hasta 1 s) y se abre
       ok($("#fervis-dialog").open, "tocar al robot que ha saltado abre el chat");
       ok(!$(".fervis-ghost") && !$("#fervis-button").classList.contains("ausente"), "y el robot vuelve a la barra");
